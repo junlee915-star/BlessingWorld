@@ -8,7 +8,10 @@ import { cn } from "@/lib/utils";
 export function FeatureCardGrid() {
   return (
     <section className="mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-24">
-      <div className="grid gap-6 lg:grid-cols-3">
+      {/* §4.4 카드 그리드 + §P-01④ "매거진형 비대칭 배치": 1·2번 카드(size lg)가
+          lg:col-span-2로 크게 자리 잡고, grid-flow-dense가 3·4·5번 작은 카드로
+          빈 칸을 채웁니다. DOM 순서(읽기/탭 순서)는 항상 1~5번 그대로입니다. */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 lg:grid-flow-row-dense">
         {HOME_CARDS.map((card) => {
           const content = (
             <>
