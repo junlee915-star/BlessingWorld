@@ -8,34 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CURRICULUM_FINAL_CTA, CURRICULUM_HERO, CURRICULUM_VIDEO_PLACEHOLDER } from "@/content/curriculum";
 import type { Course } from "@/content/curriculum";
-import { fetchPublishedCourses } from "@/lib/courses";
+import { fetchPublishedCourses, getCompletedCourses, saveCompletedCourses } from "@/lib/courses";
 import { cn } from "@/lib/utils";
-
-const PROGRESS_STORAGE_KEY = "blessingworld:course-progress";
-
-function readCompletedIds(): Set<string> {
-  if (typeof window === "undefined") return new Set();
-  try {
-    const raw = window.localStorage.getItem(PROGRESS_STORAGE_KEY);
-    const parsed = raw ? (JSON.parse(raw) as string[]) : [];
-    return new Set(Array.isArray(parsed) ? parsed : []);
-  } catch {
-    return new Set();
-  }
-}
-
-function writeCompletedIds(ids: Set<string>) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify([...ids]));
-  } catch {
-    // 프라이빗 모드 등 저장 공간을 쓸 수 없는 경우 조용히 무시합니다.
-  }
-}
 
 export default function Curriculum() {
   const [courses, setCourses] = useState<Course[] | null>(null);
-  const [completed, setCompleted] = useState<Set<string>>(() => readCompletedIds());
+  const [completed, setCompleted] = useState<Set<string>>(() => new Set(getCompletedCourses()));
 
   useEffect(() => {
     let cancelled = false;
@@ -60,7 +38,7 @@ export default function Curriculum() {
       } else {
         next.add(id);
       }
-      writeCompletedIds(next);
+      saveCompletedCourses([...next]);
       return next;
     });
   }

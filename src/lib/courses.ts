@@ -115,3 +115,44 @@ export async function saveCourses(courses: Course[]): Promise<CoursePersistTarge
   writeLocalOverride(courses);
   return "local";
 }
+
+const PROGRESS_STORAGE_KEY = "blessingworld:course-progress";
+
+/**
+ * 이 브라우저에서 "다 들었어요"로 표시한 강좌 id 목록. 로그인 없이 localStorage에만
+ * 저장됩니다(§P-04②). /curriculum이 진행률 표시에, /onboarding이 §P-07 연계(교육 이수
+ * 여부를 안내 신청 페이로드에 포함)에 각각 이 값을 읽습니다.
+ */
+export function getCompletedCourses(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(PROGRESS_STORAGE_KEY);
+    const parsed = raw ? (JSON.parse(raw) as string[]) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+/** getCompletedCourses()가 읽는 것과 같은 localStorage 키에 완료한 강좌 id 목록을 저장합니다. */
+export function saveCompletedCourses(ids: string[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(ids));
+  } catch {
+    // 프라이빗 모드 등으로 저장 공간을 쓸 수 없는 경우 조용히 무시합니다.
+  }
+}
+
+/**
+ * courseIds가 비어있지 않고 전부 완료 목록에 있으면 true. completed를 생략하면
+ * getCompletedCourses()로 이 브라우저의 현재 값을 읽습니다.
+ */
+export function isAllCompleted(
+  courseIds: string[],
+  completed: string[] = getCompletedCourses(),
+): boolean {
+  if (courseIds.length === 0) return false;
+  const done = new Set(completed);
+  return courseIds.every((id) => done.has(id));
+}

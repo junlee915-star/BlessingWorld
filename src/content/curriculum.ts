@@ -69,5 +69,7 @@ export const CURRICULUM_VIDEO_PLACEHOLDER = "강의 영상은 준비 중이에�
 export const CURRICULUM_FINAL_CTA = {
   title: "4강좌를 모두 들으셨나요?",
   body: "이제 지역 담당자와 함께 다음 걸음을 이야기해보세요.",
-  cta: { label: "축복결혼 안내 신청하기", to: "/onboarding" },
+  // ref=curriculum: /onboarding이 §P-04 교육 이수를 거쳐 왔음을 알고 안내 문구와
+  // 제출 페이로드(completed_courses)에 반영할 수 있게 하는 연계 파라미터(§P-07).
+  cta: { label: "축복결혼 안내 신청하기", to: "/onboarding?ref=curriculum" },
 };

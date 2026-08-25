@@ -62,6 +62,8 @@ export interface Database {
           source: string;
           purge_after: string | null;
           created_at: string;
+          /** §P-04↔§P-07 연계: 제출 시점에 이 브라우저에서 이수 완료된 강좌 id 목록(§lib/courses.ts). */
+          completed_courses: string[] | null;
         };
         Insert: Omit<
           Database["public"]["Tables"]["guidance_requests"]["Row"],
@@ -78,7 +80,7 @@ export interface Database {
           Partial<
             Pick<
               Database["public"]["Tables"]["guidance_requests"]["Row"],
-              "status" | "source" | "user_id" | "email"
+              "status" | "source" | "user_id" | "email" | "completed_courses"
             >
           >;
         Update: Partial<Database["public"]["Tables"]["guidance_requests"]["Row"]>;
