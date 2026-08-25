@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Base */
+    --background: 40 33% 98%; /* #FCFAF7 웜 아이보리 */
+    --foreground: 265 15% 20%; /* #322D3B 딥 플럼 그레이 */
+
+    /* Brand — Lavender */
+    --primary: 265 38% 58%; /* #8367B8 라벤더 */
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 265 45% 94%; /* #EDE7F6 라벤더 틴트 */
+    --primary-deep: 265 42% 38%; /* #57388A 강조 텍스트 */
+
+    /* Accent — Muted Gold */
+    --accent: 41 55% 56%; /* #CBA24E 뮤트 골드 */
+    --accent-foreground: 265 20% 18%;
+    --accent-soft: 41 60% 94%; /* #FAF2E0 */
+
+    /* Neutral */
+    --card: 0 0% 100%;
+    --card-foreground: 265 15% 20%;
+    --muted: 40 20% 95%; /* #F5F2ED */
+    --muted-foreground: 265 8% 46%; /* #74707C */
+    --border: 40 18% 89%; /* #E8E3DB */
+    --input: 40 18% 89%;
+    --ring: 265 38% 58%;
+
+    /* Semantic */
+    --destructive: 0 65% 55%;
+    --success: 152 45% 42%;
+    --warning: 38 85% 55%;
+
+    --radius: 0.875rem; /* 14px */
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  p,
+  li,
+  blockquote {
+    word-break: keep-all;
+  }
+
+  ::selection {
+    background-color: hsl(var(--primary-soft));
+    color: hsl(var(--primary-deep));
+  }
+
+  :focus-visible {
+    outline: none;
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background rounded-sm;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply font-eyebrow text-xs font-semibold uppercase tracking-[0.2em];
+  }
+
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100]
+      focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground;
+  }
+
+  .prose-copy {
+    @apply max-w-prose leading-[1.75] text-foreground/90;
+  }
+}
