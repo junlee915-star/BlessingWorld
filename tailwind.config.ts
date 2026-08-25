@@ -66,7 +66,7 @@ export default {
         prose: "62ch",
       },
       boxShadow: {
-        card: "0 2px 16px -4px rgba(50,45,59,0.08)",
+        card: "0 2px 20px -6px rgba(13,23,48,0.12)",
       },
       keyframes: {
         "fade-in-up": {

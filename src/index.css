@@ -4,36 +4,36 @@
 
 @layer base {
   :root {
-    /* Base */
-    --background: 40 33% 98%; /* #FCFAF7 웜 아이보리 */
-    --foreground: 265 15% 20%; /* #322D3B 딥 플럼 그레이 */
+    /* Base — Duo 스타일 리스킨: 웜 라벤더 → 딥 네이비 트러스트 팔레트 */
+    --background: 210 22% 98%; /* #F7F8FA 쿨 오프화이트 */
+    --foreground: 222 32% 15%; /* #1B2333 딥 네이비 그레이 */
 
-    /* Brand — Lavender */
-    --primary: 265 38% 58%; /* #8367B8 라벤더 */
+    /* Brand — Deep Navy */
+    --primary: 222 56% 24%; /* #1B3568 네이비 */
     --primary-foreground: 0 0% 100%;
-    --primary-soft: 265 45% 94%; /* #EDE7F6 라벤더 틴트 */
-    --primary-deep: 265 42% 38%; /* #57388A 강조 텍스트 */
+    --primary-soft: 222 40% 95%; /* #EBEEF6 네이비 틴트 */
+    --primary-deep: 224 62% 14%; /* #0D1730 강조 텍스트 */
 
-    /* Accent — Muted Gold */
-    --accent: 41 55% 56%; /* #CBA24E 뮤트 골드 */
-    --accent-foreground: 265 20% 18%;
-    --accent-soft: 41 60% 94%; /* #FAF2E0 */
+    /* Accent — Warm Gold (네이비와 대비되는 온기 포인트) */
+    --accent: 36 68% 50%; /* #D89A2E 웜 골드 */
+    --accent-foreground: 26 45% 14%;
+    --accent-soft: 38 70% 95%; /* #FCF2DE */
 
     /* Neutral */
     --card: 0 0% 100%;
-    --card-foreground: 265 15% 20%;
-    --muted: 40 20% 95%; /* #F5F2ED */
-    --muted-foreground: 265 8% 46%; /* #74707C */
-    --border: 40 18% 89%; /* #E8E3DB */
-    --input: 40 18% 89%;
-    --ring: 265 38% 58%;
+    --card-foreground: 222 32% 15%;
+    --muted: 210 18% 95%; /* #F0F2F5 */
+    --muted-foreground: 222 10% 45%; /* #666D7A */
+    --border: 210 16% 88%; /* #DBE0E6 */
+    --input: 210 16% 88%;
+    --ring: 222 56% 24%;
 
     /* Semantic */
     --destructive: 0 65% 55%;
     --success: 152 45% 42%;
     --warning: 38 85% 55%;
 
-    --radius: 0.875rem; /* 14px */
+    --radius: 0.625rem; /* 10px — 필 형태 대신 절제된 라운드로 */
   }
 
   * {

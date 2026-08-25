@@ -19,8 +19,8 @@ export default function Home() {
       <SEO path="/" jsonLd={[ORGANIZATION_JSON_LD]} />
       <HeroCarousel />
       <IntroTriad />
-      <HomeCtaSection />
       <FeatureCardGrid />
+      <HomeCtaSection />
     </>
   );
 }

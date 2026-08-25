@@ -47,6 +47,12 @@ export const HOME_CTA = {
   secondary: { label: "축복결혼 안내 신청", to: "/onboarding" },
 };
 
+export const HOME_CTA_BAND = {
+  eyebrow: "READY TO BEGIN",
+  title: "축복결혼, 이제 첫걸음을 내딛어보세요",
+  body: "궁금한 것부터 하나씩, 블레싱월드가 끝까지 함께합니다.",
+};
+
 export interface HomeCard {
   badge: string;
   title: string;

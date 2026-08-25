@@ -28,7 +28,7 @@ export function FeatureCardGrid() {
               </div>
               <div className="flex flex-1 flex-col gap-3 p-6">
                 <Badge className="w-fit">{card.badge}</Badge>
-                <h3 className="flex items-center gap-1.5 text-xl font-semibold text-foreground">
+                <h3 className="flex items-center gap-1.5 text-xl font-semibold text-foreground transition-colors group-hover:text-primary-deep">
                   {card.title}
                   {card.external ? (
                     <ExternalLink className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
@@ -43,7 +43,7 @@ export function FeatureCardGrid() {
           );
 
           const className = cn(
-            "group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg",
+            "group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-card transition-all duration-300 ease-out hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg",
             card.size === "lg" && "lg:col-span-2",
           );
 
