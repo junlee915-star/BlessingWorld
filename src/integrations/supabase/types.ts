@@ -267,8 +267,14 @@ export interface Database {
           course_id: string;
           completed_at: string;
         };
-        Insert: Partial<Pick<Database["public"]["Tables"]["course_completions"]["Row"], "completed_at">> &
-          Pick<Database["public"]["Tables"]["course_completions"]["Row"], "user_id" | "course_id">;
+        // Pick<Row, ...> 조합으로 쓰면 설치된 @supabase/supabase-js(2.112.x)의 타입 추론이
+        // 이 프로젝트의 손으로 쓴 Database 타입과 맞물려 select() 결과까지 `never`로
+        // 좁혀버리는 라이브러리 쪽 버그가 있습니다 — courses/churches와 같은
+        // `Partial<Row> & {필수 키}` 형태로 맞춰서 피합니다.
+        Insert: Partial<Database["public"]["Tables"]["course_completions"]["Row"]> & {
+          user_id: string;
+          course_id: string;
+        };
         Update: Partial<Database["public"]["Tables"]["course_completions"]["Row"]>;
         Relationships: [];
       };

@@ -17,17 +17,27 @@ export interface MemberRow {
 export async function fetchMembersWithCompletion(): Promise<MemberRow[]> {
   if (!isSupabaseConfigured || !supabase) return [];
 
+  // 설치된 @supabase/supabase-js(2.112.x)의 select() 타입이 이 프로젝트의 손으로 쓴
+  // Database 타입과 맞물리면(profiles select("*")도 포함) 결과 타입을 `never`로 좁혀버리는
+  // 라이브러리 쪽 타입 버그가 있습니다 — §src/lib/auth.tsx가 profiles를 읽을 때 쓰는 것과
+  // 같은 우회(수동 캐스트)를 씁니다. 실제 요청은 정상 동작합니다.
   const [{ data: profiles, error }, completions] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id, display_name, email, role, created_at")
-      .order("created_at", { ascending: false }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 라이브러리 타입 버그 우회, 위 주석 참고
+    (supabase.from("profiles") as any).select("*").order("created_at", { ascending: false }),
     fetchAllMemberCompletions(),
   ]);
 
   if (error || !profiles) return [];
 
-  return profiles.map((row) => ({
+  const rows = profiles as {
+    id: string;
+    display_name: string;
+    email: string | null;
+    role: ProfileRole;
+    created_at: string;
+  }[];
+
+  return rows.map((row) => ({
     id: row.id,
     displayName: row.display_name,
     email: row.email,

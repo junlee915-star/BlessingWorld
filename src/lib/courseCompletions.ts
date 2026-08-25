@@ -9,12 +9,16 @@ import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 /** 로그인한 본인(userId)이 이수 완료로 표시한 강좌 id 목록. */
 export async function fetchCompletedCourseIds(userId: string): Promise<string[]> {
   if (!isSupabaseConfigured || !supabase) return [];
-  const { data, error } = await supabase
-    .from("course_completions")
+  // 설치된 @supabase/supabase-js(2.112.x)의 select() 타입이 이 프로젝트의 손으로 쓴
+  // Database 타입과 맞물리면(이 테이블에 한해 select("*")도 포함) 결과 타입을 `never`로
+  // 좁혀버리는 라이브러리 쪽 타입 버그가 있습니다(§src/lib/courses.ts saveCourses()의
+  // upsert 우회와 같은 원인). 실제 요청은 정상 동작하므로 이 한 줄만 우회합니다.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 라이브러리 타입 버그 우회, 위 주석 참고
+  const { data, error } = await (supabase.from("course_completions") as any)
     .select("course_id")
     .eq("user_id", userId);
   if (error || !data) return [];
-  return data.map((row) => row.course_id);
+  return (data as { course_id: string }[]).map((row) => row.course_id);
 }
 
 /** courseId의 이수 여부를 계정에 저장(완료)하거나 지웁니다(취소). 성공 여부를 돌려줍니다. */
@@ -49,10 +53,13 @@ export async function setCourseCompletion(
 /** staff/admin 전용(§/admin/members) — 전체 회원의 이수 현황을 { user_id: course_id[] }로 묶어 돌려줍니다. */
 export async function fetchAllMemberCompletions(): Promise<Record<string, string[]>> {
   if (!isSupabaseConfigured || !supabase) return {};
-  const { data, error } = await supabase.from("course_completions").select("user_id, course_id");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 라이브러리 타입 버그 우회, fetchCompletedCourseIds() 주석 참고
+  const { data, error } = await (supabase.from("course_completions") as any).select(
+    "user_id, course_id",
+  );
   if (error || !data) return {};
   const byUser: Record<string, string[]> = {};
-  for (const row of data) {
+  for (const row of data as { user_id: string; course_id: string }[]) {
     (byUser[row.user_id] ??= []).push(row.course_id);
   }
   return byUser;
