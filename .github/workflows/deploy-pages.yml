@@ -1,0 +1,51 @@
+name: Deploy to GitHub Pages
+
+# main에 push될 때마다 GitHub Pages(project site: /BlessingWorld/)로 배포합니다.
+# 정적 호스팅이라 딥링크를 index.html로 리라이트해주지 않으므로 HashRouter로
+# 빌드합니다(§App.tsx의 VITE_USE_HASH_ROUTER 참고). Supabase 연결 정보는 이
+# 저장소의 Actions secrets(VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY)에서 옵니다
+# — 비어 있어도 빌드는 되고, 그 기능만 조용히 비활성화됩니다.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          VITE_USE_HASH_ROUTER: "true"
+          VITE_BASE_PATH: /BlessingWorld/
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
