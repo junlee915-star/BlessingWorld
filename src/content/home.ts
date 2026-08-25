@@ -3,8 +3,8 @@
 export const HERO_SLIDES = [
   {
     image:
-      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=2000&q=80",
-    alt: "다양한 국적의 부부들이 함께 참여한 합동축복식",
+      "https://images.unsplash.com/photo-1772305436753-e308844ecda2?auto=format&fit=crop&w=2000&q=80",
+    alt: "함께 웃으며 즐거운 시간을 보내는 축복가정",
   },
   {
     image:
