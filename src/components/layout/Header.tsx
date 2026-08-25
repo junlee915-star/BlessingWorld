@@ -1,15 +1,21 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, User } from "lucide-react";
 
 import { LogoMark } from "@/components/common/LogoMark";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { BRAND, NAV_ITEMS } from "@/content/nav";
+import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  // GNB 4개 항목(§2.3, AC-01)과 별개인 계정 진입점 — §/login, §/mypage.
+  const { session, profile } = useAuth();
+  const accountLink = session
+    ? { to: "/mypage", label: profile?.displayName ? `${profile.displayName}님` : "마이페이지" }
+    : { to: "/login", label: "로그인" };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
@@ -42,6 +48,14 @@ export function Header() {
             </NavLink>
           ))}
         </nav>
+
+        <Link
+          to={accountLink.to}
+          className="hidden items-center gap-1.5 text-sm font-medium text-foreground/75 transition-colors hover:text-primary-deep md:flex"
+        >
+          <User className="h-4 w-4" aria-hidden="true" />
+          {accountLink.label}
+        </Link>
 
         <Button asChild size="sm" className="ml-auto hidden md:inline-flex">
           <Link to="/onboarding">안내 신청</Link>
@@ -80,6 +94,15 @@ export function Header() {
                 </SheetClose>
               ))}
             </nav>
+            <SheetClose asChild>
+              <NavLink
+                to={accountLink.to}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-3 text-base font-medium text-foreground/80 transition hover:bg-muted"
+              >
+                <User className="h-4 w-4" aria-hidden="true" />
+                {accountLink.label}
+              </NavLink>
+            </SheetClose>
             <SheetClose asChild>
               <Button asChild className="mt-2">
                 <Link to="/onboarding">안내 신청</Link>

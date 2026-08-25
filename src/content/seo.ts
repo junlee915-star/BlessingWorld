@@ -59,6 +59,18 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     title: "지역가정교회 관리 — 블레싱월드 관리자",
     description: "지역가정교회(/churches)에 노출되는 목록을 관리합니다.",
   },
+  "/admin/members": {
+    title: "회원관리 — 블레싱월드 관리자",
+    description: "전체 회원 목록과 각자의 축복교육 이수 현황을 확인합니다.",
+  },
+  "/login": {
+    title: "로그인 — 블레싱월드",
+    description: "이메일과 비밀번호로 로그인하고, 내가 수강한 교육을 확인해보세요.",
+  },
+  "/mypage": {
+    title: "마이페이지 — 블레싱월드",
+    description: "내가 수강한 축복교육 강좌 현황을 확인합니다.",
+  },
 };
 
 export const OG_IMAGE_URL =

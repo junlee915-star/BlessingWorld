@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { ScrollToTop } from "@/components/common/ScrollToTop";
 import { RequireAdmin } from "@/components/admin/RequireAdmin";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 import { AuthProvider } from "@/lib/auth";
 
 import Home from "@/pages/Home";
@@ -17,10 +18,13 @@ import Churches from "@/pages/Churches";
 import Onboarding from "@/pages/Onboarding";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
+import Login from "@/pages/Login";
+import MyPage from "@/pages/MyPage";
 import NotFound from "@/pages/NotFound";
 import CourseAdmin from "@/pages/admin/CourseAdmin";
 import ChurchAdmin from "@/pages/admin/ChurchAdmin";
-import Login from "@/pages/admin/Login";
+import MemberAdmin from "@/pages/admin/MemberAdmin";
+import AdminLogin from "@/pages/admin/Login";
 
 const queryClient = new QueryClient();
 
@@ -55,7 +59,16 @@ export default function App() {
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
-                <Route path="/admin/login" element={<Login />} />
+                <Route path="/login" element={<Login />} />
+                <Route
+                  path="/mypage"
+                  element={
+                    <RequireAuth>
+                      <MyPage />
+                    </RequireAuth>
+                  }
+                />
+                <Route path="/admin/login" element={<AdminLogin />} />
                 <Route
                   path="/admin/curriculum"
                   element={
@@ -69,6 +82,14 @@ export default function App() {
                   element={
                     <RequireAdmin>
                       <ChurchAdmin />
+                    </RequireAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/members"
+                  element={
+                    <RequireAdmin>
+                      <MemberAdmin />
                     </RequireAdmin>
                   }
                 />

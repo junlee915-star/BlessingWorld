@@ -261,6 +261,17 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["churches"]["Row"]>;
         Relationships: [];
       };
+      course_completions: {
+        Row: {
+          user_id: string;
+          course_id: string;
+          completed_at: string;
+        };
+        Insert: Partial<Pick<Database["public"]["Tables"]["course_completions"]["Row"], "completed_at">> &
+          Pick<Database["public"]["Tables"]["course_completions"]["Row"], "user_id" | "course_id">;
+        Update: Partial<Database["public"]["Tables"]["course_completions"]["Row"]>;
+        Relationships: [];
+      };
     };
     // @supabase/supabase-js(최신)의 쿼리 빌더가 스키마 타입에서 요구하는 필드입니다.
     // 이 프로젝트는 뷰/함수를 쓰지 않아 비워둡니다 — 없으면 모든 .from() 호출의 타입이

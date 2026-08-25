@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, Circle, GraduationCap } from "lucide-react";
+import { toast } from "sonner";
 
 import { SEO } from "@/components/common/SEO";
 import { EyebrowLabel } from "@/components/common/EyebrowLabel";
@@ -9,9 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { CURRICULUM_FINAL_CTA, CURRICULUM_HERO, CURRICULUM_VIDEO_PLACEHOLDER } from "@/content/curriculum";
 import type { Course } from "@/content/curriculum";
 import { fetchPublishedCourses, getCompletedCourses, saveCompletedCourses } from "@/lib/courses";
+import { fetchCompletedCourseIds, setCourseCompletion } from "@/lib/courseCompletions";
+import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 export default function Curriculum() {
+  const { user } = useAuth();
   const [courses, setCourses] = useState<Course[] | null>(null);
   const [completed, setCompleted] = useState<Set<string>>(() => new Set(getCompletedCourses()));
 
@@ -25,22 +29,49 @@ export default function Curriculum() {
     };
   }, []);
 
+  useEffect(() => {
+    // 로그인하면 계정(course_completions)의 이수 기록을 이 브라우저의 localStorage 기록과
+    // 합칩니다 — 서버에만 있던 기록은 그대로 반영하고, 이 브라우저에만 있던 기록(로그인 전
+    // 진행분)은 계정에 업로드해 다른 기기에서도 이어볼 수 있게 합니다.
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const serverIds = await fetchCompletedCourseIds(user.id);
+      const localIds = getCompletedCourses();
+      const localOnly = localIds.filter((id) => !serverIds.includes(id));
+      if (localOnly.length > 0) {
+        await Promise.all(localOnly.map((id) => setCourseCompletion(user.id, id, true)));
+      }
+      if (cancelled) return;
+      const merged = [...new Set([...serverIds, ...localIds])];
+      saveCompletedCourses(merged);
+      setCompleted(new Set(merged));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
   const total = courses?.length ?? 0;
   const doneCount = courses?.filter((course) => completed.has(course.id)).length ?? 0;
   const progressPercent = total > 0 ? Math.round((doneCount / total) * 100) : 0;
   const allDone = total > 0 && doneCount === total;
 
-  function toggleComplete(id: string) {
-    setCompleted((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      saveCompletedCourses([...next]);
-      return next;
-    });
+  async function toggleComplete(id: string) {
+    const willComplete = !completed.has(id);
+    const next = new Set(completed);
+    if (willComplete) {
+      next.add(id);
+    } else {
+      next.delete(id);
+    }
+    setCompleted(next);
+    saveCompletedCourses([...next]);
+
+    if (user) {
+      const ok = await setCourseCompletion(user.id, id, willComplete);
+      if (!ok) toast.error("계정에 저장하지 못했어요. 이 브라우저에는 반영되었어요.");
+    }
   }
 
   return (
@@ -71,7 +102,19 @@ export default function Curriculum() {
               />
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              이 진행 상태는 이 브라우저에만 저장돼요. 다른 기기에서는 다시 시작됩니다.
+              {user ? (
+                <>
+                  계정에 저장되고 있어요. <Link to="/mypage" className="font-medium text-primary-deep hover:underline">마이페이지</Link>에서도 확인할 수 있어요.
+                </>
+              ) : (
+                <>
+                  이 진행 상태는 이 브라우저에만 저장돼요.{" "}
+                  <Link to="/login" className="font-medium text-primary-deep hover:underline">
+                    로그인
+                  </Link>
+                  하면 다른 기기에서도 이어볼 수 있어요.
+                </>
+              )}
             </p>
           </div>
         ) : null}
