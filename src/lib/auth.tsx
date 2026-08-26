@@ -2,6 +2,7 @@
 // Supabase가 연결되지 않은 환경(§client.ts의 isSupabaseConfigured)에서도 앱이 죽지 않도록
 // 항상 "로그인 안 됨" 상태로 조용히 동작합니다.
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import type { Session, User } from "@supabase/supabase-js";
 
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
@@ -31,12 +32,17 @@ interface AuthContextValue {
   /** 가입 확인 메일을 받지 못했을 때 다시 보냅니다. Supabase 자체 발송 주기 제한에 걸리면
    *  "for security purposes..." 류 에러 메시지가 그대로 반환됩니다. */
   resendConfirmationEmail: (email: string) => Promise<{ error: string | null }>;
+  /** 비밀번호 재설정 메일을 보냅니다. 링크를 클릭하면 §/reset-password로 이동합니다. */
+  requestPasswordReset: (email: string) => Promise<{ error: string | null }>;
+  /** §/reset-password에서 새 비밀번호를 저장합니다. 재설정 메일의 임시 세션이 있어야 동작해요. */
+  updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [sessionLoading, setSessionLoading] = useState(isSupabaseConfigured);
@@ -50,13 +56,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSessionLoading(false);
     });
 
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: subscription } = supabase.auth.onAuthStateChange((event, nextSession) => {
       setSession(nextSession);
       setSessionLoading(false);
+      // BrowserRouter 배포는 Supabase가 재설정 링크의 #access_token=...&type=recovery를
+      // 자동 감지해 이 이벤트를 쏩니다. HashRouter 배포는 §lib/authHashRedirect.ts가
+      // React Router 마운트 전에 직접 /reset-password로 보내므로 이 경로를 타지 않아요.
+      if (event === "PASSWORD_RECOVERY") {
+        navigate("/reset-password");
+      }
     });
 
     return () => subscription.subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -127,6 +139,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { error: "Supabase가 연결되어 있지 않아요." };
         }
         const { error } = await supabase.auth.resend({ type: "signup", email });
+        return { error: error?.message ?? null };
+      },
+      async requestPasswordReset(email) {
+        if (!isSupabaseConfigured || !supabase) {
+          return { error: "Supabase가 연결되어 있지 않아요." };
+        }
+        // 사이트 루트로 되돌아오게 합니다. 이 값이 Supabase 프로젝트의 Site URL/허용된
+        // Redirect URL과 일치해야 링크가 정상 동작해요(대시보드 쪽 설정).
+        const redirectTo = window.location.origin + import.meta.env.BASE_URL;
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+        return { error: error?.message ?? null };
+      },
+      async updatePassword(newPassword) {
+        if (!isSupabaseConfigured || !supabase) {
+          return { error: "Supabase가 연결되어 있지 않아요." };
+        }
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
         return { error: error?.message ?? null };
       },
       async signOut() {

@@ -20,6 +20,7 @@ import Onboarding from "@/pages/Onboarding";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
 import Login from "@/pages/Login";
+import ResetPassword from "@/pages/ResetPassword";
 import MyPage from "@/pages/MyPage";
 import NotFound from "@/pages/NotFound";
 import CourseAdmin from "@/pages/admin/CourseAdmin";
@@ -62,6 +63,14 @@ export default function App() {
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/login" element={<Login />} />
+                <Route
+                  path="/reset-password"
+                  element={
+                    <RequireAuth>
+                      <ResetPassword />
+                    </RequireAuth>
+                  }
+                />
                 <Route
                   path="/mypage"
                   element={

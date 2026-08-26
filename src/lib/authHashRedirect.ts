@@ -25,6 +25,9 @@ export async function resolveAuthRedirectHash(): Promise<void> {
   const params = new URLSearchParams(rawHash);
   const accessToken = params.get("access_token");
   const refreshToken = params.get("refresh_token");
+  // type=recovery는 비밀번호 재설정 링크입니다 — 새 비밀번호를 입력받는 화면으로 보냅니다.
+  // signup/magiclink 등은 그대로 로그인된 상태로 마이페이지로 보냅니다.
+  const type = params.get("type");
   const errorDescription = params.get("error_description") || params.get("error");
 
   let nextHash = "#/login";
@@ -36,7 +39,9 @@ export async function resolveAuthRedirectHash(): Promise<void> {
     });
     nextHash = error
       ? `#/login?authError=${encodeURIComponent(error.message)}`
-      : "#/mypage";
+      : type === "recovery"
+        ? "#/reset-password"
+        : "#/mypage";
   } else if (errorDescription) {
     // 링크가 만료됐거나 이미 사용된 경우 등 — 로그인 화면에서 안내 문구로 보여줍니다.
     nextHash = `#/login?authError=${encodeURIComponent(errorDescription)}`;

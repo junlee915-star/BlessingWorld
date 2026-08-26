@@ -72,6 +72,10 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     title: "로그인 — 블레싱월드",
     description: "이메일과 비밀번호로 로그인하고, 내가 수강한 교육을 확인해보세요.",
   },
+  "/reset-password": {
+    title: "비밀번호 재설정 — 블레싱월드",
+    description: "새 비밀번호를 설정합니다.",
+  },
   "/mypage": {
     title: "마이페이지 — 블레싱월드",
     description: "내가 수강한 축복교육 강좌 현황을 확인합니다.",
