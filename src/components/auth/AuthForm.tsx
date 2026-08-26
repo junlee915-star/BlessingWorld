@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { LogIn, Mail, UserPlus } from "lucide-react";
 
 import { EyebrowLabel } from "@/components/common/EyebrowLabel";
@@ -61,6 +61,19 @@ export function AuthForm({ variant, defaultRedirectTo }: AuthFormProps) {
     const timer = setInterval(() => setResendCooldown((seconds) => Math.max(0, seconds - 1)), 1000);
     return () => clearInterval(timer);
   }, [resendCooldown]);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    // §lib/authHashRedirect.ts가 인증 콜백 처리에 실패했을 때(만료·중복 사용된 링크 등)
+    // "#/login?authError=..."로 보내는 안내 문구를 여기서 한 번만 꺼내 보여줍니다.
+    const authError = searchParams.get("authError");
+    if (!authError) return;
+    setError(authError);
+    const next = new URLSearchParams(searchParams);
+    next.delete("authError");
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 이미 로그인돼 있으면 바로 보냅니다 (RequireAdmin/RequireAuth가 권한을 다시 확인해요).
   if (session) {
