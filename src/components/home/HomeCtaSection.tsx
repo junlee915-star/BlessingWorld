@@ -7,7 +7,8 @@ export function HomeCtaSection() {
   return (
     <section className="bg-primary-deep text-white">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-5 py-16 text-center md:px-8 md:py-20">
-        <p className="eyebrow text-accent">{HOME_CTA_BAND.eyebrow}</p>
+        {/* bg-primary-deep(다크) 위라 accent-soft — §HeroCarousel.tsx와 같은 이유(§9.1). */}
+        <p className="eyebrow text-accent-soft">{HOME_CTA_BAND.eyebrow}</p>
         <h2 className="max-w-xl text-2xl font-bold leading-[1.4] md:text-[32px]">
           {HOME_CTA_BAND.title}
         </h2>

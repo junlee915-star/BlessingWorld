@@ -15,9 +15,11 @@ export function IntroTriad() {
                 {String(index + 1).padStart(2, "0")}
               </span>
               <p className="eyebrow mt-5 text-primary-deep">{item.eyebrow}</p>
-              <h3 className="mt-2 text-xl font-semibold leading-[1.4] text-foreground">
+              {/* 이 섹션엔 별도 SectionHeading(h2)이 없어 카드 제목이 사실상 첫 하위 제목입니다 —
+                  h1(히어로) 바로 다음이라 h3로 건너뛰면 안 됩니다(§9.1 heading-order, Lighthouse 실측). */}
+              <h2 className="mt-2 text-xl font-semibold leading-[1.4] text-foreground">
                 {item.title}
-              </h3>
+              </h2>
               <p className="mt-3 text-[15px] leading-[1.75] text-muted-foreground">
                 {item.body}
               </p>

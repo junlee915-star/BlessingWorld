@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useState } from "react";
+
 import { SEO } from "@/components/common/SEO";
 import { EyebrowLabel } from "@/components/common/EyebrowLabel";
 import { TrustBadges } from "@/components/guide/TrustBadges";
@@ -7,22 +9,39 @@ import { StepJourney } from "@/components/guide/StepJourney";
 import { FaqAccordion } from "@/components/guide/FaqAccordion";
 import { GuideFinalCta } from "@/components/guide/GuideFinalCta";
 import { GUIDE_HERO } from "@/content/guide";
-import { FAQ_ITEMS } from "@/content/faq";
-
-const FAQ_JSON_LD = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: FAQ_ITEMS.map((item) => ({
-    "@type": "Question",
-    name: item.question,
-    acceptedAnswer: { "@type": "Answer", text: item.answer },
-  })),
-};
+import type { FaqItem } from "@/content/faq";
+import { fetchPublishedFaqs } from "@/lib/faq";
 
 export default function Guide() {
+  // FaqAccordion과 아래 JSON-LD가 같은 값을 써야 해서 여기서 한 번만 가져와 내려줍니다.
+  const [faqs, setFaqs] = useState<FaqItem[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchPublishedFaqs().then((data) => {
+      if (!cancelled) setFaqs(data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const faqJsonLd = useMemo(
+    () => ({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: (faqs ?? []).map((item) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: { "@type": "Answer", text: item.answer },
+      })),
+    }),
+    [faqs],
+  );
+
   return (
     <>
-      <SEO path="/guide" jsonLd={[FAQ_JSON_LD]} />
+      <SEO path="/guide" jsonLd={[faqJsonLd]} />
 
       <section className="mx-auto max-w-6xl px-5 pb-8 pt-16 md:px-8 md:pt-24">
         <EyebrowLabel>{GUIDE_HERO.eyebrow}</EyebrowLabel>
@@ -35,7 +54,7 @@ export default function Guide() {
       <WhatIsBlessing />
       <ValuePillars />
       <StepJourney />
-      <FaqAccordion />
+      <FaqAccordion items={faqs} />
       <GuideFinalCta />
     </>
   );

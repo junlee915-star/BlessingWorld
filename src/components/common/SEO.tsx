@@ -7,14 +7,20 @@ interface SEOProps {
   jsonLd?: Record<string, unknown>[];
   /** 검색엔진에 노출하지 않을 페이지(예: /admin/*)에 true로 전달하세요. */
   noindex?: boolean;
+  /**
+   * `/stories/:slug`처럼 경로만으로 메타를 결정할 수 없는 동적 페이지용 오버라이드.
+   * ROUTE_SEO 조회 결과보다 우선합니다.
+   */
+  title?: string;
+  description?: string;
 }
 
-export function SEO({ path, jsonLd, noindex }: SEOProps) {
+export function SEO({ path, jsonLd, noindex, title: titleOverride, description: descriptionOverride }: SEOProps) {
   const route = ROUTE_SEO[path] ?? SEO_DEFAULTS;
-  const title = route.title;
-  const description = route.description;
-  const ogTitle = route.ogTitle ?? title;
-  const ogDescription = route.ogDescription ?? description;
+  const title = titleOverride ?? route.title;
+  const description = descriptionOverride ?? route.description;
+  const ogTitle = titleOverride ?? route.ogTitle ?? title;
+  const ogDescription = descriptionOverride ?? route.ogDescription ?? description;
 
   return (
     <Helmet>

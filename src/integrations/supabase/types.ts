@@ -61,6 +61,9 @@ export interface Database {
           privacy_agreed_at: string;
           source: string;
           purge_after: string | null;
+          /** status가 'closed'로 바뀐 시각. §0010_guidance_admin.sql 트리거가 자동으로 채우고,
+           *  같은 트리거가 이 값 + 1년으로 purge_after도 함께 계산합니다(§7.4). */
+          closed_at: string | null;
           created_at: string;
           /** §P-04↔§P-07 연계: 제출 시점에 이 브라우저에서 이수 완료된 강좌 id 목록(§lib/courses.ts). */
           completed_courses: string[] | null;
@@ -75,6 +78,7 @@ export interface Database {
           | "memo"
           | "source"
           | "purge_after"
+          | "closed_at"
           | "created_at"
         > &
           Partial<
@@ -206,8 +210,15 @@ export interface Database {
           is_default_visible: boolean;
           is_published: boolean;
         };
-        Insert: Omit<Database["public"]["Tables"]["faqs"]["Row"], "id">;
+        // courses/churches와 같은 `Partial<Row> & {필수 키}` 형태 — §src/lib/courses.ts saveCourses()
+        // 주석 참고(설치된 @supabase/supabase-js의 upsert() 타입 버그 우회에도 필요).
+        Insert: Partial<Database["public"]["Tables"]["faqs"]["Row"]> & {
+          id: string;
+          question: string;
+          answer: string;
+        };
         Update: Partial<Database["public"]["Tables"]["faqs"]["Row"]>;
+        Relationships: [];
       };
       regions: {
         Row: {
@@ -259,6 +270,20 @@ export interface Database {
           name: string;
         };
         Update: Partial<Database["public"]["Tables"]["churches"]["Row"]>;
+        Relationships: [];
+      };
+      /** §7.4 개인정보 자동 파기(purge-guidance-requests 함수)가 남기는 건수 로그. 개인식별정보는 없습니다. */
+      audit_log: {
+        Row: {
+          id: string;
+          action: string;
+          count: number;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["audit_log"]["Row"]> & {
+          action: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["audit_log"]["Row"]>;
         Relationships: [];
       };
       course_completions: {

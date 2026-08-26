@@ -9,7 +9,9 @@ export function DocumentChecklist({ category }: { category: DocumentCategory }) 
         <p className="text-sm text-muted-foreground">
           {category.eligibility} · {category.effectiveDate} · {category.issuedBy}
         </p>
-        <h3 className="text-lg font-bold text-foreground">{category.fullTitle}</h3>
+        {/* 상위 §pages/Documents.tsx는 이 탭 섹션에 별도 h2가 없어, 카테고리 제목이 h1
+            바로 다음 첫 하위 제목입니다 — h3로 건너뛰면 안 됩니다(§9.1, Lighthouse 실측). */}
+        <h2 className="text-lg font-bold text-foreground">{category.fullTitle}</h2>
       </div>
 
       <ol className="mt-8 space-y-4">
@@ -25,7 +27,7 @@ export function DocumentChecklist({ category }: { category: DocumentCategory }) 
               {item.no}
             </span>
             <div className="min-w-0 flex-1">
-              <h4 className="text-base font-semibold text-foreground">{item.title}</h4>
+              <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
               <ul className="mt-2 space-y-1.5">
                 {item.criteria.map((line, index) => (
                   <li

@@ -19,7 +19,7 @@ export function Footer() {
         <div className="mt-10 grid grid-cols-1 gap-x-8 gap-y-8 border-t border-border pt-8 sm:grid-cols-2 lg:grid-cols-4">
           {FOOTER_CONTENT.blocks.map((block) => (
             <div key={block.title}>
-              <p className="eyebrow text-accent">{block.title}</p>
+              <p className="eyebrow text-accent-deep">{block.title}</p>
               <p className="mt-3 whitespace-pre-line text-sm leading-[1.7] text-foreground/80">
                 {block.body}
               </p>

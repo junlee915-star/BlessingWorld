@@ -73,6 +73,7 @@ export default function MyPage() {
             <div
               className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted"
               role="progressbar"
+              aria-label="내가 수강한 교육"
               aria-valuenow={total > 0 ? Math.round((doneCount / total) * 100) : 0}
               aria-valuemin={0}
               aria-valuemax={100}
