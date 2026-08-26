@@ -8,8 +8,11 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 
 const ADMIN_NAV = [
+  { label: "신청 관리", path: "/admin/guidance" },
   { label: "축복가치교육 관리", path: "/admin/curriculum" },
   { label: "지역가정교회 관리", path: "/admin/churches" },
+  { label: "스토리 관리", path: "/admin/stories" },
+  { label: "FAQ 관리", path: "/admin/faq" },
   { label: "회원관리", path: "/admin/members" },
 ];
 

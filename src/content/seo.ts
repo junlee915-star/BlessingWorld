@@ -64,6 +64,18 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     title: "지역가정교회 관리 — 블레싱월드 관리자",
     description: "지역가정교회(/churches)에 노출되는 목록을 관리합니다.",
   },
+  "/admin/stories": {
+    title: "스토리 관리 — 블레싱월드 관리자",
+    description: "행복의 꽃(/stories)에 노출되는 글을 관리합니다.",
+  },
+  "/admin/faq": {
+    title: "FAQ 관리 — 블레싱월드 관리자",
+    description: "/guide에 노출되는 자주 묻는 질문을 관리합니다.",
+  },
+  "/admin/guidance": {
+    title: "신청 관리 — 블레싱월드 관리자",
+    description: "안내 신청 목록을 확인하고 담당자 배정·상태 변경을 관리합니다.",
+  },
   "/admin/members": {
     title: "회원관리 — 블레싱월드 관리자",
     description: "전체 회원 목록과 각자의 축복교육 이수 현황을 확인합니다.",
