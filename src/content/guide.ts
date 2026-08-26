@@ -121,6 +121,7 @@ export const STEP_JOURNEY: { eyebrow: string; title: string; lead: string; group
           title: "축복 신청과 가정 출발",
           description:
             "두 사람의 뜻을 확인하고 필요한 서류와 예식, 이후의 가정생활을 준비합니다.",
+          to: { label: "제출서류·심사기준 보기", href: "/documents" },
         },
       ],
     },

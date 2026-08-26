@@ -15,6 +15,7 @@ import Curriculum from "@/pages/Curriculum";
 import Stories from "@/pages/Stories";
 import StoryDetail from "@/pages/StoryDetail";
 import Churches from "@/pages/Churches";
+import Documents from "@/pages/Documents";
 import Onboarding from "@/pages/Onboarding";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
@@ -50,6 +51,7 @@ export default function App() {
                 <Route path="/stories" element={<Stories />} />
                 <Route path="/stories/:slug" element={<StoryDetail />} />
                 <Route path="/churches" element={<Churches />} />
+                <Route path="/documents" element={<Documents />} />
                 {/* 가정민원실 폐기(§13.1) — 이전 경로 북마크 대비 리다이렉트 */}
                 <Route path="/civil-affairs" element={<Navigate to="/churches" replace />} />
                 <Route
