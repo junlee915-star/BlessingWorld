@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import {
@@ -8,15 +8,30 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { SectionHeading } from "@/components/common/SectionHeading";
-import { FAQ_ITEMS } from "@/content/faq";
+import type { FaqItem } from "@/content/faq";
 import { FAQ_SECTION_HEADING } from "@/content/guide";
 
-const VISIBLE_DEFAULT = 5;
+interface FaqAccordionProps {
+  /** §pages/Guide.tsx가 fetchPublishedFaqs()로 미리 가져와 JSON-LD 생성과 함께 씁니다. */
+  items: FaqItem[] | null;
+}
 
-export function FaqAccordion() {
+export function FaqAccordion({ items: faqs }: FaqAccordionProps) {
   const [expanded, setExpanded] = useState(false);
-  const hiddenCount = Math.max(FAQ_ITEMS.length - VISIBLE_DEFAULT, 0);
-  const visibleItems = expanded ? FAQ_ITEMS : FAQ_ITEMS.slice(0, VISIBLE_DEFAULT);
+
+  // §admin/faq의 "기본 노출" 체크 여부(is_default_visible)로 나눕니다 — 고정된 개수(예: 5개)가
+  // 아니라 관리자가 직접 고른 항목만 항상 보이고, 나머지는 "질문 더 보기" 뒤에 숨습니다(AC-06).
+  const { visibleItems, hiddenItems } = useMemo(() => {
+    const all = faqs ?? [];
+    return {
+      visibleItems: all.filter((item) => item.isDefaultVisible),
+      hiddenItems: all.filter((item) => !item.isDefaultVisible),
+    };
+  }, [faqs]);
+
+  const items = expanded ? [...visibleItems, ...hiddenItems] : visibleItems;
+
+  if (faqs !== null && faqs.length === 0) return null;
 
   return (
     <section className="mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-24">
@@ -29,28 +44,23 @@ export function FaqAccordion() {
 
       <div className="mx-auto mt-10 max-w-2xl">
         <Accordion type="single" collapsible defaultValue="faq-0">
-          {visibleItems.map((item, index) => (
-            <AccordionItem key={item.question} value={`faq-${index}`}>
+          {items.map((item, index) => (
+            <AccordionItem key={item.id} value={`faq-${index}`}>
               <AccordionTrigger>{item.question}</AccordionTrigger>
               <AccordionContent>
                 <p>{item.answer}</p>
-                {item.isDraft ? (
-                  <p className="mt-2 text-xs text-muted-foreground/70">
-                    ※ 담당자 확인 전 초안 답변입니다.
-                  </p>
-                ) : null}
               </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
 
-        {hiddenCount > 0 ? (
+        {hiddenItems.length > 0 ? (
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
             className="mx-auto mt-6 flex items-center gap-1.5 text-sm font-semibold text-primary-deep hover:underline"
           >
-            {expanded ? "질문 접기" : `질문 더 보기 (${hiddenCount})`}
+            {expanded ? "질문 접기" : `질문 더 보기 (${hiddenItems.length})`}
             <ChevronDown className={expanded ? "h-4 w-4 rotate-180 transition-transform" : "h-4 w-4 transition-transform"} />
           </button>
         ) : null}
