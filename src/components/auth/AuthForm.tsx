@@ -1,11 +1,15 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { LogIn, UserPlus } from "lucide-react";
+import { LogIn, Mail, UserPlus } from "lucide-react";
 
 import { EyebrowLabel } from "@/components/common/EyebrowLabel";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/lib/auth";
+
+// 재전송 버튼 연타로 Supabase 발송 주기 제한("for security purposes...")에 바로 걸리지
+// 않도록 클라이언트에서도 짧은 쿨다운을 둡니다.
+const RESEND_COOLDOWN_SECONDS = 60;
 
 const inputClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -34,7 +38,7 @@ interface AuthFormProps {
 /** §/admin/login, §/login이 공유하는 이메일·비밀번호 로그인/가입 폼(Supabase Auth). */
 export function AuthForm({ variant, defaultRedirectTo }: AuthFormProps) {
   const copy = VARIANT_COPY[variant];
-  const { session, signInWithPassword, signUp } = useAuth();
+  const { session, signInWithPassword, signUp, resendConfirmationEmail } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from =
@@ -46,6 +50,17 @@ export function AuthForm({ variant, defaultRedirectTo }: AuthFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  const [resending, setResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendNotice, setResendNotice] = useState<string | null>(null);
+  const [resendError, setResendError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => setResendCooldown((seconds) => Math.max(0, seconds - 1)), 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   // 이미 로그인돼 있으면 바로 보냅니다 (RequireAdmin/RequireAuth가 권한을 다시 확인해요).
   if (session) {
@@ -86,6 +101,24 @@ export function AuthForm({ variant, defaultRedirectTo }: AuthFormProps) {
     }
     // 이메일 인증이 꺼져 있으면 가입과 동시에 로그인됩니다.
     navigate(from, { replace: true });
+  }
+
+  async function handleResend() {
+    setResendNotice(null);
+    setResendError(null);
+    if (!email.trim()) {
+      setResendError("재전송할 이메일 주소를 먼저 입력해주세요.");
+      return;
+    }
+    setResending(true);
+    const { error: resendErrorMessage } = await resendConfirmationEmail(email.trim());
+    setResending(false);
+    if (resendErrorMessage) {
+      setResendError(resendErrorMessage);
+      return;
+    }
+    setResendNotice("인증 메일을 다시 보냈어요. 메일함(스팸함 포함)을 확인해주세요.");
+    setResendCooldown(RESEND_COOLDOWN_SECONDS);
   }
 
   return (
@@ -172,6 +205,27 @@ export function AuthForm({ variant, defaultRedirectTo }: AuthFormProps) {
             <Button type="submit" size="lg" disabled={submitting} className="mt-2">
               <UserPlus className="h-4 w-4" /> {submitting ? "가입하는 중…" : "회원가입"}
             </Button>
+
+            <div className="flex flex-col items-start gap-1.5 border-t border-border pt-4">
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resending || resendCooldown > 0}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-deep underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-60 disabled:no-underline"
+              >
+                <Mail className="h-3.5 w-3.5" aria-hidden="true" />
+                {resending
+                  ? "인증 메일을 다시 보내는 중…"
+                  : resendCooldown > 0
+                    ? `${resendCooldown}초 후 다시 보낼 수 있어요`
+                    : "인증 메일을 받지 못하셨나요? 다시 보내기"}
+              </button>
+              <p className="text-xs text-muted-foreground">
+                위 이메일란에 가입하신 주소를 입력한 뒤 눌러주세요. 스팸함도 함께 확인해보세요.
+              </p>
+              {resendNotice ? <p className="text-sm text-primary-deep">{resendNotice}</p> : null}
+              {resendError ? <p className="text-sm text-destructive">{resendError}</p> : null}
+            </div>
           </form>
         </TabsContent>
       </Tabs>

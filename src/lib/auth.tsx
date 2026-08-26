@@ -28,6 +28,9 @@ interface AuthContextValue {
     password: string,
     displayName: string,
   ) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>;
+  /** 가입 확인 메일을 받지 못했을 때 다시 보냅니다. Supabase 자체 발송 주기 제한에 걸리면
+   *  "for security purposes..." 류 에러 메시지가 그대로 반환됩니다. */
+  resendConfirmationEmail: (email: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -118,6 +121,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) return { error: error.message, needsEmailConfirmation: false };
         // 이메일 인증이 켜져 있으면 세션 없이 사용자만 생성됩니다.
         return { error: null, needsEmailConfirmation: !data.session };
+      },
+      async resendConfirmationEmail(email) {
+        if (!isSupabaseConfigured || !supabase) {
+          return { error: "Supabase가 연결되어 있지 않아요." };
+        }
+        const { error } = await supabase.auth.resend({ type: "signup", email });
+        return { error: error?.message ?? null };
       },
       async signOut() {
         if (!isSupabaseConfigured || !supabase) return;
