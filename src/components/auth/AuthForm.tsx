@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { LogIn, Mail, UserPlus } from "lucide-react";
+import { KeyRound, LogIn, Mail, UserPlus } from "lucide-react";
 
 import { EyebrowLabel } from "@/components/common/EyebrowLabel";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,7 @@ interface AuthFormProps {
 /** §/admin/login, §/login이 공유하는 이메일·비밀번호 로그인/가입 폼(Supabase Auth). */
 export function AuthForm({ variant, defaultRedirectTo }: AuthFormProps) {
   const copy = VARIANT_COPY[variant];
-  const { session, signInWithPassword, signUp, resendConfirmationEmail } = useAuth();
+  const { session, signInWithPassword, signUp, resendConfirmationEmail, requestPasswordReset } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from =
@@ -61,6 +61,17 @@ export function AuthForm({ variant, defaultRedirectTo }: AuthFormProps) {
     const timer = setInterval(() => setResendCooldown((seconds) => Math.max(0, seconds - 1)), 1000);
     return () => clearInterval(timer);
   }, [resendCooldown]);
+
+  const [resetSending, setResetSending] = useState(false);
+  const [resetCooldown, setResetCooldown] = useState(0);
+  const [resetNotice, setResetNotice] = useState<string | null>(null);
+  const [resetError, setResetError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (resetCooldown <= 0) return;
+    const timer = setInterval(() => setResetCooldown((seconds) => Math.max(0, seconds - 1)), 1000);
+    return () => clearInterval(timer);
+  }, [resetCooldown]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   useEffect(() => {
@@ -134,6 +145,24 @@ export function AuthForm({ variant, defaultRedirectTo }: AuthFormProps) {
     setResendCooldown(RESEND_COOLDOWN_SECONDS);
   }
 
+  async function handlePasswordResetRequest() {
+    setResetNotice(null);
+    setResetError(null);
+    if (!email.trim()) {
+      setResetError("재설정 메일을 받을 이메일 주소를 먼저 입력해주세요.");
+      return;
+    }
+    setResetSending(true);
+    const { error: resetErrorMessage } = await requestPasswordReset(email.trim());
+    setResetSending(false);
+    if (resetErrorMessage) {
+      setResetError(resetErrorMessage);
+      return;
+    }
+    setResetNotice("비밀번호 재설정 메일을 보냈어요. 메일함(스팸함 포함)을 확인해주세요.");
+    setResetCooldown(RESEND_COOLDOWN_SECONDS);
+  }
+
   return (
     <section className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-5 py-16 md:px-8">
       <EyebrowLabel>{copy.eyebrow}</EyebrowLabel>
@@ -174,6 +203,27 @@ export function AuthForm({ variant, defaultRedirectTo }: AuthFormProps) {
             <Button type="submit" size="lg" disabled={submitting} className="mt-2">
               <LogIn className="h-4 w-4" /> {submitting ? "로그인 중…" : "로그인"}
             </Button>
+
+            <div className="flex flex-col items-start gap-1.5 border-t border-border pt-4">
+              <button
+                type="button"
+                onClick={handlePasswordResetRequest}
+                disabled={resetSending || resetCooldown > 0}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-deep underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-60 disabled:no-underline"
+              >
+                <KeyRound className="h-3.5 w-3.5" aria-hidden="true" />
+                {resetSending
+                  ? "재설정 메일을 보내는 중…"
+                  : resetCooldown > 0
+                    ? `${resetCooldown}초 후 다시 보낼 수 있어요`
+                    : "비밀번호를 잊으셨나요? 재설정 메일 받기"}
+              </button>
+              <p className="text-xs text-muted-foreground">
+                위 이메일란에 가입하신 주소를 입력한 뒤 눌러주세요.
+              </p>
+              {resetNotice ? <p className="text-sm text-primary-deep">{resetNotice}</p> : null}
+              {resetError ? <p className="text-sm text-destructive">{resetError}</p> : null}
+            </div>
           </form>
         </TabsContent>
 
