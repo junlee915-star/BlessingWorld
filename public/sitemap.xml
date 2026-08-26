@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- §9.3 SEO — 실제 라우트(§App.tsx)와 맞춘 정적 사이트맵입니다. /community, /civil-affairs*는
+     §13.1/§13.5에 따라 폐기되어(/churches로 리다이렉트) 여기서 뺐습니다. /stories/:slug처럼
+     콘텐츠에 따라 늘어나는 동적 라우트는 빌드 시점에 알 수 없어 포함하지 않았습니다 —
+     검색엔진은 /stories 목록 페이지의 링크를 따라가 개별 글을 찾습니다. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://blessingworld.example/</loc><priority>1.0</priority></url>
   <url><loc>https://blessingworld.example/guide</loc><priority>0.9</priority></url>
+  <url><loc>https://blessingworld.example/curriculum</loc><priority>0.8</priority></url>
   <url><loc>https://blessingworld.example/stories</loc><priority>0.7</priority></url>
-  <url><loc>https://blessingworld.example/community</loc><priority>0.7</priority></url>
-  <url><loc>https://blessingworld.example/civil-affairs</loc><priority>0.8</priority></url>
-  <url><loc>https://blessingworld.example/civil-affairs/blessing-marriage</loc><priority>0.7</priority></url>
+  <url><loc>https://blessingworld.example/churches</loc><priority>0.7</priority></url>
+  <url><loc>https://blessingworld.example/documents</loc><priority>0.6</priority></url>
   <url><loc>https://blessingworld.example/onboarding</loc><priority>0.9</priority></url>
   <url><loc>https://blessingworld.example/privacy</loc><priority>0.3</priority></url>
   <url><loc>https://blessingworld.example/terms</loc><priority>0.3</priority></url>

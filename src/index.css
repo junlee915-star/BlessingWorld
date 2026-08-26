@@ -15,15 +15,23 @@
     --primary-deep: 224 62% 14%; /* #0D1730 강조 텍스트 */
 
     /* Accent — Warm Gold (네이비와 대비되는 온기 포인트) */
-    --accent: 36 68% 50%; /* #D89A2E 웜 골드 */
+    --accent: 36 68% 50%; /* #D89A2E 웜 골드 — 버튼 배경(accent-foreground와 짝)·다크 배경 위 텍스트용 */
     --accent-foreground: 26 45% 14%;
-    --accent-soft: 38 70% 95%; /* #FCF2DE */
+    --accent-soft: 38 70% 95%; /* #FCF2DE — 다크 배경(히어로 등) 위 eyebrow 텍스트용 */
+    /* text-accent를 밝은 배경(카드·푸터 등)의 작은 eyebrow 텍스트에 그대로 쓰면 대비가
+       2.4:1로 WCAG AA 4.5:1에 못 미쳤습니다(§9.1, Lighthouse color-contrast 실측).
+       --accent 자체를 어둡게 하면 버튼 배경(accent-foreground와 짝)·다크 배경 위 텍스트
+       용도가 반대로 망가져서, 밝은 배경 텍스트 전용 변형을 따로 둡니다. */
+    --accent-deep: 36 68% 33%; /* #8D601B */
 
     /* Neutral */
     --card: 0 0% 100%;
     --card-foreground: 222 32% 15%;
     --muted: 210 18% 95%; /* #F0F2F5 */
-    --muted-foreground: 222 10% 45%; /* #666D7A */
+    /* 원래 L45%(#666D7A)였는데 bg-primary-soft(가장 어두운 틴트 배경) 위에서 4.48:1로
+       WCAG AA 4.5:1에 아주 살짝 못 미쳤습니다(§GuideFinalCta.tsx, Lighthouse 실측).
+       2%p만 낮춰 모든 배경에서 여유 있게 통과하도록 했습니다 — 육안으로는 거의 차이 없습니다. */
+    --muted-foreground: 222 10% 43%; /* #616876 */
     --border: 210 16% 88%; /* #DBE0E6 */
     --input: 210 16% 88%;
     --ring: 222 56% 24%;

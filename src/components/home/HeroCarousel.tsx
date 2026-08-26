@@ -61,7 +61,8 @@ export function HeroCarousel() {
       <div className="absolute inset-0 bg-gradient-to-t from-primary-deep/90 via-primary-deep/45 to-primary-deep/10" />
 
       <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col justify-center px-5 md:px-8">
-        <p className="eyebrow text-accent">{HERO_COPY.eyebrow}</p>
+        {/* 다크 히어로 배경 위라 accent-soft(연한 크림 골드) — text-accent-deep은 밝은 배경 전용(§9.1). */}
+        <p className="eyebrow text-accent-soft">{HERO_COPY.eyebrow}</p>
         <h1 className="mt-4 max-w-2xl whitespace-pre-line text-[32px] font-bold leading-[1.28] md:text-[48px]">
           {HERO_COPY.title}
         </h1>

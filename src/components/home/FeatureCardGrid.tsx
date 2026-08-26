@@ -28,12 +28,13 @@ export function FeatureCardGrid() {
               </div>
               <div className="flex flex-1 flex-col gap-3 p-6">
                 <Badge className="w-fit">{card.badge}</Badge>
-                <h3 className="flex items-center gap-1.5 text-xl font-semibold text-foreground transition-colors group-hover:text-primary-deep">
+                {/* IntroTriad와 같은 이유로 h2 — 이 섹션도 별도 SectionHeading이 없습니다(§9.1). */}
+                <h2 className="flex items-center gap-1.5 text-xl font-semibold text-foreground transition-colors group-hover:text-primary-deep">
                   {card.title}
                   {card.external ? (
                     <ExternalLink className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                   ) : null}
-                </h3>
+                </h2>
                 <p className="flex-1 text-sm leading-[1.7] text-muted-foreground">
                   {card.description}
                 </p>

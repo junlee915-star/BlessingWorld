@@ -29,6 +29,7 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
           soft: "hsl(var(--accent-soft))",
+          deep: "hsl(var(--accent-deep))",
         },
         card: {
           DEFAULT: "hsl(var(--card))",

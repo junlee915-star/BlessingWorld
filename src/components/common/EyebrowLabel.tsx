@@ -8,7 +8,8 @@ interface EyebrowLabelProps {
 
 const TONE_CLASSES: Record<NonNullable<EyebrowLabelProps["tone"]>, string> = {
   primary: "text-primary-deep",
-  accent: "text-accent",
+  // 밝은 배경(대부분의 페이지 상단 히어로) 전용 — 다크 배경에는 tone="light"를 쓰세요.
+  accent: "text-accent-deep",
   light: "text-accent-soft",
 };
 

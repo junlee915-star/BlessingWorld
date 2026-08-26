@@ -1,8 +1,12 @@
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+
 import { SEO } from "@/components/common/SEO";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { IntroTriad } from "@/components/home/IntroTriad";
 import { HomeCtaSection } from "@/components/home/HomeCtaSection";
 import { FeatureCardGrid } from "@/components/home/FeatureCardGrid";
+import { useAuth } from "@/lib/auth";
 
 const ORGANIZATION_JSON_LD = {
   "@context": "https://schema.org",
@@ -14,10 +18,27 @@ const ORGANIZATION_JSON_LD = {
 };
 
 export default function Home() {
+  // §10 I-10 — 기존 준비자(U-2)가 로그인 후 홈에 재방문했을 때 돌아갈 동선이 없었습니다.
+  // 로그인 상태에서만 노출되는 조용한 진입점을 추가합니다(비로그인 방문자는 그대로 헤더의
+  // "로그인"만 봅니다).
+  const { session } = useAuth();
+
   return (
     <>
       <SEO path="/" jsonLd={[ORGANIZATION_JSON_LD]} />
       <HeroCarousel />
+      {session ? (
+        <div className="border-b border-border bg-card">
+          <div className="mx-auto max-w-6xl px-5 py-3 md:px-8">
+            <Link
+              to="/mypage"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-deep hover:underline"
+            >
+              내 준비 현황 보기 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      ) : null}
       <IntroTriad />
       <FeatureCardGrid />
       <HomeCtaSection />

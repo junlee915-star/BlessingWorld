@@ -100,7 +100,7 @@ export default function Churches() {
             {results.length > 0 ? (
               results.map((church) => (
                 <div key={church.id} className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-accent-deep">
                     {church.regionSido} {church.regionSigungu}
                   </p>
                   <h3 className="mt-1.5 text-lg font-semibold text-foreground">{church.name}</h3>

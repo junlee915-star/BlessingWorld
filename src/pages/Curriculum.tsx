@@ -95,7 +95,14 @@ export default function Curriculum() {
                 {doneCount} / {total}강 완료
               </span>
             </div>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={progressPercent} aria-valuemin={0} aria-valuemax={100}>
+            <div
+              className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted"
+              role="progressbar"
+              aria-label="내 진행 상태"
+              aria-valuenow={progressPercent}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
               <div
                 className="h-full rounded-full bg-primary transition-all duration-500 ease-out"
                 style={{ width: `${progressPercent}%` }}
