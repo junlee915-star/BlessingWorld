@@ -38,6 +38,11 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     title: "축복가치교육 — 축복교육 4강좌",
     description: "축복결혼이 궁금한 분들을 위한 4개의 강좌를 순서대로, 또는 골라서 들어보세요.",
   },
+  "/documents": {
+    title: "제출서류 안내 — 축복후보자 제출서류 및 심사기준",
+    description:
+      "미혼1세·축복자녀 축복후보자가 준비할 제출서류와 심사기준을 유형별로 확인해보세요.",
+  },
   "/onboarding": {
     title: "처음 오셨나요? — 블레싱월드 안내",
     description:

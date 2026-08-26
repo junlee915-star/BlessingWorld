@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 export function Header() {
   const [open, setOpen] = useState(false);
-  // GNB 4개 항목(§2.3, AC-01)과 별개인 계정 진입점 — §/login, §/mypage.
+  // GNB 5개 항목(§2.3, AC-01)과 별개인 계정 진입점 — §/login, §/mypage.
   const { session, profile } = useAuth();
   const accountLink = session
     ? { to: "/mypage", label: profile?.displayName ? `${profile.displayName}님` : "마이페이지" }
