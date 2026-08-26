@@ -79,7 +79,7 @@ export const HOME_CARDS: HomeCard[] = [
     size: "lg",
   },
   {
-    badge: "온라인교육과정",
+    badge: "축복가치교육",
     title: "축복교육 4강좌",
     description:
       "축복결혼이 궁금한 분들을 위한 4개의 강좌. 순서대로, 또는 궁금한 것부터 들어보세요.",

@@ -35,7 +35,7 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     description: "지역을 선택하면 담당 지역가정교회의 연락처를 안내해드려요.",
   },
   "/curriculum": {
-    title: "온라인교육과정 — 축복교육 4강좌",
+    title: "축복가치교육 — 축복교육 4강좌",
     description: "축복결혼이 궁금한 분들을 위한 4개의 강좌를 순서대로, 또는 골라서 들어보세요.",
   },
   "/onboarding": {
@@ -52,7 +52,7 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     description: "블레싱월드 이용약관을 안내합니다.",
   },
   "/admin/curriculum": {
-    title: "교육과정 관리 — 블레싱월드 관리자",
+    title: "축복가치교육 관리 — 블레싱월드 관리자",
     description: "축복교육 강좌 목록을 관리합니다.",
   },
   "/admin/churches": {

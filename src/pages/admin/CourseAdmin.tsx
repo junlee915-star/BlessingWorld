@@ -95,7 +95,7 @@ export default function CourseAdmin() {
       <SEO path="/admin/curriculum" noindex />
 
       <AdminHeader
-        title="교육과정 관리 — 축복교육 강좌"
+        title="축복가치교육 관리 — 축복교육 강좌"
         description={
           <>
             /curriculum 페이지에 노출되는 강좌 목록을 추가·수정·삭제·순서 변경할 수 있어요.
