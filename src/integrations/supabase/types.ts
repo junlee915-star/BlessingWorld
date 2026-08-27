@@ -17,6 +17,16 @@ export type CommunityStatus = "open" | "reserved" | "completed";
 export type CommunityRequestStatus = "pending" | "accepted" | "rejected" | "cancelled";
 export type VerificationStatus = "pending" | "approved" | "rejected";
 export type BlessingStepStatus = "not_started" | "in_progress" | "completed";
+/** 축복상담 신청서에서 고르는 상담 방식 — 일정 예약 대신 방식만 받습니다(6축 개편 §4.6). */
+export type ConsultMethod = "visit" | "phone" | "video";
+
+/** 사랑의 기술 강좌별 확인 퀴즈 문항. `courses.quiz`(jsonb)에 배열로 저장됩니다. */
+export interface QuizQuestion {
+  q: string;
+  choices: string[];
+  /** 정답 보기의 인덱스(0부터). */
+  answer: number;
+}
 
 export interface Database {
   public: {
@@ -67,6 +77,8 @@ export interface Database {
           created_at: string;
           /** §P-04↔§P-07 연계: 제출 시점에 이 브라우저에서 이수 완료된 강좌 id 목록(§lib/courses.ts). */
           completed_courses: string[] | null;
+          /** 희망 상담 방식(6축 개편 §4.6). 개편 이전 신청 건은 null입니다. */
+          consult_method: ConsultMethod | null;
         };
         Insert: Omit<
           Database["public"]["Tables"]["guidance_requests"]["Row"],
@@ -84,7 +96,7 @@ export interface Database {
           Partial<
             Pick<
               Database["public"]["Tables"]["guidance_requests"]["Row"],
-              "status" | "source" | "user_id" | "email" | "completed_courses"
+              "status" | "source" | "user_id" | "email" | "completed_courses" | "consult_method"
             >
           >;
         Update: Partial<Database["public"]["Tables"]["guidance_requests"]["Row"]>;
@@ -100,6 +112,10 @@ export interface Database {
           category: StoryCategory;
           family_name: string | null;
           region: string | null;
+          /** 카드 제목으로 쓰는 가정의 한마디(6축 개편 §4.3). 비어 있으면 title로 폴백합니다. */
+          quote: string | null;
+          /** 축복 유형 배지(예: 합동축복, 축복자녀). category(콘텐츠 형식)와는 다른 축입니다. */
+          blessing_type: string | null;
           view_count: number;
           is_published: boolean;
           published_at: string | null;
@@ -198,8 +214,15 @@ export interface Database {
           completed_at: string | null;
           updated_by: string | null;
         };
-        Insert: Omit<Database["public"]["Tables"]["blessing_progress"]["Row"], "id">;
+        // Omit<Row,"id"> 형태로 두면 설치된 @supabase/supabase-js의 타입이 select() 결과까지
+        // `never`로 좁혀버립니다(courses/course_completions와 같은 사안 — 커밋 dcceb89).
+        // `Partial<Row> & {필수 키}` 형태로 맞춰서 피합니다.
+        Insert: Partial<Database["public"]["Tables"]["blessing_progress"]["Row"]> & {
+          user_id: string;
+          step_key: string;
+        };
         Update: Partial<Database["public"]["Tables"]["blessing_progress"]["Row"]>;
+        Relationships: [];
       };
       faqs: {
         Row: {
@@ -240,6 +263,10 @@ export interface Database {
           description: string | null;
           video_url: string | null;
           is_published: boolean;
+          /** 강좌 확인 퀴즈 문항. 비어 있으면 퀴즈 없이 '시청 완료'로 이수 처리합니다. */
+          quiz: QuizQuestion[] | null;
+          /** 이수 처리 기준 점수(%). 기본 60. */
+          pass_score: number | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["courses"]["Row"]> & {
@@ -286,11 +313,50 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["audit_log"]["Row"]>;
         Relationships: [];
       };
+      roadmap_steps: {
+        Row: {
+          /** 'step_01' ~ 'step_08' — blessing_progress.step_key와 같은 키를 씁니다. */
+          key: string;
+          order_no: number;
+          title: string;
+          description: string;
+          /** 예: "1~2주". 확정되지 않았으면 null — 화면에서 기간 배지를 생략합니다. */
+          duration_label: string | null;
+          link_to: string | null;
+          link_label: string | null;
+          is_published: boolean;
+        };
+        Insert: Partial<Database["public"]["Tables"]["roadmap_steps"]["Row"]> & {
+          key: string;
+          title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["roadmap_steps"]["Row"]>;
+        Relationships: [];
+      };
+      site_stats: {
+        Row: {
+          key: string;
+          label: string;
+          value: number | null;
+          /** 기준일. null이면 홈에서 해당 카드를 렌더하지 않습니다(추정치 노출 금지). */
+          basis_date: string | null;
+          unit: string | null;
+          display_order: number;
+        };
+        Insert: Partial<Database["public"]["Tables"]["site_stats"]["Row"]> & {
+          key: string;
+          label: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["site_stats"]["Row"]>;
+        Relationships: [];
+      };
       course_completions: {
         Row: {
           user_id: string;
           course_id: string;
           completed_at: string;
+          /** 확인 퀴즈 점수(%). 퀴즈가 없는 강좌는 null입니다. */
+          quiz_score: number | null;
         };
         // Pick<Row, ...> 조합으로 쓰면 설치된 @supabase/supabase-js(2.112.x)의 타입 추론이
         // 이 프로젝트의 손으로 쓴 Database 타입과 맞물려 select() 결과까지 `never`로
