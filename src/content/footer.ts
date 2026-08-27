@@ -1,9 +1,9 @@
 // 푸터 — §5.2. 모든 페이지 공통.
 // ※ §10 I-02, I-03: 원본은 표기(운영기관명·답변 소요시간)가 페이지마다 달랐음.
-//   재구현본에서는 "세계평화통일가정연합 한국협회 가정행복지원국 축복가정부" /
+//   재구현본에서는 "세계평화통일가정연합 한국협회 가정행복국 축복가정부" /
 //   "영업일 기준 1~2일 이내" 로 전 페이지 통일.
 export const ORG_NAME = "세계평화통일가정연합 한국협회";
-export const ORG_DEPARTMENT = "가정행복지원국 축복가정부";
+export const ORG_DEPARTMENT = "가정행복국 축복가정부";
 export const RESPONSE_TIME = "영업일 기준 1~2일 이내";
 export const CONTACT_PHONE_DISPLAY = "02-3271-0480";
 export const CONTACT_PHONE_TEL = "tel:0232710480";

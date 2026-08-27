@@ -17,7 +17,7 @@ const ORGANIZATION_JSON_LD = {
   name: "블레싱월드",
   url: "https://blessingworld.example/",
   description:
-    "세계평화통일가정연합 한국협회 가정행복지원국 축복가정부가 운영하는 축복결혼·가정생활 통합 안내 서비스",
+    "세계평화통일가정연합 한국협회 가정행복국 축복가정부가 운영하는 축복결혼·가정생활 통합 안내 서비스",
 };
 
 export default function Home() {

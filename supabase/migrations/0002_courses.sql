@@ -33,12 +33,12 @@ create policy "staff can manage courses" on courses
 -- 기본 4강좌 시드 (src/content/curriculum.ts의 DEFAULT_COURSES와 동일)
 insert into courses (id, order_no, title, instructor, duration_minutes, description, is_published)
 values
-  ('step-01', 1, '1강. 축복결혼이란 무엇인가', '가정행복지원국', 25,
+  ('step-01', 1, '1강. 축복결혼이란 무엇인가', '가정행복국', 25,
     '축복결혼의 정의와 역사, 왜 ''축복''이라 부르는지를 소개합니다.', true),
-  ('step-02', 2, '2강. 참사랑과 가정의 가치', '가정행복지원국', 30,
+  ('step-02', 2, '2강. 참사랑과 가정의 가치', '가정행복국', 30,
     '참사랑의 의미와 가정이 사랑과 평화가 시작되는 자리인 이유를 배웁니다.', true),
-  ('step-03', 3, '3강. 참부모님의 삶과 축복의 역사', '가정행복지원국', 35,
+  ('step-03', 3, '3강. 참부모님의 삶과 축복의 역사', '가정행복국', 35,
     '참부모님의 삶의 여정과 축복결혼이 걸어온 역사를 함께 돌아봅니다.', true),
-  ('step-04', 4, '4강. 축복가정으로 살아가기', '가정행복지원국', 28,
+  ('step-04', 4, '4강. 축복가정으로 살아가기', '가정행복국', 28,
     '축복을 받은 이후 가정생활에서 실천하는 태도와 준비를 안내합니다.', true)
 on conflict (id) do nothing;
