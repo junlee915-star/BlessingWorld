@@ -6,8 +6,11 @@ import { SEO } from "@/components/common/SEO";
 import { EmptyState } from "@/components/common/EmptyState";
 import { EyebrowLabel } from "@/components/common/EyebrowLabel";
 import { Button } from "@/components/ui/button";
+import { VideoRailSection } from "@/components/stories/VideoRail";
+import { VIDEO_RAILS } from "@/content/familyVideos";
 import { Badge } from "@/components/ui/badge";
 import {
+  STORIES_ARCHIVE_HEADING,
   STORIES_CATEGORY_EMPTY_STATE,
   STORIES_EMPTY_STATE,
   STORIES_HERO,
@@ -72,7 +75,17 @@ export default function Stories() {
         </p>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 pb-16 md:px-8 md:pb-24">
+      <section className="mx-auto max-w-6xl px-5 pb-4 pt-8 md:px-8 md:pt-10">
+        <div className="mb-8">
+          <EyebrowLabel>{STORIES_ARCHIVE_HEADING.eyebrow}</EyebrowLabel>
+          <h2 className="mt-2 text-xl font-bold text-foreground md:text-2xl">
+            {STORIES_ARCHIVE_HEADING.title}
+          </h2>
+          <p className="mt-2 max-w-prose text-sm leading-[1.75] text-muted-foreground">
+            {STORIES_ARCHIVE_HEADING.body}
+          </p>
+        </div>
+
         <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap gap-2" role="tablist" aria-label="스토리 카테고리">
             {STORY_CATEGORIES.map((item) => (
@@ -199,6 +212,14 @@ export default function Stories() {
             </div>
           ) : null}
         </div>
+      </section>
+
+      {/* 영상 블록 — 축복가정 인터뷰 → 가정예배 순(§content/familyVideos.ts).
+          재생은 YouTube에서 하고 이 페이지는 링크만 겁니다. */}
+      <section className="mx-auto max-w-6xl px-5 pb-16 md:px-8 md:pb-24">
+        {VIDEO_RAILS.map((rail) => (
+          <VideoRailSection key={rail.id} rail={rail} />
+        ))}
       </section>
     </>
   );
