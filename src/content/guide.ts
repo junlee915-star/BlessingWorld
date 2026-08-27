@@ -1,8 +1,12 @@
 // 축복의 씨앗 `/guide` — §6 P-02
+// 2026-08-27: 원본 사이트(온기정원)의 개편된 /guide 카피를 반영했습니다.
+// 이 페이지는 '가치'만 다룹니다 — 절차는 /roadmap, 행동은 /center(6축 개편 §3.4).
 
 export const GUIDE_HERO = {
   eyebrow: "BLESSING GUIDE",
-  title: "두 사람의 약속이 한 가정의 시작이 됩니다",
+  title: "사랑이 가정이 되고,\n가정이 평화가 됩니다",
+  /** 히어로 하단 해시태그 — 축복의 방향을 세 마디로 요약합니다. */
+  hashtags: ["조건 없이 주는", "함께 배우고 성장하는", "가정에서 세상으로"],
 };
 
 export const TRUST_BADGES = [
@@ -12,42 +16,50 @@ export const TRUST_BADGES = [
 ];
 
 export const WHAT_IS_BLESSING = {
-  eyebrow: "What is the Blessing?",
-  title: "결혼을 넘어, 함께 살아갈 방향을 약속합니다",
+  eyebrow: "WHAT IS THE BLESSING?",
+  title: "결혼을 넘어,\n함께 살아갈 방향을 약속합니다",
   bodyParagraphs: [
-    "축복결혼은 단지 두 사람이 만나는 예식이 아닙니다. 서로의 다름을 존중하고, 어려움 속에서도 사랑을 선택하며, 행복한 가정을 함께 만들어 가겠다는 삶의 약속입니다.",
-    "세계평화통일가정연합은 가정을 사랑과 평화가 시작되는 가장 소중한 자리로 바라봅니다.",
+    "축복결혼은 두 사람이 서로의 다름을 존중하며, 사랑과 책임으로 함께 살아갈 삶을 약속하는 예식입니다.",
+    "가정연합은 '가정'을 사랑을 배우고, 평화가 시작되는 가장 소중한 자리로 바라봅니다.",
   ],
   quote:
-    "완벽한 사람을 찾기보다, 함께 성장할 사람을 만나는 것.\n축복결혼은 그 진솔한 약속에서 시작됩니다.",
+    "완벽한 사람을 찾기보다, 함께 더 좋은 사람이 되어 갈 사람을 만나는 것.\n축복결혼은 그 진솔한 약속에서 시작됩니다.",
 };
 
 export const OUR_DIRECTION = {
-  eyebrow: "Our Direction",
+  eyebrow: "OUR DIRECTION",
   title: "우리가 소중히 여기는 것",
   lead: "완벽한 가정보다 서로 배우고 성장하는 가정을 꿈꿉니다.",
   pillars: [
     {
       icon: "Heart",
-      title: "존중",
-      description: "서로의 다름을 인정하고 있는 그대로의 삶을 귀하게 여깁니다.",
-    },
-    {
-      icon: "HandHeart",
-      title: "책임",
-      description: "사랑을 말에만 두지 않고 배려와 돌봄으로 실천합니다.",
+      title: "참사랑",
+      description: "먼저 주고,\n더 주고 싶은 마음으로\n서로를 대합니다.",
     },
     {
       icon: "Sprout",
-      title: "성장",
-      description: "갈등을 피하기보다 함께 풀어가며 더 깊은 관계로 나아갑니다.",
+      title: "함께 성장하는 약속",
+      description: "서로의 꿈을 응원하며,\n오늘보다 더 넓은 내일로\n함께 성장합니다.",
+    },
+    {
+      icon: "Home",
+      title: "사랑의 터전",
+      description: "사랑을 배우고 생명을 잇는 곳,\n가정은 우리 삶의\n가장 따뜻한 뿌리입니다.",
     },
     {
       icon: "Users",
-      title: "나눔",
-      description: "우리 가정의 행복을 이웃과 나누며 더 따뜻한 세상을 만들어 갑니다.",
+      title: "평화의 시작",
+      description: "행복한 한 가정이\n이웃을 밝히고,\n세상을 따뜻하게 합니다.",
     },
   ],
+};
+
+/** 절차(=/roadmap)로 넘어가는 다리 역할 섹션. 원본의 TOGETHER, FOR FAMILY 카피입니다. */
+export const TOGETHER_FOR_FAMILY = {
+  eyebrow: "TOGETHER, FOR FAMILY",
+  title: "축복가정을 꿈꾸는 사람들과,\n좋은 사람이 되는 법을 배웁니다",
+  body: "축복결혼은 교육과 만남을 통해 사랑하는 법, 대화하는 법, 책임지는 법을 익히며 행복한 가정을 차근차근 준비해 가는 여정입니다.",
+  cta: { label: "축복로드맵 보기", to: "/roadmap" },
 };
 
 // 절차(단계별 여정) 데이터는 6축 개편에서 /roadmap으로 옮겼습니다 — src/content/roadmap.ts가

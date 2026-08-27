@@ -1,9 +1,9 @@
-import { Heart, HandHeart, Sprout, Users, type LucideIcon } from "lucide-react";
+import { Heart, HandHeart, Home, Sprout, Users, type LucideIcon } from "lucide-react";
 
 import { SectionHeading } from "@/components/common/SectionHeading";
 import { OUR_DIRECTION } from "@/content/guide";
 
-const ICONS: Record<string, LucideIcon> = { Heart, HandHeart, Sprout, Users };
+const ICONS: Record<string, LucideIcon> = { Heart, HandHeart, Home, Sprout, Users };
 
 export function ValuePillars() {
   return (
@@ -25,7 +25,7 @@ export function ValuePillars() {
                 <Icon className="h-5 w-5" aria-hidden="true" />
               </span>
               <h3 className="mt-4 text-lg font-semibold text-foreground">{pillar.title}</h3>
-              <p className="mt-2 text-sm leading-[1.75] text-muted-foreground">
+              <p className="mt-2 whitespace-pre-line text-sm leading-[1.75] text-muted-foreground">
                 {pillar.description}
               </p>
             </div>
