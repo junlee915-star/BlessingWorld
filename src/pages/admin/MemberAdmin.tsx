@@ -42,7 +42,7 @@ export default function MemberAdmin() {
 
       <AdminHeader
         title="회원관리"
-        description="가입한 전체 회원과 각자의 축복교육(§/curriculum) 이수 현황을 확인해요. 회원이 로그인한 상태에서 강좌를 '다 들었어요'로 표시해야 여기 반영됩니다 — 비로그인 방문자의 진행 상태는 그 브라우저에만 남아 여기서는 보이지 않아요."
+        description="가입한 전체 회원과 각자의 사랑의 기술(§/curriculum) 이수 현황을 확인해요. 회원이 로그인한 상태에서 강좌를 '다 들었어요'로 표시해야 여기 반영됩니다 — 비로그인 방문자의 진행 상태는 그 브라우저에만 남아 여기서는 보이지 않아요."
       />
 
       <section className="mx-auto max-w-5xl px-5 pb-24 md:px-8">
