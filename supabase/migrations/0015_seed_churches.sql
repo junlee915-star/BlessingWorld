@@ -4,8 +4,8 @@
 -- 학사(기숙사)·대교회 소구역·본부 부속기관·교구청 사무실 행은 제외했습니다.
 -- 담당자 개인 휴대전화는 공개하지 않으며, 사무실 전화가 없는 곳만 대표자 휴대전화로 대체했습니다.
 -- contact_name은 노출하지 않기로 해 빈 문자열로 둡니다.
--- '청평'(주소 미기재)과 '거문도'(행정동 주소 미기재)의 시/도·주소는 원본에 없어 실제 지리로
--- 추정 보완했습니다 — /admin/churches에서 확인해 주세요.
+-- '거문도'(행정동 주소 미기재)의 시/도·주소는 원본에 없어 실제 지리로 추정 보완했습니다.
+-- '청평' 주소는 원본에 없었으나 /admin/churches에서 실주소로 채워져 함께 반영했습니다.
 
 delete from churches where id in ('seoul-gangnam', 'gyeonggi-suwon', 'busan-haeundae');
 
@@ -13,7 +13,7 @@ insert into churches (id, region_sido, region_sigungu, name, address, phone, con
 values
   ($BW$천원특별-천원궁-천원$BW$, $BW$경기$BW$, $BW$가평군$BW$, $BW$천원궁 천원$BW$, $BW$경기도 가평군 설악면 신천중앙로 132번길 8$BW$, $BW$031-585-8012$BW$, $BW$$BW$, true),
   ($BW$천원특별-가평$BW$, $BW$경기$BW$, $BW$가평군$BW$, $BW$가평$BW$, $BW$경기도 가평군 가평읍 향교로 18(읍내리 540-2)$BW$, $BW$031-581-1172$BW$, $BW$$BW$, true),
-  ($BW$천원특별-청평$BW$, $BW$경기$BW$, $BW$가평군$BW$, $BW$청평$BW$, $BW$$BW$, $BW$031-584-0414$BW$, $BW$$BW$, true),
+  ($BW$천원특별-청평$BW$, $BW$경기$BW$, $BW$가평군$BW$, $BW$청평$BW$, $BW$경기 가평군 청평면 경춘로 800$BW$, $BW$031-584-0414$BW$, $BW$$BW$, true),
   ($BW$천원특별-북면-개척$BW$, $BW$경기$BW$, $BW$가평군$BW$, $BW$북면 개척$BW$, $BW$경기도 가평군 북면 화악산로 131$BW$, $BW$$BW$, $BW$$BW$, true),
   ($BW$천원특별-조종-개척$BW$, $BW$경기$BW$, $BW$가평군$BW$, $BW$조종 개척$BW$, $BW$경기도 가평군 조종면 현창로28-7, 5층$BW$, $BW$010-8923-7023$BW$, $BW$$BW$, true),
   ($BW$천원특별-상면-개척$BW$, $BW$경기$BW$, $BW$가평군$BW$, $BW$상면 개척$BW$, $BW$경기도 가평군 상면 임초리 412-1(청군로 700)$BW$, $BW$010-2848-2979$BW$, $BW$$BW$, true),
