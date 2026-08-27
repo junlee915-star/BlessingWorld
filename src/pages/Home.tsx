@@ -6,6 +6,9 @@ import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { IntroTriad } from "@/components/home/IntroTriad";
 import { HomeCtaSection } from "@/components/home/HomeCtaSection";
 import { FeatureCardGrid } from "@/components/home/FeatureCardGrid";
+import { StatBand } from "@/components/home/StatBand";
+import { RoadmapPreview } from "@/components/home/RoadmapPreview";
+import { TrustBadges } from "@/components/guide/TrustBadges";
 import { useAuth } from "@/lib/auth";
 
 const ORGANIZATION_JSON_LD = {
@@ -39,8 +42,17 @@ export default function Home() {
           </div>
         </div>
       ) : null}
+      {/* 6축 개편 §4.1 — 듀오식 4블록 순서: 감정(히어로·인트로) → 숫자(StatBand)
+          → 방법론(5축 카드·로드맵) → 안심(신뢰 배지) → 전환(CTA 밴드). */}
       <IntroTriad />
+      <StatBand />
       <FeatureCardGrid />
+      <RoadmapPreview />
+      <section className="bg-muted/60 py-12">
+        <div className="mx-auto max-w-6xl px-5 md:px-8">
+          <TrustBadges className="justify-center" />
+        </div>
+      </section>
       <HomeCtaSection />
     </>
   );
