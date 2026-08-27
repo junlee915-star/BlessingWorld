@@ -26,6 +26,8 @@ export async function setCourseCompletion(
   userId: string,
   courseId: string,
   completed: boolean,
+  /** 확인 퀴즈 점수(%). 퀴즈가 없는 강좌는 생략합니다. */
+  quizScore?: number,
 ): Promise<boolean> {
   if (!isSupabaseConfigured || !supabase) return false;
 
@@ -44,7 +46,7 @@ export async function setCourseCompletion(
   // 이 한 줄만 우회합니다.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 라이브러리 타입 버그 우회, 위 주석 참고
   const { error } = await (supabase.from("course_completions") as any).upsert(
-    { user_id: userId, course_id: courseId },
+    { user_id: userId, course_id: courseId, quiz_score: quizScore ?? null },
     { onConflict: "user_id,course_id" },
   );
   return !error;

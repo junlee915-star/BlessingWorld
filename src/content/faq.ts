@@ -47,7 +47,7 @@ export const DEFAULT_FAQS: FaqItem[] = [
     id: "faq-04",
     question: "축복을 준비하려면 어떤 교육을 받나요?",
     answer:
-      "축복교육에서는 가정연합의 가치와 참부모님의 삶, 축복가정의 의미를 배웁니다. 상담을 통해 나에게 맞는 교육 일정과 과정을 자세히 안내받으실 수 있습니다.",
+      "사랑의 기술(축복가치교육)에서는 가정연합의 가치와 참부모님의 삶, 축복가정의 의미를 배웁니다. 상담을 통해 나에게 맞는 교육 일정과 과정을 자세히 안내받으실 수 있습니다.",
     sortOrder: 4,
     isDefaultVisible: true,
     isPublished: true,
