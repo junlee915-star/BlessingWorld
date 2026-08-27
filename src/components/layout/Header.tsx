@@ -5,7 +5,7 @@ import { Menu, User } from "lucide-react";
 import { LogoMark } from "@/components/common/LogoMark";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { BRAND, NAV_ITEMS } from "@/content/nav";
+import { BRAND, NAV_ITEMS, PRIMARY_CTA } from "@/content/nav";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -58,7 +58,7 @@ export function Header() {
         </Link>
 
         <Button asChild size="sm" className="ml-auto hidden md:inline-flex">
-          <Link to="/onboarding">안내 신청</Link>
+          <Link to={PRIMARY_CTA.to}>{PRIMARY_CTA.label}</Link>
         </Button>
 
         <Sheet open={open} onOpenChange={setOpen}>
@@ -105,7 +105,7 @@ export function Header() {
             </SheetClose>
             <SheetClose asChild>
               <Button asChild className="mt-2">
-                <Link to="/onboarding">안내 신청</Link>
+                <Link to={PRIMARY_CTA.to}>{PRIMARY_CTA.label}</Link>
               </Button>
             </SheetClose>
           </SheetContent>

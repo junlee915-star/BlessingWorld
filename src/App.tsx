@@ -18,6 +18,9 @@ const Guide = lazy(() => import("@/pages/Guide"));
 const Curriculum = lazy(() => import("@/pages/Curriculum"));
 const Stories = lazy(() => import("@/pages/Stories"));
 const StoryDetail = lazy(() => import("@/pages/StoryDetail"));
+const CourseDetail = lazy(() => import("@/pages/CourseDetail"));
+const Roadmap = lazy(() => import("@/pages/Roadmap"));
+const Center = lazy(() => import("@/pages/Center"));
 const Churches = lazy(() => import("@/pages/Churches"));
 const Documents = lazy(() => import("@/pages/Documents"));
 const Onboarding = lazy(() => import("@/pages/Onboarding"));
@@ -33,6 +36,8 @@ const StoryAdmin = lazy(() => import("@/pages/admin/StoryAdmin"));
 const FaqAdmin = lazy(() => import("@/pages/admin/FaqAdmin"));
 const GuidanceAdmin = lazy(() => import("@/pages/admin/GuidanceAdmin"));
 const MemberAdmin = lazy(() => import("@/pages/admin/MemberAdmin"));
+const RoadmapAdmin = lazy(() => import("@/pages/admin/RoadmapAdmin"));
+const StatsAdmin = lazy(() => import("@/pages/admin/StatsAdmin"));
 const AdminLogin = lazy(() => import("@/pages/admin/Login"));
 
 function RouteFallback() {
@@ -63,19 +68,29 @@ export default function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/guide" element={<Guide />} />
                   <Route path="/curriculum" element={<Curriculum />} />
+                  <Route path="/curriculum/:courseId" element={<CourseDetail />} />
                   {/* 이전 경로 북마크 대비 리다이렉트 */}
                   <Route path="/guide/curriculum" element={<Navigate to="/curriculum" replace />} />
                   <Route path="/stories" element={<Stories />} />
                   <Route path="/stories/:slug" element={<StoryDetail />} />
-                  <Route path="/churches" element={<Churches />} />
-                  <Route path="/documents" element={<Documents />} />
+                  <Route path="/roadmap" element={<Roadmap />} />
+
+                  {/* 축복센터 — 신청·교회찾기·서류를 한 허브 아래로 모았습니다(6축 개편 §3.2) */}
+                  <Route path="/center" element={<Center />} />
+                  <Route path="/center/apply" element={<Onboarding />} />
+                  <Route path="/center/churches" element={<Churches />} />
+                  <Route path="/center/documents" element={<Documents />} />
+
+                  {/* 이전 경로 북마크·검색 유입 보존 — 6축 개편 전 URL들 */}
+                  <Route path="/churches" element={<Navigate to="/center/churches" replace />} />
+                  <Route path="/documents" element={<Navigate to="/center/documents" replace />} />
+                  <Route path="/onboarding" element={<Navigate to="/center/apply" replace />} />
                   {/* 가정민원실 폐기(§13.1) — 이전 경로 북마크 대비 리다이렉트 */}
-                  <Route path="/civil-affairs" element={<Navigate to="/churches" replace />} />
+                  <Route path="/civil-affairs" element={<Navigate to="/center/churches" replace />} />
                   <Route
                     path="/civil-affairs/blessing-marriage"
-                    element={<Navigate to="/churches" replace />}
+                    element={<Navigate to="/center/churches" replace />}
                   />
-                  <Route path="/onboarding" element={<Onboarding />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/login" element={<Login />} />
@@ -141,6 +156,22 @@ export default function App() {
                     element={
                       <RequireAdmin>
                         <MemberAdmin />
+                      </RequireAdmin>
+                    }
+                  />
+                  <Route
+                    path="/admin/roadmap"
+                    element={
+                      <RequireAdmin>
+                        <RoadmapAdmin />
+                      </RequireAdmin>
+                    }
+                  />
+                  <Route
+                    path="/admin/stats"
+                    element={
+                      <RequireAdmin>
+                        <StatsAdmin />
                       </RequireAdmin>
                     }
                   />
