@@ -24,6 +24,10 @@ export const WHAT_IS_BLESSING = {
   ],
   quote:
     "완벽한 사람을 찾기보다, 함께 더 좋은 사람이 되어 갈 사람을 만나는 것.\n축복결혼은 그 진솔한 약속에서 시작됩니다.",
+  // 좌측 사진 위에 eyebrow·제목이 얹히는 2열 카드 레이아웃(§components/guide/WhatIsBlessing.tsx).
+  image:
+    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+  imageAlt: "서로를 바라보며 미소짓는 부부",
 };
 
 export const OUR_DIRECTION = {
@@ -35,21 +39,33 @@ export const OUR_DIRECTION = {
       icon: "Heart",
       title: "참사랑",
       description: "먼저 주고,\n더 주고 싶은 마음으로\n서로를 대합니다.",
+      image:
+        "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80",
+      imageAlt: "마주 보며 이야기 나누는 부부",
     },
     {
       icon: "Sprout",
       title: "함께 성장하는 약속",
       description: "서로의 꿈을 응원하며,\n오늘보다 더 넓은 내일로\n함께 성장합니다.",
+      image:
+        "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80",
+      imageAlt: "나란히 걸으며 대화하는 두 사람",
     },
     {
       icon: "Home",
       title: "사랑의 터전",
       description: "사랑을 배우고 생명을 잇는 곳,\n가정은 우리 삶의\n가장 따뜻한 뿌리입니다.",
+      image:
+        "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=800&q=80",
+      imageAlt: "집에서 함께 시간을 보내는 가정",
     },
     {
       icon: "Users",
       title: "평화의 시작",
       description: "행복한 한 가정이\n이웃을 밝히고,\n세상을 따뜻하게 합니다.",
+      image:
+        "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=800&q=80",
+      imageAlt: "이웃과 함께 모인 사람들",
     },
   ],
 };
@@ -71,7 +87,11 @@ export const FAQ_SECTION_HEADING = {
 };
 
 export const GUIDE_FINAL_CTA = {
-  title: "축복을 향한 첫걸음, 궁금함에서 시작해도 좋습니다",
+  // 좌측 사진 + 우측 안내 패널의 2열 카드(§components/guide/GuideFinalCta.tsx).
+  image:
+    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+  imageAlt: "축복결혼식에서 함께 걷는 신랑 신부",
+  title: "축복을 향한 첫걸음,\n궁금함에서 시작해도 좋습니다",
   body: "축복결혼이 낯설어도 괜찮습니다. 좋은 가정을 꿈꾸는 마음이 있다면, 지금부터 천천히 함께 알아가 보세요.",
   cta: { label: "축복결혼 안내 신청하기", to: "/center/apply" },
   badges: ["무료 상담", "1~2영업일 내 지역 안내", "언제든 연락 중단 가능"],

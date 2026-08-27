@@ -42,10 +42,16 @@ export function FaqAccordion({ items: faqs }: FaqAccordionProps) {
         className="mx-auto"
       />
 
-      <div className="mx-auto mt-10 max-w-2xl">
-        <Accordion type="single" collapsible defaultValue="faq-0">
+      <div className="mx-auto mt-10 max-w-3xl">
+        <Accordion type="single" collapsible defaultValue="faq-0" className="space-y-3">
           {items.map((item, index) => (
-            <AccordionItem key={item.id} value={`faq-${index}`}>
+            <AccordionItem
+              key={item.id}
+              value={`faq-${index}`}
+              // AccordionItem 기본 클래스의 last:border-b-0이 마지막 카드의 아래 테두리를 지우므로
+              // last:border-b로 되돌립니다(행 구분선이 아니라 카드 테두리라서 필요합니다).
+              className="rounded-2xl border border-border bg-card px-5 shadow-card last:border-b"
+            >
               <AccordionTrigger>{item.question}</AccordionTrigger>
               <AccordionContent>
                 <p>{item.answer}</p>
@@ -58,7 +64,7 @@ export function FaqAccordion({ items: faqs }: FaqAccordionProps) {
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="mx-auto mt-6 flex items-center gap-1.5 text-sm font-semibold text-primary-deep hover:underline"
+            className="mx-auto mt-8 flex items-center gap-1.5 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-primary-deep transition-colors hover:border-primary hover:bg-primary-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             {expanded ? "질문 접기" : `질문 더 보기 (${hiddenItems.length})`}
             <ChevronDown className={expanded ? "h-4 w-4 rotate-180 transition-transform" : "h-4 w-4 transition-transform"} />

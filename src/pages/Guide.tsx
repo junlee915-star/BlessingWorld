@@ -42,14 +42,14 @@ export default function Guide() {
     <>
       <SEO path="/guide" jsonLd={[faqJsonLd]} />
 
-      <section className="mx-auto max-w-6xl px-5 pb-8 pt-16 md:px-8 md:pt-24">
+      <section className="mx-auto flex max-w-6xl flex-col items-center px-5 pb-6 pt-16 text-center md:px-8 md:pt-24">
         <EyebrowLabel>{GUIDE_HERO.eyebrow}</EyebrowLabel>
         <h1 className="mt-4 max-w-3xl whitespace-pre-line text-[28px] font-bold leading-[1.3] text-foreground md:text-[40px]">
           {GUIDE_HERO.title}
         </h1>
         {/* 신뢰 배지(무료·본인 결정·중단 가능)는 하단 CTA(GuideFinalCta)에 이미 있어서,
             히어로에는 원본처럼 방향을 요약한 해시태그를 둡니다. */}
-        <ul className="mt-8 flex flex-wrap gap-2">
+        <ul className="mt-8 flex flex-wrap justify-center gap-2">
           {GUIDE_HERO.hashtags.map((tag) => (
             <li
               key={tag}
