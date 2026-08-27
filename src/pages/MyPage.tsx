@@ -12,7 +12,7 @@ import { fetchCompletedCourseIds } from "@/lib/courseCompletions";
 import type { Course } from "@/content/curriculum";
 import { cn } from "@/lib/utils";
 
-// §마이페이지 `/mypage` — 로그인한 회원이 자신이 수강한 축복교육을 확인하는 화면.
+// §마이페이지 `/mypage` — 로그인한 회원이 자신이 수강한 사랑의 기술 강좌를 확인하는 화면.
 // §RequireAuth.tsx가 이 페이지를 감싸서 로그인 여부를 이미 확인했습니다(역할 무관).
 export default function MyPage() {
   const { user, profile, signOut } = useAuth();
@@ -121,7 +121,7 @@ export default function MyPage() {
 
         <Button asChild variant="outline" className="mt-8">
           <Link to="/curriculum">
-            {doneCount < total ? "이어서 듣기 →" : "축복교육 다시 보기 →"}
+            {doneCount < total ? "이어서 듣기 →" : "사랑의 기술 다시 보기 →"}
           </Link>
         </Button>
       </section>

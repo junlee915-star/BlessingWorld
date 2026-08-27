@@ -50,83 +50,8 @@ export const OUR_DIRECTION = {
   ],
 };
 
-interface JourneyStep {
-  no: string;
-  title: string;
-  description: string;
-  /** 이 단계와 연결된 페이지가 있으면 링크를 노출합니다 (예: 축복교육 → 4강좌 보기). */
-  to?: { label: string; href: string };
-}
-
-interface JourneyGroup {
-  label: string;
-  title: string;
-  description: string;
-  steps: JourneyStep[];
-}
-
-export const STEP_JOURNEY: { eyebrow: string; title: string; lead: string; groups: JourneyGroup[] } = {
-  eyebrow: "Step by Step",
-  title: "천천히 배우고, 충분히 준비합니다",
-  lead: "축복결혼은 한 번의 신청으로 결정되는 과정이 아닙니다. 상담과 교육을 통해 나와 가정을 준비하고, 충분히 이해한 뒤 다음 걸음을 선택합니다.",
-  groups: [
-    {
-      label: "A",
-      title: "알아보기",
-      description: "가정을 향한 마음을 천천히 나눕니다",
-      steps: [
-        {
-          no: "01",
-          title: "축복 알아보기",
-          description: "축복결혼의 의미와 전체 과정을 이해합니다.",
-        },
-        {
-          no: "02",
-          title: "첫 상담",
-          description: "지역 담당자와 현재 상황과 궁금한 점을 이야기합니다.",
-        },
-      ],
-    },
-    {
-      label: "B",
-      title: "배우고 자라기",
-      description: "사랑과 관계를 배우며 나를 준비합니다",
-      steps: [
-        {
-          no: "03",
-          title: "축복교육",
-          description: "가정연합의 가치와 참부모님의 삶, 축복가정의 의미를 배웁니다.",
-          to: { label: "4강좌 보기", href: "/curriculum" },
-        },
-        {
-          no: "04",
-          title: "나를 준비하기",
-          description: "관계와 생활, 건강과 책임감을 돌아보며 가정생활을 준비합니다.",
-        },
-      ],
-    },
-    {
-      label: "C",
-      title: "만남과 가정의 시작",
-      description: "함께할 사람을 만나, 새로운 가정을 시작합니다",
-      steps: [
-        {
-          no: "05",
-          title: "만남 준비와 소개",
-          description:
-            "필요한 교육을 마친 뒤, 같은 기준으로 준비된 상대와의 만남을 안내받습니다.",
-        },
-        {
-          no: "06",
-          title: "축복 신청과 가정 출발",
-          description:
-            "두 사람의 뜻을 확인하고 필요한 서류와 예식, 이후의 가정생활을 준비합니다.",
-          to: { label: "제출서류·심사기준 보기", href: "/documents" },
-        },
-      ],
-    },
-  ],
-};
+// 절차(단계별 여정) 데이터는 6축 개편에서 /roadmap으로 옮겼습니다 — src/content/roadmap.ts가
+// 유일한 출처입니다. 축복의 씨앗은 '가치'만 다루고, 절차는 RoadmapBanner로 넘깁니다(§4.2).
 
 export const FAQ_SECTION_HEADING = {
   eyebrow: "FAQ",
@@ -136,7 +61,7 @@ export const FAQ_SECTION_HEADING = {
 export const GUIDE_FINAL_CTA = {
   title: "축복을 향한 첫걸음, 궁금함에서 시작해도 좋습니다",
   body: "축복결혼이 낯설어도 괜찮습니다. 좋은 가정을 꿈꾸는 마음이 있다면, 지금부터 천천히 함께 알아가 보세요.",
-  cta: { label: "축복결혼 안내 신청하기", to: "/onboarding" },
+  cta: { label: "축복결혼 안내 신청하기", to: "/center/apply" },
   badges: ["무료 상담", "1~2영업일 내 지역 안내", "언제든 연락 중단 가능"],
   fineprint: "개인정보는 안내 목적에만 사용됩니다.",
 };

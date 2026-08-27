@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 
 import { SEO } from "@/components/common/SEO";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { QuizEditor } from "@/components/admin/QuizEditor";
 import { Button } from "@/components/ui/button";
 import type { Course } from "@/content/curriculum";
 import { fetchAllCourses, saveCourses } from "@/lib/courses";
@@ -95,10 +96,12 @@ export default function CourseAdmin() {
       <SEO path="/admin/curriculum" noindex />
 
       <AdminHeader
-        title="축복가치교육 관리 — 축복교육 강좌"
+        title="사랑의 기술 관리"
         description={
           <>
-            /curriculum 페이지에 노출되는 강좌 목록을 추가·수정·삭제·순서 변경할 수 있어요.
+            /curriculum에 노출되는 강좌 목록과 강좌별 확인 퀴즈를 관리할 수 있어요.
+            퀴즈 문항을 등록하면 방문자는 통과해야 이수 처리되고, 문항이 없으면 '다 들었어요'
+            버튼만으로 이수 처리됩니다.
             {isSupabaseConfigured
               ? " 저장하면 Supabase에 반영되어 모든 방문자에게 보여요."
               : " 현재 Supabase가 연결되어 있지 않아 저장하면 이 브라우저에만 임시로 보관돼요."}
@@ -199,6 +202,15 @@ export default function CourseAdmin() {
                       placeholder="비워두면 '영상 준비 중'으로 표시돼요"
                     />
                   </label>
+
+                  <div className="sm:col-span-2">
+                    <QuizEditor
+                      questions={course.quiz ?? []}
+                      passScore={course.passScore}
+                      onChange={(quiz) => updateCourse(course.id, { quiz })}
+                      onPassScoreChange={(passScore) => updateCourse(course.id, { passScore })}
+                    />
+                  </div>
 
                   <label className="flex items-center gap-2 text-sm sm:col-span-2">
                     <input

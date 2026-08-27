@@ -5,17 +5,21 @@ import { Eye, Flower2 } from "lucide-react";
 import { SEO } from "@/components/common/SEO";
 import { EmptyState } from "@/components/common/EmptyState";
 import { EyebrowLabel } from "@/components/common/EyebrowLabel";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   STORIES_CATEGORY_EMPTY_STATE,
   STORIES_EMPTY_STATE,
   STORIES_HERO,
+  STORIES_LOAD_MORE_LABEL,
+  STORIES_PAGE_SIZE,
   STORY_CATEGORIES,
   STORY_CATEGORY_LABELS,
   STORY_SORTS,
   type Story,
 } from "@/content/stories";
 import { fetchPublishedStories } from "@/lib/stories";
-import { cn } from "@/lib/utils";
+import { cn, maskFamilyName } from "@/lib/utils";
 
 function formatPublishedDate(story: Story): string {
   const raw = story.publishedAt ?? story.createdAt;
@@ -26,6 +30,7 @@ export default function Stories() {
   const [stories, setStories] = useState<Story[] | null>(null);
   const [category, setCategory] = useState<(typeof STORY_CATEGORIES)[number]["value"]>("all");
   const [sort, setSort] = useState<(typeof STORY_SORTS)[number]["value"]>("latest");
+  const [visibleCount, setVisibleCount] = useState(STORIES_PAGE_SIZE);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,6 +55,8 @@ export default function Stories() {
 
   const loading = stories === null;
   const hasAnyStories = (stories?.length ?? 0) > 0;
+  const shownStories = visibleStories.slice(0, visibleCount);
+  const hasMore = visibleStories.length > shownStories.length;
 
   return (
     <>
@@ -74,7 +81,10 @@ export default function Stories() {
                 type="button"
                 role="tab"
                 aria-selected={category === item.value}
-                onClick={() => setCategory(item.value)}
+                onClick={() => {
+                  setCategory(item.value);
+                  setVisibleCount(STORIES_PAGE_SIZE);
+                }}
                 className={cn(
                   "rounded-full px-4 py-2 text-sm font-medium transition-colors",
                   category === item.value
@@ -121,7 +131,7 @@ export default function Stories() {
             />
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {visibleStories.map((story) => (
+              {shownStories.map((story) => (
                 <Link
                   key={story.id}
                   to={`/stories/${story.slug}`}
@@ -142,20 +152,29 @@ export default function Stories() {
                     )}
                   </div>
                   <div className="flex flex-1 flex-col gap-2 p-5">
-                    <span className="inline-flex w-fit items-center rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary-deep">
-                      {STORY_CATEGORY_LABELS[story.category]}
-                    </span>
-                    <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-foreground">
-                      {story.title}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="inline-flex w-fit items-center rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary-deep">
+                        {STORY_CATEGORY_LABELS[story.category]}
+                      </span>
+                      {story.blessingType ? (
+                        <Badge variant="accent">{story.blessingType}</Badge>
+                      ) : null}
+                    </div>
+                    {/* 카드 제목은 가정의 한마디(quote)를 씁니다 — 없으면 글 제목으로 폴백(§4.3). */}
+                    <h3 className="line-clamp-3 text-lg font-semibold leading-snug text-foreground">
+                      {story.quote ? `“${story.quote}”` : story.title}
                     </h3>
                     {story.excerpt ? (
-                      <p className="line-clamp-3 text-sm leading-[1.7] text-muted-foreground">
+                      <p className="line-clamp-2 text-sm leading-[1.7] text-muted-foreground">
                         {story.excerpt}
                       </p>
                     ) : null}
                     <div className="mt-auto flex items-center justify-between pt-2 text-xs text-muted-foreground">
                       <span>
-                        {story.familyName || story.region || "축복가정"} · {formatPublishedDate(story)}
+                        {story.familyName
+                          ? maskFamilyName(story.familyName)
+                          : story.region || "축복가정"}{" "}
+                        · {formatPublishedDate(story)}
                       </span>
                       <span className="flex items-center gap-1">
                         <Eye className="h-3.5 w-3.5" aria-hidden="true" /> {story.viewCount}
@@ -166,6 +185,19 @@ export default function Stories() {
               ))}
             </div>
           )}
+
+          {hasMore ? (
+            <div className="mt-10 flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={() => setVisibleCount((prev) => prev + STORIES_PAGE_SIZE)}
+              >
+                {STORIES_LOAD_MORE_LABEL} ({visibleStories.length - shownStories.length})
+              </Button>
+            </div>
+          ) : null}
         </div>
       </section>
     </>

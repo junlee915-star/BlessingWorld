@@ -1,10 +1,10 @@
-// 축복교육 강좌 데이터 접근 계층.
+// 사랑의 기술 강좌 데이터 접근 계층.
 // Supabase가 연결되어 있으면 `courses` 테이블을 쓰고, 연결되지 않았거나(§client.ts의
 // isSupabaseConfigured) 요청이 실패하면 이 브라우저의 localStorage → content/curriculum.ts
 // 기본값 순으로 내려갑니다. 이 프로젝트에는 아직 관리자 로그인 화면이 없어서, Supabase
 // 미연결 상태의 "관리"는 이 브라우저에만 반영되는 임시 저장이라는 점을 UI에서 알려주세요.
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
-import { DEFAULT_COURSES, type Course } from "@/content/curriculum";
+import { DEFAULT_COURSES, type Course, type QuizQuestion } from "@/content/curriculum";
 
 const LOCAL_STORAGE_KEY = "blessingworld:courses";
 
@@ -40,6 +40,8 @@ function rowToCourse(row: {
   description: string | null;
   video_url: string | null;
   is_published: boolean;
+  quiz?: QuizQuestion[] | null;
+  pass_score?: number | null;
 }): Course {
   return {
     id: row.id,
@@ -50,6 +52,8 @@ function rowToCourse(row: {
     description: row.description ?? "",
     videoUrl: row.video_url ?? "",
     isPublished: row.is_published,
+    quiz: row.quiz ?? undefined,
+    passScore: row.pass_score ?? undefined,
   };
 }
 
@@ -63,6 +67,8 @@ function courseToRow(course: Course) {
     description: course.description,
     video_url: course.videoUrl,
     is_published: course.isPublished,
+    quiz: course.quiz ?? null,
+    pass_score: course.passScore ?? null,
   };
 }
 
@@ -70,7 +76,7 @@ function sortByOrder(courses: Course[]): Course[] {
   return [...courses].sort((a, b) => a.order - b.order);
 }
 
-/** 공개 페이지(/guide/curriculum)에서 씁니다 — 게시된 강좌만 정렬해 돌려줍니다. */
+/** 공개 페이지(/curriculum)에서 씁니다 — 게시된 강좌만 정렬해 돌려줍니다. */
 export async function fetchPublishedCourses(): Promise<Course[]> {
   const all = await fetchAllCourses();
   return sortByOrder(all.filter((course) => course.isPublished));

@@ -3,10 +3,12 @@
 // 연결되지 않으면 그냥 빈 목록을 보여줍니다(다른 admin 화면처럼 로컬에 "임시 관리"할
 // 대상이 아닙니다).
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
-import type { Gender, GuidanceStatus } from "@/integrations/supabase/types";
+import type { ConsultMethod, Gender, GuidanceStatus } from "@/integrations/supabase/types";
 
 export interface GuidanceRequestRow {
   id: string;
+  /** 로그인 상태로 신청한 경우에만 채워집니다. 로드맵 단계 기록(blessing_progress)의 키입니다. */
+  userId: string | null;
   name: string;
   phone: string;
   email: string | null;
@@ -24,6 +26,7 @@ export interface GuidanceRequestRow {
   purgeAfter: string | null;
   createdAt: string;
   completedCourses: string[] | null;
+  consultMethod: ConsultMethod | null;
 }
 
 export interface StaffOption {
@@ -34,6 +37,7 @@ export interface StaffOption {
 
 function rowFromDb(row: {
   id: string;
+  user_id: string | null;
   name: string;
   phone: string;
   email: string | null;
@@ -51,9 +55,11 @@ function rowFromDb(row: {
   purge_after: string | null;
   created_at: string;
   completed_courses: string[] | null;
+  consult_method: ConsultMethod | null;
 }): GuidanceRequestRow {
   return {
     id: row.id,
+    userId: row.user_id ?? null,
     name: row.name,
     phone: row.phone,
     email: row.email,
@@ -71,6 +77,7 @@ function rowFromDb(row: {
     purgeAfter: row.purge_after,
     createdAt: row.created_at,
     completedCourses: row.completed_courses,
+    consultMethod: row.consult_method ?? null,
   };
 }
 

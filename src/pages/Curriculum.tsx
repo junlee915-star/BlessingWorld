@@ -1,19 +1,24 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CheckCircle2, Circle, GraduationCap } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowRight, GraduationCap, HelpCircle } from "lucide-react";
 
 import { SEO } from "@/components/common/SEO";
 import { EyebrowLabel } from "@/components/common/EyebrowLabel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CURRICULUM_FINAL_CTA, CURRICULUM_HERO, CURRICULUM_VIDEO_PLACEHOLDER } from "@/content/curriculum";
+import {
+  CURRICULUM_FINAL_CTA,
+  CURRICULUM_HERO,
+  CURRICULUM_VIDEO_PLACEHOLDER,
+} from "@/content/curriculum";
 import type { Course } from "@/content/curriculum";
 import { fetchPublishedCourses, getCompletedCourses, saveCompletedCourses } from "@/lib/courses";
 import { fetchCompletedCourseIds, setCourseCompletion } from "@/lib/courseCompletions";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
+// 사랑의 기술 `/curriculum` — 6축 개편 §4.4.
+// 목록은 진입점 역할만 하고, 재생·퀴즈·이수 처리는 강좌 상세(`/curriculum/:courseId`)가 맡습니다.
 export default function Curriculum() {
   const { user } = useAuth();
   const [courses, setCourses] = useState<Course[] | null>(null);
@@ -57,32 +62,16 @@ export default function Curriculum() {
   const progressPercent = total > 0 ? Math.round((doneCount / total) * 100) : 0;
   const allDone = total > 0 && doneCount === total;
 
-  async function toggleComplete(id: string) {
-    const willComplete = !completed.has(id);
-    const next = new Set(completed);
-    if (willComplete) {
-      next.add(id);
-    } else {
-      next.delete(id);
-    }
-    setCompleted(next);
-    saveCompletedCourses([...next]);
-
-    if (user) {
-      const ok = await setCourseCompletion(user.id, id, willComplete);
-      if (!ok) toast.error("계정에 저장하지 못했어요. 이 브라우저에는 반영되었어요.");
-    }
-  }
-
   return (
     <>
       <SEO path="/curriculum" />
 
       <section className="mx-auto max-w-6xl px-5 pb-8 pt-16 md:px-8 md:pt-24">
         <EyebrowLabel>{CURRICULUM_HERO.eyebrow}</EyebrowLabel>
-        <h1 className="mt-4 max-w-2xl text-[28px] font-bold leading-[1.3] text-foreground md:text-[40px]">
+        <h1 className="mt-4 max-w-2xl whitespace-pre-line text-[28px] font-bold leading-[1.3] text-foreground md:text-[40px]">
           {CURRICULUM_HERO.title}
         </h1>
+        <p className="mt-3 text-sm font-medium text-primary-deep">{CURRICULUM_HERO.subtitle}</p>
         <p className="mt-4 max-w-prose text-[15px] leading-[1.8] text-muted-foreground md:text-base">
           {CURRICULUM_HERO.body}
         </p>
@@ -111,7 +100,11 @@ export default function Curriculum() {
             <p className="mt-2 text-xs text-muted-foreground">
               {user ? (
                 <>
-                  계정에 저장되고 있어요. <Link to="/mypage" className="font-medium text-primary-deep hover:underline">마이페이지</Link>에서도 확인할 수 있어요.
+                  계정에 저장되고 있어요.{" "}
+                  <Link to="/mypage" className="font-medium text-primary-deep hover:underline">
+                    마이페이지
+                  </Link>
+                  에서도 확인할 수 있어요.
                 </>
               ) : (
                 <>
@@ -133,63 +126,61 @@ export default function Curriculum() {
         ) : courses.length === 0 ? (
           <p className="text-sm text-muted-foreground">아직 게시된 강좌가 없어요.</p>
         ) : (
-          <ol className="space-y-5">
+          <ol className="grid gap-5 md:grid-cols-2">
             {courses.map((course) => {
               const isDone = completed.has(course.id);
               return (
-                <li
-                  key={course.id}
-                  className={cn(
-                    "flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 shadow-card transition-colors sm:flex-row sm:items-start sm:justify-between",
-                    isDone && "border-primary/40 bg-primary-soft/30",
-                  )}
-                >
-                  <div className="flex gap-4">
-                    <span
-                      aria-hidden="true"
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-soft text-lg font-bold text-primary-deep"
-                    >
-                      {course.order}
-                    </span>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="text-lg font-semibold text-foreground">{course.title}</h2>
-                        {isDone ? <Badge variant="success">완료</Badge> : null}
-                      </div>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {course.instructor}
-                        {course.durationMinutes ? ` · 약 ${course.durationMinutes}분` : ""}
-                      </p>
-                      <p className="mt-3 max-w-prose text-sm leading-[1.75] text-muted-foreground">
-                        {course.description}
-                      </p>
-                      {!course.videoUrl ? (
-                        <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <GraduationCap className="h-3.5 w-3.5" aria-hidden="true" />
-                          {CURRICULUM_VIDEO_PLACEHOLDER}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => toggleComplete(course.id)}
-                    aria-pressed={isDone}
+                <li key={course.id}>
+                  <Link
+                    to={`/curriculum/${course.id}`}
                     className={cn(
-                      "flex shrink-0 items-center gap-2 self-start rounded-full border px-4 py-2 text-sm font-medium transition-colors sm:self-center",
-                      isDone
-                        ? "border-primary bg-primary text-primary-foreground hover:bg-primary-deep"
-                        : "border-border text-muted-foreground hover:border-primary hover:text-primary-deep",
+                      "flex h-full flex-col gap-4 rounded-2xl border bg-card p-6 shadow-card transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                      isDone ? "border-primary/40 bg-primary-soft/30" : "border-border",
                     )}
                   >
-                    {isDone ? (
-                      <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-                    ) : (
-                      <Circle className="h-4 w-4" aria-hidden="true" />
-                    )}
-                    {isDone ? "들었어요" : "다 들었어요"}
-                  </button>
+                    <div className="flex gap-4">
+                      <span
+                        aria-hidden="true"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-soft text-lg font-bold text-primary-deep"
+                      >
+                        {course.order}
+                      </span>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="text-lg font-semibold text-foreground">{course.title}</h2>
+                          {isDone ? <Badge variant="success">이수 완료</Badge> : null}
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {course.instructor}
+                          {course.durationMinutes ? ` · 약 ${course.durationMinutes}분` : ""}
+                        </p>
+                      </div>
+                    </div>
+
+                    <p className="flex-1 text-sm leading-[1.75] text-muted-foreground">
+                      {course.description}
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+                      {!course.videoUrl ? (
+                        <span className="flex items-center gap-1.5">
+                          <GraduationCap className="h-3.5 w-3.5" aria-hidden="true" />
+                          {CURRICULUM_VIDEO_PLACEHOLDER}
+                        </span>
+                      ) : null}
+                      {course.quiz && course.quiz.length > 0 ? (
+                        <span className="flex items-center gap-1.5">
+                          <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                          확인 퀴즈 {course.quiz.length}문항
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary-deep">
+                      {isDone ? "다시 보기" : "강좌 열기"}
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                  </Link>
                 </li>
               );
             })}

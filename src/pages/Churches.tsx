@@ -47,7 +47,7 @@ export default function Churches() {
 
   return (
     <>
-      <SEO path="/churches" />
+      <SEO path="/center/churches" />
 
       <section className="mx-auto max-w-6xl px-5 pb-16 pt-16 md:px-8 md:pb-24 md:pt-24">
         <SectionHeading

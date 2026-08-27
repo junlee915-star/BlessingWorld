@@ -285,5 +285,5 @@ export const DOCUMENT_CATEGORIES: DocumentCategory[] = [
 export const DOCUMENTS_FINAL_CTA = {
   title: "서류 준비, 혼자 고민하지 않아도 괜찮아요",
   body: "빠뜨린 서류나 궁금한 심사기준이 있다면 지역 담당자에게 직접 확인해보세요.",
-  cta: { label: "축복결혼 안내 신청하기", to: "/onboarding" },
+  cta: { label: "축복결혼 안내 신청하기", to: "/center/apply" },
 };

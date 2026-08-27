@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import { Download } from "lucide-react";
 
 import { SEO } from "@/components/common/SEO";
+import { DEFAULT_ROADMAP_STEPS } from "@/content/roadmap";
+import { setProgress } from "@/lib/blessingProgress";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,7 +17,14 @@ import {
   type StaffOption,
 } from "@/lib/guidanceAdmin";
 import { isSupabaseConfigured } from "@/integrations/supabase/client";
-import type { GuidanceStatus } from "@/integrations/supabase/types";
+import { useAuth } from "@/lib/auth";
+import type { ConsultMethod, GuidanceStatus } from "@/integrations/supabase/types";
+
+const CONSULT_METHOD_LABEL: Record<ConsultMethod, string> = {
+  visit: "교회 방문",
+  phone: "전화",
+  video: "화상",
+};
 
 const STATUS_OPTIONS: GuidanceStatus[] = [
   "received",
@@ -92,6 +101,7 @@ function downloadCsv(rows: GuidanceRequestRow[], staffById: Map<string, string>)
 // 도달할 수 없어야 합니다 — RequireAdmin과 RLS("owner or staff can read guidance
 // request", §0001_init.sql/§0004) 둘 다 이 전제에 의존합니다.
 export default function GuidanceAdmin() {
+  const { profile } = useAuth();
   const [rows, setRows] = useState<GuidanceRequestRow[] | null>(null);
   const [staff, setStaff] = useState<StaffOption[]>([]);
   const [sidoFilter, setSidoFilter] = useState("");
@@ -153,13 +163,35 @@ export default function GuidanceAdmin() {
     applyUpdate(row.id, updated, "메모 저장에 실패했어요.");
   }
 
+  /**
+   * 담당자가 회원의 현재 로드맵 단계를 지정합니다 — 고른 단계를 in_progress로,
+   * 그 앞 단계들을 completed로 기록해 /roadmap의 "지금 여기"가 바로 맞춰지게 합니다.
+   * blessing_progress는 user_id가 필요해서 로그인 신청 건에만 쓸 수 있습니다.
+   */
+  async function handleStepChange(userId: string | null, stepKey: string) {
+    if (!userId || !stepKey) return;
+    const index = DEFAULT_ROADMAP_STEPS.findIndex((step) => step.key === stepKey);
+    if (index < 0) return;
+    const results = await Promise.all(
+      DEFAULT_ROADMAP_STEPS.map((step, i) =>
+        i < index
+          ? setProgress(userId, step.key, "completed", profile?.id ?? null)
+          : i === index
+            ? setProgress(userId, step.key, "in_progress", profile?.id ?? null)
+            : Promise.resolve(true),
+      ),
+    );
+    if (results.every(Boolean)) toast.success("로드맵 단계를 기록했어요.");
+    else toast.error("단계 기록에 실패했어요. 잠시 후 다시 시도해주세요.");
+  }
+
   return (
     <>
       <SEO path="/admin/guidance" noindex />
 
       <AdminHeader
         title="신청 관리"
-        description="/onboarding으로 들어온 안내 신청을 확인하고, 지역 담당자를 배정하고, 진행 상태를 관리해요. 상태를 '종료'로 바꾸면 1년 뒤 개인정보가 자동으로 파기됩니다(§7.4)."
+        description="/center/apply로 들어온 축복상담 신청을 확인하고, 지역 담당자를 배정하고, 진행 상태를 관리해요. 상태를 '종료'로 바꾸면 1년 뒤 개인정보가 자동으로 파기됩니다(§7.4). 로그인 상태로 신청한 분은 '로드맵 단계'를 지정할 수 있고, 그 값이 /roadmap의 '지금 여기' 표시에 반영됩니다."
       />
 
       <section className="mx-auto max-w-6xl px-5 pb-24 md:px-8">
@@ -249,7 +281,9 @@ export default function GuidanceAdmin() {
                       <th className="px-4 py-3">지역</th>
                       <th className="px-4 py-3">유입경로</th>
                       <th className="px-4 py-3">신청일</th>
+                      <th className="px-4 py-3">상담 방식</th>
                       <th className="px-4 py-3">상태</th>
+                      <th className="px-4 py-3">로드맵 단계</th>
                       <th className="px-4 py-3">담당자</th>
                       <th className="px-4 py-3">메모</th>
                     </tr>
@@ -279,6 +313,11 @@ export default function GuidanceAdmin() {
                         </td>
                         <td className="px-4 py-3 text-muted-foreground">{row.source}</td>
                         <td className="px-4 py-3 text-muted-foreground">{formatDate(row.createdAt)}</td>
+                        <td className="px-4 py-3 text-muted-foreground">
+                          {row.consultMethod
+                            ? CONSULT_METHOD_LABEL[row.consultMethod]
+                            : "—"}
+                        </td>
                         <td className="px-4 py-3">
                           <select
                             className={inputClass}
@@ -297,6 +336,28 @@ export default function GuidanceAdmin() {
                           {row.status === "closed" && row.purgeAfter ? (
                             <p className="mt-1 text-xs text-muted-foreground">{row.purgeAfter} 파기 예정</p>
                           ) : null}
+                        </td>
+                        <td className="px-4 py-3">
+                          {row.userId ? (
+                            <select
+                              className={inputClass}
+                              defaultValue=""
+                              onChange={(e) => void handleStepChange(row.userId, e.target.value)}
+                            >
+                              <option value="">단계 지정…</option>
+                              {DEFAULT_ROADMAP_STEPS.map((step) => (
+                                <option key={step.key} value={step.key}>
+                                  {step.no}. {step.title}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">
+                              비로그인 신청
+                              <br />
+                              (단계 기록 불가)
+                            </p>
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           <select
