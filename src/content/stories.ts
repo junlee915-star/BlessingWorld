@@ -2,10 +2,14 @@
 import type { StoryCategory } from "@/integrations/supabase/types";
 
 export const STORIES_HERO = {
-  eyebrow: "Our Stories",
+  eyebrow: "OUR STORIES",
   title: "행복의 꽃",
   sub: "서로를 이해하고 함께 성장해 온 축복가정의 진솔한 이야기를 만납니다.",
 };
+
+/** 한 번에 보여줄 카드 수 — 나머지는 "더 보기"로 이어 붙입니다(듀오 §1.5 페이지네이션). */
+export const STORIES_PAGE_SIZE = 12;
+export const STORIES_LOAD_MORE_LABEL = "더 보기";
 
 export const STORY_CATEGORIES: { value: "all" | StoryCategory; label: string }[] = [
   { value: "all", label: "전체" },
@@ -41,6 +45,13 @@ export interface Story {
   id: string;
   slug: string;
   title: string;
+  /**
+   * 카드 제목으로 노출할 가정의 한마디(6축 개편 §4.3 — 듀오 성혼 인터뷰 형식).
+   * 비어 있으면 title로 폴백합니다.
+   */
+  quote: string;
+  /** 축복 유형 배지(예: 합동축복, 축복자녀). category(콘텐츠 형식)와 다른 축입니다. */
+  blessingType: string;
   excerpt: string;
   /** 마크다운/리치텍스트 원문(§7.2). 이 프로젝트에는 아직 렌더러가 없어 줄바꿈만 살려 그대로 보여줍니다. */
   body: string;

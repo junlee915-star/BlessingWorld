@@ -8,6 +8,7 @@ import { ComingSoon } from "@/components/common/ComingSoon";
 import { Button } from "@/components/ui/button";
 import { STORY_CATEGORY_LABELS, type Story } from "@/content/stories";
 import { fetchPublishedStories } from "@/lib/stories";
+import { maskFamilyName } from "@/lib/utils";
 
 function formatPublishedDate(story: Story): string {
   const raw = story.publishedAt ?? story.createdAt;
@@ -107,7 +108,7 @@ export default function StoryDetail() {
           {story.title}
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          {story.familyName || story.region || "축복가정"}
+          {story.familyName ? maskFamilyName(story.familyName) : story.region || "축복가정"}
           {story.familyName && story.region ? ` · ${story.region}` : ""} · {formatPublishedDate(story)}
         </p>
 
@@ -153,7 +154,7 @@ export default function StoryDetail() {
             이 이야기처럼, 당신의 축복결혼도 시작될 수 있어요.
           </p>
           <Button asChild size="lg" className="mt-4">
-            <Link to="/onboarding">축복결혼 안내 신청하기</Link>
+            <Link to="/center/apply">축복결혼 안내 신청하기</Link>
           </Button>
         </div>
       </article>

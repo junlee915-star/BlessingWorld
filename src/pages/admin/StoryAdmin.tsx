@@ -25,6 +25,8 @@ function makeEmptyStory(): Story {
     coverImageUrl: "",
     category: "interview",
     familyName: "",
+    quote: "",
+    blessingType: "",
     region: "",
     viewCount: 0,
     isPublished: false,
@@ -195,6 +197,29 @@ export default function StoryAdmin() {
                         </option>
                       ))}
                     </select>
+                  </label>
+
+                  <label className="flex flex-col gap-1.5 text-sm sm:col-span-2">
+                    <span className="font-medium text-foreground">가정의 한마디 (카드 제목)</span>
+                    <input
+                      className={inputClass}
+                      value={story.quote}
+                      onChange={(e) => updateStory(story.id, { quote: e.target.value })}
+                      placeholder="예: 완벽한 사람을 찾기보다, 함께 자랄 사람을 만났어요."
+                    />
+                    <span className="text-xs text-muted-foreground">
+                      목록 카드의 제목으로 쓰입니다. 비워두면 위의 글 제목이 대신 노출돼요.
+                    </span>
+                  </label>
+
+                  <label className="flex flex-col gap-1.5 text-sm">
+                    <span className="font-medium text-foreground">축복 유형 배지</span>
+                    <input
+                      className={inputClass}
+                      value={story.blessingType}
+                      onChange={(e) => updateStory(story.id, { blessingType: e.target.value })}
+                      placeholder="예: 합동축복 / 축복자녀"
+                    />
                   </label>
 
                   <label className="flex flex-col gap-1.5 text-sm">

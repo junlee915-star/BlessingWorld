@@ -45,6 +45,8 @@ function rowToStory(row: {
   category: StoryCategory;
   family_name: string | null;
   region: string | null;
+  quote?: string | null;
+  blessing_type?: string | null;
   view_count: number;
   is_published: boolean;
   published_at: string | null;
@@ -60,6 +62,8 @@ function rowToStory(row: {
     category: row.category,
     familyName: row.family_name ?? "",
     region: row.region ?? "",
+    quote: row.quote ?? "",
+    blessingType: row.blessing_type ?? "",
     viewCount: row.view_count,
     isPublished: row.is_published,
     publishedAt: row.published_at,
@@ -78,6 +82,8 @@ function storyToRow(story: Story) {
     category: story.category,
     family_name: story.familyName,
     region: story.region,
+    quote: story.quote || null,
+    blessing_type: story.blessingType || null,
     view_count: story.viewCount,
     is_published: story.isPublished,
     published_at: story.publishedAt,
