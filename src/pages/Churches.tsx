@@ -108,7 +108,16 @@ export default function Churches() {
                     {church.address ? (
                       <div className="flex items-start gap-2">
                         <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                        <dd>{church.address}</dd>
+                        <dd>
+                          <a
+                            href={`https://map.naver.com/v5/search/${encodeURIComponent(church.address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-primary-deep hover:underline"
+                          >
+                            {church.address}
+                          </a>
+                        </dd>
                       </div>
                     ) : null}
                     {church.phone ? (
