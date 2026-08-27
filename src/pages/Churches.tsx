@@ -11,6 +11,13 @@ import { CONTACT_HOURS, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_TEL } from "@/conte
 const selectClass =
   "w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
 
+// 원본 주소록은 군/시 소재지 읍 이름이 군·시명과 같으면 "부안군(읍)"처럼 줄여 씁니다.
+// 화면에는 그대로 보여주되, 지도 검색에는 실제 지명("부안군 부안읍")으로 풀어서 넘겨야
+// 네이버 지도가 위치를 찾습니다.
+function toMapQuery(address: string): string {
+  return address.replace(/([가-힣]+)(군|시)\(읍\)/g, "$1$2 $1읍");
+}
+
 // 지역가정교회 `/churches` — 가정민원실을 대체(§13.1). 지역(시·도/시·군·구)으로 가까운
 // 가정교회를 찾아 연락처를 안내하는 디렉터리만 제공합니다.
 export default function Churches() {
@@ -110,7 +117,7 @@ export default function Churches() {
                         <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                         <dd>
                           <a
-                            href={`https://map.naver.com/v5/search/${encodeURIComponent(church.address)}`}
+                            href={`https://map.naver.com/v5/search/${encodeURIComponent(toMapQuery(church.address))}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hover:text-primary-deep hover:underline"
