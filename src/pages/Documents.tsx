@@ -10,7 +10,7 @@ import { DOCUMENT_CATEGORIES, DOCUMENTS_FINAL_CTA, DOCUMENTS_HERO } from "@/cont
 export default function Documents() {
   return (
     <>
-      <SEO path="/documents" />
+      <SEO path="/center/documents" />
 
       <section className="mx-auto max-w-6xl px-5 pb-8 pt-16 md:px-8 md:pt-24">
         <EyebrowLabel>{DOCUMENTS_HERO.eyebrow}</EyebrowLabel>

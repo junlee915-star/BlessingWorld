@@ -3,7 +3,7 @@
 // 리드 데이터라서) — Supabase가 연결되지 않았다면 실패로 보고하고, 화면에서 전화
 // 문의로 안내하세요.
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
-import type { Gender } from "@/integrations/supabase/types";
+import type { ConsultMethod, Gender } from "@/integrations/supabase/types";
 
 export interface GuidanceRequestPayload {
   name: string;
@@ -17,6 +17,8 @@ export interface GuidanceRequestPayload {
   source?: string;
   /** §P-04 이수 완료 강좌 id 목록(§src/lib/courses.ts getCompletedCourses()). */
   completedCourses: string[];
+  /** 희망 상담 방식(6축 개편 §4.6) — 일정 예약 대신 방식만 받습니다. */
+  consultMethod: ConsultMethod;
 }
 
 export type GuidanceSubmitResult =
@@ -82,6 +84,7 @@ export async function submitGuidanceRequest(
     privacy_agreed_at: new Date().toISOString(),
     source: payload.source ?? "web",
     completed_courses: payload.completedCourses.length > 0 ? payload.completedCourses : undefined,
+    consult_method: payload.consultMethod,
   };
 
   recordClientSubmitAttempt();
