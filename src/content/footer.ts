@@ -5,8 +5,8 @@
 export const ORG_NAME = "세계평화통일가정연합 한국협회";
 export const ORG_DEPARTMENT = "가정행복지원국 축복가정부";
 export const RESPONSE_TIME = "영업일 기준 1~2일 이내";
-export const CONTACT_PHONE_DISPLAY = "02-3000-3000";
-export const CONTACT_PHONE_TEL = "tel:0230003000";
+export const CONTACT_PHONE_DISPLAY = "02-3271-0480";
+export const CONTACT_PHONE_TEL = "tel:0232710480";
 export const CONTACT_HOURS = "평일 09:00–18:00";
 
 export const FOOTER_CONTENT = {

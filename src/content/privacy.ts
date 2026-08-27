@@ -25,4 +25,4 @@ export const PRIVACY_SECTIONS = [
 export const PRIVACY_INTRO =
   "블레싱월드는 축복결혼·가정생활 안내 서비스로서 다음과 같이 개인정보를 관리합니다.";
 
-export const PRIVACY_CONTACT = "문의처: 02-3000-3000 | 평일 09:00–18:00";
+export const PRIVACY_CONTACT = "문의처: 02-3271-0480 | 평일 09:00–18:00";
