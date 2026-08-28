@@ -8,9 +8,8 @@ export function Footer() {
   return (
     <footer className="border-t border-border bg-muted/60">
       <div className="mx-auto max-w-6xl px-5 py-14 md:px-8 md:py-16">
-        <Link to="/" className="inline-flex items-center gap-2.5">
+        <Link to="/" aria-label={BRAND.homeLabel} className="inline-flex items-center">
           <LogoMark />
-          <span className="text-lg font-bold text-foreground">{BRAND.name}</span>
         </Link>
         <p className="mt-5 max-w-prose text-sm leading-[1.8] text-muted-foreground">
           {FOOTER_CONTENT.description}

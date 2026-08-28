@@ -23,12 +23,9 @@ export function Header() {
         <Link
           to="/"
           aria-label={BRAND.homeLabel}
-          className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
+          className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
         >
           <LogoMark />
-          <span className="font-sans text-lg font-bold tracking-tight text-foreground">
-            {BRAND.name}
-          </span>
         </Link>
 
         <nav aria-label="주 메뉴" className="ml-auto hidden items-center gap-8 md:flex">
@@ -73,9 +70,9 @@ export function Header() {
             </button>
           </SheetTrigger>
           <SheetContent>
-            <SheetTitle className="flex items-center gap-2">
+            <SheetTitle className="flex items-center">
               <LogoMark />
-              {BRAND.name}
+              <span className="sr-only">{BRAND.name}</span>
             </SheetTitle>
             <nav aria-label="모바일 메뉴" className="flex flex-col gap-1">
               {NAV_ITEMS.map((item) => (
