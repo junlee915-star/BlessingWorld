@@ -17,7 +17,7 @@ import { fetchPublishedCourses, getCompletedCourses, isAllCompleted } from "@/li
 import { submitGuidanceRequest } from "@/lib/guidance";
 import type { ConsultMethod, Gender } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
-import { ValuesAssessmentStep } from "@/components/apply/ValuesAssessmentStep";
+import { ValuesAssessmentSection } from "@/components/apply/ValuesAssessmentSection";
 import type { ValuesAssessmentResult } from "@/content/valuesAssessment";
 
 // 축복상담 신청 `/center/apply` — 6축 개편 §4.6.
@@ -156,13 +156,7 @@ export default function Onboarding() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [flowStep, setFlowStep] = useState<"assessment" | "form">("assessment");
   const [valuesAssessment, setValuesAssessment] = useState<ValuesAssessmentResult | null>(null);
-
-  function handleAssessmentDone(result: ValuesAssessmentResult | null) {
-    setValuesAssessment(result);
-    setFlowStep("form");
-  }
 
   useEffect(() => {
     setCompletedIds(getCompletedCourses());
@@ -313,55 +307,43 @@ export default function Onboarding() {
         <EyebrowLabel className="mt-6">BLESSING CENTER</EyebrowLabel>
         <h1 className="mt-3 text-2xl font-bold text-foreground md:text-[32px]">축복상담 신청</h1>
 
-        {flowStep === "assessment" ? (
-          <div className="mt-8 flex w-full justify-center">
-            <ValuesAssessmentStep onDone={handleAssessmentDone} />
-          </div>
-        ) : (
-          <>
-            <p className="mt-4 max-w-prose text-[15px] leading-[1.8] text-muted-foreground">
-              아래 항목만 알려주시면 가까운 지역가정교회에서 연락드립니다. 상담은 무료이고, 원하지
-              않으시면 언제든 중단하실 수 있어요.
+        <p className="mt-4 max-w-prose text-[15px] leading-[1.8] text-muted-foreground">
+          아래 항목만 알려주시면 가까운 지역가정교회에서 연락드립니다. 상담은 무료이고, 원하지
+          않으시면 언제든 중단하실 수 있어요.
+        </p>
+        <p className="mt-2 text-sm font-medium text-primary-deep">30초면 끝나요</p>
+
+        {showEduBanner ? (
+          <div
+            className={cn(
+              "mt-6 flex w-full max-w-md items-center gap-3 rounded-2xl border p-4 text-left",
+              eduCompleted ? "border-primary/40 bg-primary-soft/30" : "border-border bg-muted/60",
+            )}
+          >
+            <GraduationCap className="h-5 w-5 shrink-0 text-primary-deep" aria-hidden="true" />
+            <p className="text-sm text-muted-foreground">
+              {eduCompleted ? (
+                <>
+                  사랑의 기술 {courseIds.length}강좌를 모두 들으셨네요.{" "}
+                  <Badge variant="success" className="align-middle">
+                    이수 완료
+                  </Badge>{" "}
+                  이수 내역을 담당자에게 함께 전달해드릴게요.
+                </>
+              ) : (
+                <>
+                  사랑의 기술 {completedIds.length}강좌를 들으셨어요. 이수 내역을 함께
+                  전달해드릴게요.
+                </>
+              )}
             </p>
-            <p className="mt-2 text-sm font-medium text-primary-deep">30초면 끝나요</p>
+          </div>
+        ) : null}
 
-            {valuesAssessment ? (
-              <Badge variant="default" className="mt-4">
-                가치관 진단 결과 첨부됨
-              </Badge>
-            ) : null}
+        <div className="mt-8 flex w-full justify-center">
+          <ValuesAssessmentSection onChange={setValuesAssessment} />
+        </div>
 
-            {showEduBanner ? (
-              <div
-                className={cn(
-                  "mt-6 flex w-full max-w-md items-center gap-3 rounded-2xl border p-4 text-left",
-                  eduCompleted ? "border-primary/40 bg-primary-soft/30" : "border-border bg-muted/60",
-                )}
-              >
-                <GraduationCap className="h-5 w-5 shrink-0 text-primary-deep" aria-hidden="true" />
-                <p className="text-sm text-muted-foreground">
-                  {eduCompleted ? (
-                    <>
-                      사랑의 기술 {courseIds.length}강좌를 모두 들으셨네요.{" "}
-                      <Badge variant="success" className="align-middle">
-                        이수 완료
-                      </Badge>{" "}
-                      이수 내역을 담당자에게 함께 전달해드릴게요.
-                    </>
-                  ) : (
-                    <>
-                      사랑의 기술 {completedIds.length}강좌를 들으셨어요. 이수 내역을 함께
-                      전달해드릴게요.
-                    </>
-                  )}
-                </p>
-              </div>
-            ) : null}
-          </>
-        )}
-
-        {flowStep === "form" ? (
-        <>
         <form
           onSubmit={handleFormSubmit}
           noValidate
@@ -589,8 +571,6 @@ export default function Onboarding() {
           </a>
           로 바로 안내받으실 수 있어요.
         </p>
-        </>
-        ) : null}
 
         <TrustBadges className="mt-10 justify-center" />
 
