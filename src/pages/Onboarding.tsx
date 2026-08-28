@@ -17,8 +17,6 @@ import { fetchPublishedCourses, getCompletedCourses, isAllCompleted } from "@/li
 import { submitGuidanceRequest } from "@/lib/guidance";
 import type { ConsultMethod, Gender } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
-import { ValuesAssessmentSection } from "@/components/apply/ValuesAssessmentSection";
-import type { ValuesAssessmentResult } from "@/content/valuesAssessment";
 
 // 축복상담 신청 `/center/apply` — 6축 개편 §4.6.
 // 이전에는 5단계 위저드였으나, 듀오 간편상담신청(§1.6: 한 화면 7필드, 전부 선택형 위주)의
@@ -156,7 +154,6 @@ export default function Onboarding() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [valuesAssessment, setValuesAssessment] = useState<ValuesAssessmentResult | null>(null);
 
   useEffect(() => {
     setCompletedIds(getCompletedCourses());
@@ -207,7 +204,6 @@ export default function Onboarding() {
       consultMethod: values.consultMethod,
       source: ref === "curriculum" ? "curriculum" : "web",
       completedCourses: completedIds,
-      valuesAssessment: valuesAssessment ?? undefined,
     });
     setSubmitting(false);
 
@@ -339,10 +335,6 @@ export default function Onboarding() {
             </p>
           </div>
         ) : null}
-
-        <div className="mt-8 flex w-full justify-center">
-          <ValuesAssessmentSection onChange={setValuesAssessment} />
-        </div>
 
         <form
           onSubmit={handleFormSubmit}
