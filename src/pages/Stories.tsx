@@ -65,12 +65,12 @@ export default function Stories() {
     <>
       <SEO path="/stories" />
 
-      <section className="mx-auto max-w-6xl px-5 pb-8 pt-16 md:px-8 md:pt-24">
+      <section className="mx-auto max-w-6xl px-5 pb-8 pt-16 text-center md:px-8 md:pt-24">
         <EyebrowLabel>{STORIES_HERO.eyebrow}</EyebrowLabel>
         <h1 className="mt-4 text-[28px] font-bold leading-[1.3] text-foreground md:text-[40px]">
           {STORIES_HERO.title}
         </h1>
-        <p className="mt-4 max-w-prose text-[15px] leading-[1.8] text-muted-foreground md:text-base">
+        <p className="mx-auto mt-4 max-w-prose text-[15px] leading-[1.8] text-muted-foreground md:text-base">
           {STORIES_HERO.sub}
         </p>
       </section>

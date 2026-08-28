@@ -66,13 +66,13 @@ export default function Curriculum() {
     <>
       <SEO path="/curriculum" />
 
-      <section className="mx-auto max-w-6xl px-5 pb-8 pt-16 md:px-8 md:pt-24">
+      <section className="mx-auto max-w-6xl px-5 pb-8 pt-16 text-center md:px-8 md:pt-24">
         <EyebrowLabel>{CURRICULUM_HERO.eyebrow}</EyebrowLabel>
-        <h1 className="mt-4 max-w-2xl whitespace-pre-line text-[28px] font-bold leading-[1.3] text-foreground md:text-[40px]">
+        <h1 className="mx-auto mt-4 max-w-2xl whitespace-pre-line text-[28px] font-bold leading-[1.3] text-foreground md:text-[40px]">
           {CURRICULUM_HERO.title}
         </h1>
         <p className="mt-3 text-sm font-medium text-primary-deep">{CURRICULUM_HERO.subtitle}</p>
-        <p className="mt-4 max-w-prose text-[15px] leading-[1.8] text-muted-foreground md:text-base">
+        <p className="mx-auto mt-4 max-w-prose text-[15px] leading-[1.8] text-muted-foreground md:text-base">
           {CURRICULUM_HERO.body}
         </p>
 

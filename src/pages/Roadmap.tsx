@@ -66,12 +66,12 @@ export default function Roadmap() {
     <>
       <SEO path="/roadmap" jsonLd={[stepListJsonLd]} />
 
-      <section className="mx-auto max-w-6xl px-5 pb-8 pt-16 md:px-8 md:pt-24">
+      <section className="mx-auto max-w-6xl px-5 pb-8 pt-16 text-center md:px-8 md:pt-24">
         <EyebrowLabel>{ROADMAP_HERO.eyebrow}</EyebrowLabel>
-        <h1 className="mt-4 max-w-3xl text-[28px] font-bold leading-[1.3] text-foreground md:text-[40px]">
+        <h1 className="mx-auto mt-4 max-w-3xl text-[28px] font-bold leading-[1.3] text-foreground md:text-[40px]">
           {ROADMAP_HERO.title}
         </h1>
-        <p className="prose-copy mt-5 text-[15px] md:text-[17px]">{ROADMAP_HERO.body}</p>
+        <p className="prose-copy mx-auto mt-5 text-[15px] md:text-[17px]">{ROADMAP_HERO.body}</p>
       </section>
 
       <section className="mx-auto max-w-6xl px-5 pb-16 md:px-8 md:pb-24">
