@@ -4,44 +4,39 @@
 
 @layer base {
   :root {
-    /* Base — Duo 스타일 리스킨: 웜 라벤더 → 딥 네이비 트러스트 팔레트 */
-    --background: 210 22% 98%; /* #F7F8FA 쿨 오프화이트 */
-    --foreground: 222 32% 15%; /* #1B2333 딥 네이비 그레이 */
+    /* Base — DESIGN.md "Sacred Union" 리스킨: 미니멀-클래시컬, 영적 보라 × 샴페인 골드 */
+    --background: 285 100% 98%; /* #FDF7FF — ethereal-lavender wash */
+    --foreground: 264 8% 12%; /* #1D1B20 — on-background */
 
-    /* Brand — Deep Navy */
-    --primary: 222 56% 24%; /* #1B3568 네이비 */
+    /* Brand — Spiritual Purple */
+    --primary: 257 43% 38%; /* #4F378A */
     --primary-foreground: 0 0% 100%;
-    --primary-soft: 222 40% 95%; /* #EBEEF6 네이비 틴트 */
-    --primary-deep: 224 62% 14%; /* #0D1730 강조 텍스트 */
+    --primary-soft: 261 100% 93%; /* #E9DDFF — primary-fixed, 옅은 라벤더 틴트 */
+    --primary-deep: 262 100% 18%; /* #22005D — on-primary-fixed, 강조 텍스트 */
 
-    /* Accent — Warm Gold (네이비와 대비되는 온기 포인트) */
-    --accent: 36 68% 50%; /* #D89A2E 웜 골드 — 버튼 배경(accent-foreground와 짝)·다크 배경 위 텍스트용 */
-    --accent-foreground: 26 45% 14%;
-    --accent-soft: 38 70% 95%; /* #FCF2DE — 다크 배경(히어로 등) 위 eyebrow 텍스트용 */
-    /* text-accent를 밝은 배경(카드·푸터 등)의 작은 eyebrow 텍스트에 그대로 쓰면 대비가
-       2.4:1로 WCAG AA 4.5:1에 못 미쳤습니다(§9.1, Lighthouse color-contrast 실측).
-       --accent 자체를 어둡게 하면 버튼 배경(accent-foreground와 짝)·다크 배경 위 텍스트
-       용도가 반대로 망가져서, 밝은 배경 텍스트 전용 변형을 따로 둡니다. */
-    --accent-deep: 36 68% 33%; /* #8D601B */
+    /* Accent — Champagne Gold */
+    --accent: 46 65% 52%; /* #D4AF37 — 버튼 배경(accent-foreground와 짝) */
+    /* 흰 텍스트는 골드 배경 위에서 2.1:1로 WCAG AA 4.5:1에 크게 못 미쳐서(§DESIGN.md도
+       "white or deep charcoal text" 중 charcoal을 명시) 다크 차콜을 씁니다(8.1:1, 통과). */
+    --accent-foreground: 180 2% 11%; /* #1B1C1C — on-surface */
+    --accent-soft: 44 100% 77%; /* #FFE088 — 다크 배경(히어로 등) 위 eyebrow 텍스트용 */
+    /* text-accent(골드)를 밝은 배경의 작은 eyebrow 텍스트에 그대로 쓰면 대비가 부족해서
+       (2.1:1), 밝은 배경 텍스트 전용의 어두운 골드-브라운 변형을 따로 둡니다(6.1:1, 통과). */
+    --accent-deep: 48 100% 23%; /* #745C00 */
 
     /* Neutral */
-    --card: 0 0% 100%;
-    --card-foreground: 222 32% 15%;
-    --muted: 210 18% 95%; /* #F0F2F5 */
-    /* 원래 L45%(#666D7A)였는데 bg-primary-soft(가장 어두운 틴트 배경) 위에서 4.48:1로
-       WCAG AA 4.5:1에 아주 살짝 못 미쳤습니다(§GuideFinalCta.tsx, Lighthouse 실측).
-       2%p만 낮춰 모든 배경에서 여유 있게 통과하도록 했습니다 — 육안으로는 거의 차이 없습니다. */
-    --muted-foreground: 222 10% 43%; /* #616876 */
-    --border: 210 16% 88%; /* #DBE0E6 */
-    --input: 210 16% 88%;
-    --ring: 222 56% 24%;
+    --card: 0 0% 100%; /* surface-container-lowest */
+    --card-foreground: 180 2% 11%; /* on-surface */
+    --muted: 285 44% 96%; /* #F8F2FA — surface-container-low */
+    --muted-foreground: 260 8% 29%; /* #494551 — on-surface-variant, 배경 전반에서 8:1↑ 통과 */
+    --border: 270 13% 80%; /* #CBC4D2 — outline-variant, 은은한 소프트 아웃라인 */
+    --input: 270 13% 80%;
+    --ring: 257 43% 38%;
 
-    /* Semantic */
-    --destructive: 0 65% 55%;
+    /* Semantic — DESIGN.md에 없는 기능색은 기존 값을 유지 */
+    --destructive: 0 75% 42%; /* #BA1A1A — error */
     --success: 152 45% 42%;
     --warning: 38 85% 55%;
-
-    --radius: 0.625rem; /* 10px — 필 형태 대신 절제된 라운드로 */
   }
 
   * {
@@ -91,7 +86,7 @@
 
 @layer components {
   .eyebrow {
-    @apply font-eyebrow text-xs font-semibold uppercase tracking-[0.2em];
+    @apply font-sans text-xs font-semibold uppercase tracking-[0.05em];
   }
 
   .skip-link {

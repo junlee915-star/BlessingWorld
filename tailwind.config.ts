@@ -46,28 +46,22 @@ export default {
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
       },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 4px)",
-        sm: "calc(var(--radius) - 8px)",
-        xl: "calc(var(--radius) + 6px)",
-      },
+      // DESIGN.md의 rounded 스케일(sm 0.125rem/DEFAULT 0.25rem/md 0.375rem/lg 0.5rem/xl 0.75rem)이
+      // Tailwind 기본 스케일과 정확히 같아서 커스텀 오버라이드 없이 기본값을 그대로 씁니다.
       fontFamily: {
-        sans: [
-          "Pretendard Variable",
-          "Pretendard",
-          "-apple-system",
-          "Noto Sans KR",
-          "system-ui",
-          "sans-serif",
-        ],
-        eyebrow: ["Inter", "sans-serif"],
+        // 본문/기능적 텍스트 — Plus Jakarta Sans(라틴)는 한글 글리프가 없어 Noto Sans KR로 보완.
+        sans: ["Plus Jakarta Sans", "Noto Sans KR", "system-ui", "sans-serif"],
+        // 헤드라인/인용구 — Noto Serif KR(한글)·Noto Serif(라틴).
+        serif: ["Noto Serif KR", "Noto Serif", "serif"],
       },
       maxWidth: {
         prose: "62ch",
       },
       boxShadow: {
-        card: "0 2px 20px -6px rgba(13,23,48,0.12)",
+        // 톤온톤 카드 그림자 — Primary Purple을 낮은 불투명도로 은은하게.
+        card: "0 8px 30px -12px rgba(79, 55, 138, 0.14)",
+        // 고우선순위 카드용 앰비언트 글로우 — 매우 넓고 옅게 퍼지는 형태.
+        glow: "0 32px 80px -16px rgba(103, 80, 164, 0.1)",
       },
       keyframes: {
         "fade-in-up": {
