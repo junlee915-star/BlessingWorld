@@ -28,6 +28,13 @@ export interface QuizQuestion {
   answer: number;
 }
 
+/** 가치관 진단 12문항(§content/valuesAssessment.ts) 결과. `guidance_requests.values_assessment`(jsonb)에 저장됩니다. */
+export interface ValuesAssessmentJson {
+  answers: number[];
+  scores: Record<string, number>;
+  styles: Record<string, "A" | "B">;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -79,6 +86,8 @@ export interface Database {
           completed_courses: string[] | null;
           /** 희망 상담 방식(6축 개편 §4.6). 개편 이전 신청 건은 null입니다. */
           consult_method: ConsultMethod | null;
+          /** 가치관 진단 12문항 결과 — 신청자가 첨부를 선택했을 때만 채워집니다. */
+          values_assessment: ValuesAssessmentJson | null;
         };
         Insert: Omit<
           Database["public"]["Tables"]["guidance_requests"]["Row"],
@@ -96,7 +105,13 @@ export interface Database {
           Partial<
             Pick<
               Database["public"]["Tables"]["guidance_requests"]["Row"],
-              "status" | "source" | "user_id" | "email" | "completed_courses" | "consult_method"
+              | "status"
+              | "source"
+              | "user_id"
+              | "email"
+              | "completed_courses"
+              | "consult_method"
+              | "values_assessment"
             >
           >;
         Update: Partial<Database["public"]["Tables"]["guidance_requests"]["Row"]>;

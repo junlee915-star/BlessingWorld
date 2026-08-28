@@ -4,6 +4,7 @@
 // 문의로 안내하세요.
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 import type { ConsultMethod, Gender } from "@/integrations/supabase/types";
+import type { ValuesAssessmentResult } from "@/content/valuesAssessment";
 
 export interface GuidanceRequestPayload {
   name: string;
@@ -19,6 +20,8 @@ export interface GuidanceRequestPayload {
   completedCourses: string[];
   /** 희망 상담 방식(6축 개편 §4.6) — 일정 예약 대신 방식만 받습니다. */
   consultMethod: ConsultMethod;
+  /** 가치관 진단 12문항(§content/valuesAssessment.ts) 결과 — 신청자가 첨부를 선택했을 때만 전달됩니다. */
+  valuesAssessment?: ValuesAssessmentResult;
 }
 
 export type GuidanceSubmitResult =
@@ -85,6 +88,7 @@ export async function submitGuidanceRequest(
     source: payload.source ?? "web",
     completed_courses: payload.completedCourses.length > 0 ? payload.completedCourses : undefined,
     consult_method: payload.consultMethod,
+    values_assessment: payload.valuesAssessment ?? undefined,
   };
 
   recordClientSubmitAttempt();

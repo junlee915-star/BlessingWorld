@@ -3,7 +3,12 @@
 // 연결되지 않으면 그냥 빈 목록을 보여줍니다(다른 admin 화면처럼 로컬에 "임시 관리"할
 // 대상이 아닙니다).
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
-import type { ConsultMethod, Gender, GuidanceStatus } from "@/integrations/supabase/types";
+import type {
+  ConsultMethod,
+  Gender,
+  GuidanceStatus,
+  ValuesAssessmentJson,
+} from "@/integrations/supabase/types";
 
 export interface GuidanceRequestRow {
   id: string;
@@ -27,6 +32,7 @@ export interface GuidanceRequestRow {
   createdAt: string;
   completedCourses: string[] | null;
   consultMethod: ConsultMethod | null;
+  valuesAssessment: ValuesAssessmentJson | null;
 }
 
 export interface StaffOption {
@@ -56,6 +62,7 @@ function rowFromDb(row: {
   created_at: string;
   completed_courses: string[] | null;
   consult_method: ConsultMethod | null;
+  values_assessment: ValuesAssessmentJson | null;
 }): GuidanceRequestRow {
   return {
     id: row.id,
@@ -78,6 +85,7 @@ function rowFromDb(row: {
     createdAt: row.created_at,
     completedCourses: row.completed_courses,
     consultMethod: row.consult_method ?? null,
+    valuesAssessment: row.values_assessment ?? null,
   };
 }
 

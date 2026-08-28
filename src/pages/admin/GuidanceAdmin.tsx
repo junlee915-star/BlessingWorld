@@ -19,6 +19,7 @@ import {
 import { isSupabaseConfigured } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import type { ConsultMethod, GuidanceStatus } from "@/integrations/supabase/types";
+import { STYLE_COPY, VALUES_CATEGORIES } from "@/content/valuesAssessment";
 
 const CONSULT_METHOD_LABEL: Record<ConsultMethod, string> = {
   visit: "교회 방문",
@@ -277,6 +278,7 @@ export default function GuidanceAdmin() {
                   <thead className="border-b border-border bg-muted/60 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     <tr>
                       <th className="px-4 py-3">신청자</th>
+                      <th className="px-4 py-3">가치관 진단</th>
                       <th className="px-4 py-3">연락처</th>
                       <th className="px-4 py-3">지역</th>
                       <th className="px-4 py-3">유입경로</th>
@@ -301,6 +303,22 @@ export default function GuidanceAdmin() {
                               교육 {row.completedCourses.length}강 이수
                             </Badge>
                           ) : null}
+                        </td>
+                        <td className="px-4 py-3">
+                          {row.valuesAssessment ? (
+                            <ul className="space-y-0.5 text-xs text-muted-foreground">
+                              {VALUES_CATEGORIES.map((category) => (
+                                <li key={category.key}>
+                                  {category.title}:{" "}
+                                  <span className="font-medium text-foreground">
+                                    {STYLE_COPY[category.key][row.valuesAssessment!.styles[category.key]].name}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">미응답</p>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground">
                           <a href={`tel:${row.phone.replace(/-/g, "")}`} className="font-medium text-primary-deep hover:underline">
