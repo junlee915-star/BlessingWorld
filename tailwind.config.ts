@@ -49,8 +49,8 @@ export default {
       // DESIGN.md의 rounded 스케일(sm 0.125rem/DEFAULT 0.25rem/md 0.375rem/lg 0.5rem/xl 0.75rem)이
       // Tailwind 기본 스케일과 정확히 같아서 커스텀 오버라이드 없이 기본값을 그대로 씁니다.
       fontFamily: {
-        // 본문/기능적 텍스트 — Plus Jakarta Sans(라틴)는 한글 글리프가 없어 Noto Sans KR로 보완.
-        sans: ["Plus Jakarta Sans", "Noto Sans KR", "system-ui", "sans-serif"],
+        // 본문/기능적 텍스트 — Noto Sans KR(한글+라틴 모두 Noto Sans와 동일 디자인).
+        sans: ["Noto Sans KR", "system-ui", "sans-serif"],
         // 헤드라인/인용구 — Noto Serif KR(한글)·Noto Serif(라틴).
         serif: ["Noto Serif KR", "Noto Serif", "serif"],
       },
