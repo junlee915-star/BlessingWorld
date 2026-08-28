@@ -19,7 +19,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
-      <div className="mx-auto flex h-[72px] max-w-6xl items-center gap-8 px-5 md:px-8">
+      <div className="mx-auto flex h-24 max-w-6xl items-center gap-8 px-5 md:px-8">
         <Link
           to="/"
           aria-label={BRAND.homeLabel}

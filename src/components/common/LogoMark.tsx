@@ -11,7 +11,7 @@ export function LogoMark({ className }: { className?: string }) {
       src={`${import.meta.env.BASE_URL}logo/blessingworld-lockup-dark.png`}
       alt=""
       aria-hidden="true"
-      className={cn("h-9 w-auto shrink-0 object-contain", className)}
+      className={cn("h-[72px] w-auto shrink-0 object-contain", className)}
     />
   );
 }
