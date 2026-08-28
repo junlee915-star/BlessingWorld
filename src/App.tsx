@@ -20,6 +20,7 @@ const Stories = lazy(() => import("@/pages/Stories"));
 const StoryDetail = lazy(() => import("@/pages/StoryDetail"));
 const CourseDetail = lazy(() => import("@/pages/CourseDetail"));
 const Roadmap = lazy(() => import("@/pages/Roadmap"));
+const Values = lazy(() => import("@/pages/Values"));
 const Center = lazy(() => import("@/pages/Center"));
 const Churches = lazy(() => import("@/pages/Churches"));
 const Documents = lazy(() => import("@/pages/Documents"));
@@ -74,6 +75,7 @@ export default function App() {
                   <Route path="/stories" element={<Stories />} />
                   <Route path="/stories/:slug" element={<StoryDetail />} />
                   <Route path="/roadmap" element={<Roadmap />} />
+                  <Route path="/values" element={<Values />} />
 
                   {/* 축복센터 — 신청·교회찾기·서류를 한 허브 아래로 모았습니다(6축 개편 §3.2) */}
                   <Route path="/center" element={<Center />} />

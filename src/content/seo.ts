@@ -59,6 +59,11 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     description:
       "미혼1세·축복자녀 축복후보자가 준비할 제출서류와 심사기준을 유형별로 확인해보세요.",
   },
+  "/values": {
+    title: "가치관 진단 12문항 — 블레싱월드",
+    description:
+      "대화·가족·신앙·생활 4가지 영역 12문항으로 나의 성향과 잘 맞는 상대 스타일을 확인해보세요.",
+  },
   "/privacy": {
     title: "개인정보처리방침 — 블레싱월드",
     description: "블레싱월드 개인정보처리방침을 안내합니다.",

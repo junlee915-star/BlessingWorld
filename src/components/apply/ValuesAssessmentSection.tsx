@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { EyebrowLabel } from "@/components/common/EyebrowLabel";
 import {
   LIKERT_LABELS,
@@ -14,13 +16,19 @@ import {
 import { cn } from "@/lib/utils";
 
 interface ValuesAssessmentSectionProps {
-  /** 12문항을 모두 답하고 "첨부" 체크가 켜져 있을 때만 결과를 전달합니다. 그 외엔 null. */
-  onChange: (result: ValuesAssessmentResult | null) => void;
+  /** "embedded"(기본) — 축복상담 신청서 안에서 결과 첨부 여부를 고름.
+   *  "standalone" — /values 단독 페이지. 첨부 대신 다시 하기·상담 신청 CTA를 보여줌. */
+  variant?: "embedded" | "standalone";
+  /** embedded일 때만 씁니다. 12문항을 모두 답하고 "첨부" 체크가 켜져 있을 때만 결과를 전달합니다. */
+  onChange?: (result: ValuesAssessmentResult | null) => void;
 }
 
-// 축복상담 신청(§Onboarding.tsx)과 한 화면에 있는 선택 섹션 — 가치관 12문항 진단(DESIGN 목업 기반).
-// 단계 전환 없이 스크롤만으로 응답→결과 확인→(선택)첨부까지 끝나도록 한 화면에 이어붙였습니다.
-export function ValuesAssessmentSection({ onChange }: ValuesAssessmentSectionProps) {
+// 가치관 12문항 진단(DESIGN 목업 기반) — 축복상담 신청(§Onboarding.tsx) 안의 선택 섹션과
+// 독립 페이지(§pages/Values.tsx)에서 함께 씁니다.
+export function ValuesAssessmentSection({
+  variant = "embedded",
+  onChange,
+}: ValuesAssessmentSectionProps) {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [attach, setAttach] = useState(true);
 
@@ -30,32 +38,48 @@ export function ValuesAssessmentSection({ onChange }: ValuesAssessmentSectionPro
     : null;
 
   useEffect(() => {
-    onChange(result && attach ? result : null);
+    if (variant !== "embedded") return;
+    onChange?.(result && attach ? result : null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- result는 answers에서 매 렌더 새로 계산되어 참조가 바뀝니다. answers/attach 변화에만 반응하면 충분합니다.
-  }, [answers, attach]);
+  }, [answers, attach, variant]);
 
   function selectAnswer(questionId: number, value: number) {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   }
 
+  function retake() {
+    setAnswers({});
+  }
+
   return (
     <div className="w-full max-w-2xl rounded-2xl border border-border bg-card p-6 text-left shadow-card md:p-8">
-      <EyebrowLabel>{VALUES_ASSESSMENT_COPY.eyebrow}</EyebrowLabel>
-      <div className="mt-2 flex items-center justify-between gap-3">
-        <h2 className="text-xl font-bold text-foreground md:text-2xl">
-          {VALUES_ASSESSMENT_COPY.title}
-        </h2>
-        <span className="shrink-0 text-sm font-medium text-muted-foreground">
-          {Object.keys(answers).length} / {VALUES_QUESTIONS.length}
-        </span>
-      </div>
-      <p className="mt-3 text-sm leading-[1.75] text-muted-foreground">
-        {VALUES_ASSESSMENT_COPY.body}
-      </p>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Badge variant="muted">{VALUES_ASSESSMENT_COPY.timeBadge}</Badge>
-        <Badge variant="muted">선택 사항 — 건너뛰어도 신청할 수 있어요</Badge>
-      </div>
+      {variant === "embedded" ? (
+        <>
+          <EyebrowLabel>{VALUES_ASSESSMENT_COPY.eyebrow}</EyebrowLabel>
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <h2 className="text-xl font-bold text-foreground md:text-2xl">
+              {VALUES_ASSESSMENT_COPY.title}
+            </h2>
+            <span className="shrink-0 text-sm font-medium text-muted-foreground">
+              {Object.keys(answers).length} / {VALUES_QUESTIONS.length}
+            </span>
+          </div>
+          <p className="mt-3 text-sm leading-[1.75] text-muted-foreground">
+            {VALUES_ASSESSMENT_COPY.body}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Badge variant="muted">{VALUES_ASSESSMENT_COPY.timeBadge}</Badge>
+            <Badge variant="muted">선택 사항 — 건너뛰어도 신청할 수 있어요</Badge>
+          </div>
+        </>
+      ) : (
+        <div className="flex items-center justify-between gap-3">
+          <Badge variant="muted">{VALUES_ASSESSMENT_COPY.timeBadge}</Badge>
+          <span className="shrink-0 text-sm font-medium text-muted-foreground">
+            {Object.keys(answers).length} / {VALUES_QUESTIONS.length}
+          </span>
+        </div>
+      )}
 
       <div className="mt-6 space-y-8">
         {VALUES_CATEGORIES.map((category, categoryIndex) => (
@@ -128,18 +152,29 @@ export function ValuesAssessmentSection({ onChange }: ValuesAssessmentSectionPro
             })}
           </div>
 
-          <label className="mt-6 flex items-start gap-2.5 text-sm text-muted-foreground">
-            <input
-              type="checkbox"
-              checked={attach}
-              onChange={(e) => setAttach(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-border text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
-            <span>
-              <span className="font-medium text-foreground">이 결과를 신청서에 함께 보낼게요.</span>{" "}
-              {attach ? VALUES_ASSESSMENT_COPY.savedNote : VALUES_ASSESSMENT_COPY.discardedNote}
-            </span>
-          </label>
+          {variant === "embedded" ? (
+            <label className="mt-6 flex items-start gap-2.5 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={attach}
+                onChange={(e) => setAttach(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-border text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+              <span>
+                <span className="font-medium text-foreground">이 결과를 신청서에 함께 보낼게요.</span>{" "}
+                {attach ? VALUES_ASSESSMENT_COPY.savedNote : VALUES_ASSESSMENT_COPY.discardedNote}
+              </span>
+            </label>
+          ) : (
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg" className="sm:flex-1">
+                <Link to="/center/apply">이 결과 가지고 축복상담 신청하기</Link>
+              </Button>
+              <Button type="button" size="lg" variant="outline" className="sm:flex-1" onClick={retake}>
+                다시 진단하기
+              </Button>
+            </div>
+          )}
         </div>
       ) : null}
     </div>
