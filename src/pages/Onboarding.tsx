@@ -309,6 +309,15 @@ export default function Onboarding() {
         </p>
         <p className="mt-2 text-sm font-medium text-primary-deep">30초면 끝나요</p>
 
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/values">가치관 진단 먼저 해보기 →</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/roadmap">축복로드맵 먼저 보기 →</Link>
+          </Button>
+        </div>
+
         {showEduBanner ? (
           <div
             className={cn(
@@ -565,15 +574,6 @@ export default function Onboarding() {
         </p>
 
         <TrustBadges className="mt-10 justify-center" />
-
-        <div className="mt-10 flex flex-col items-center gap-2 sm:flex-row sm:gap-6">
-          <Link to="/values" className="text-sm font-medium text-primary-deep hover:underline">
-            가치관 진단 먼저 해보기 →
-          </Link>
-          <Link to="/roadmap" className="text-sm font-medium text-primary-deep hover:underline">
-            축복로드맵 먼저 보기 →
-          </Link>
-        </div>
       </section>
     </>
   );
