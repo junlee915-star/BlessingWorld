@@ -566,9 +566,14 @@ export default function Onboarding() {
 
         <TrustBadges className="mt-10 justify-center" />
 
-        <Link to="/roadmap" className="mt-10 text-sm font-medium text-primary-deep hover:underline">
-          축복로드맵 먼저 보기 →
-        </Link>
+        <div className="mt-10 flex flex-col items-center gap-2 sm:flex-row sm:gap-6">
+          <Link to="/values" className="text-sm font-medium text-primary-deep hover:underline">
+            가치관 진단 먼저 해보기 →
+          </Link>
+          <Link to="/roadmap" className="text-sm font-medium text-primary-deep hover:underline">
+            축복로드맵 먼저 보기 →
+          </Link>
+        </div>
       </section>
     </>
   );
