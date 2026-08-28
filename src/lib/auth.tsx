@@ -37,6 +37,9 @@ interface AuthContextValue {
   /** §/reset-password에서 새 비밀번호를 저장합니다. 재설정 메일의 임시 세션이 있어야 동작해요. */
   updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  /** profiles.role을 DB에서 대시보드로 직접 바꾼 경우처럼, 로그인된 채로 role이 바뀌었을 때
+   *  로그아웃 없이 다시 읽어옵니다. */
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -107,6 +110,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [session?.user?.id]);
 
+  // 대시보드에서 profiles.role을 직접 바꾼 경우, 이미 열려 있던 탭은 로그인 시점 role을
+  // 그대로 들고 있습니다 — 탭에 다시 포커스가 오면 한 번 더 읽어와 이 간극을 줄입니다.
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase || !session?.user) return;
+    const userId = session.user.id;
+
+    function handleFocus() {
+      if (!supabase) return;
+      supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle()
+        .then(({ data }) => {
+          const row = data as {
+            id: string;
+            display_name: string;
+            email: string | null;
+            role: Profile["role"];
+          } | null;
+          if (row) {
+            setProfile({ id: row.id, displayName: row.display_name, email: row.email, role: row.role });
+          }
+        });
+    }
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [session?.user?.id]);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       loading: sessionLoading || (Boolean(session?.user) && profileLoading),
@@ -161,6 +194,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async signOut() {
         if (!isSupabaseConfigured || !supabase) return;
         await supabase.auth.signOut();
+      },
+      async refreshProfile() {
+        if (!isSupabaseConfigured || !supabase || !session?.user) return;
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .maybeSingle();
+        const row = data as {
+          id: string;
+          display_name: string;
+          email: string | null;
+          role: Profile["role"];
+        } | null;
+        setProfile(
+          row ? { id: row.id, displayName: row.display_name, email: row.email, role: row.role } : null,
+        );
       },
     }),
     [session, profile, sessionLoading, profileLoading],

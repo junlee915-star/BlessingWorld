@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth";
 /** /admin/* 라우트를 감싸서 staff/admin 로그인 여부를 확인합니다. */
 export function RequireAdmin({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const { loading, session, profile, signOut } = useAuth();
+  const { loading, session, profile, signOut, refreshProfile } = useAuth();
 
   if (!isSupabaseConfigured) {
     return (
@@ -42,12 +42,16 @@ export function RequireAdmin({ children }: { children: ReactNode }) {
         <ShieldOff className="h-10 w-10 text-destructive" aria-hidden="true" />
         <h1 className="mt-5 text-xl font-bold text-foreground">관리자 권한이 없어요</h1>
         <p className="mt-3 text-sm leading-[1.75] text-muted-foreground">
-          {profile?.email ?? "이 계정"}은(는) 아직 staff/admin 권한이 없어요. 운영자에게 권한
-          부여를 요청해주세요.
+          {profile?.email ?? "이 계정"}은(는) 아직 staff/admin 권한이 없어요. 방금 Supabase에서
+          role을 바꾸셨다면, 로그인된 채로는 반영이 안 될 수 있어요 — 아래에서 다시
+          확인해보세요.
         </p>
-        <Button variant="outline" className="mt-8" onClick={() => void signOut()}>
-          로그아웃
-        </Button>
+        <div className="mt-8 flex gap-3">
+          <Button onClick={() => void refreshProfile()}>다시 확인하기</Button>
+          <Button variant="outline" onClick={() => void signOut()}>
+            로그아웃
+          </Button>
+        </div>
       </section>
     );
   }
