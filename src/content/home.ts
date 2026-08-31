@@ -2,18 +2,15 @@
 
 export const HERO_SLIDES = [
   {
-    image:
-      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=2000&q=80",
+    image: "/image/1-home-hero-mass-blessing.webp",
     alt: "다양한 국적의 부부들이 함께 참여한 합동축복식",
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=2000&q=80",
+    image: "/image/2-home-hero-couple-smile.webp",
     alt: "따뜻하게 미소짓는 축복가정 부부",
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1772305436753-e308844ecda2?auto=format&fit=crop&w=2000&q=80",
+    image: "/image/3-home-hero-family-laugh.webp",
     alt: "함께 웃으며 즐거운 시간을 보내는 축복가정",
   },
 ];
@@ -88,8 +85,7 @@ export const HOME_CARDS: HomeCard[] = [
       "서로를 존중하고 책임 있는 사랑을 실천하겠다는 약속. 그 뜻과 가치를 처음부터 편안하게 살펴보세요.",
     to: "/guide",
     cta: "가치 알아보기 →",
-    image:
-      "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1000&q=80",
+    image: "/image/4-home-card-couple.webp",
     imageAlt: "따뜻하게 미소짓는 축복가정 부부",
     size: "lg",
   },
@@ -100,8 +96,7 @@ export const HOME_CARDS: HomeCard[] = [
       "실제 축복가정의 인터뷰와 사례를 통해 축복결혼이 삶에서 어떻게 피어나는지 만나보세요.",
     to: "/stories",
     cta: "이야기 읽기 →",
-    image:
-      "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1000&q=80",
+    image: "/image/5-home-card-family-home.webp",
     imageAlt: "집에서 함께 시간을 보내는 축복가정",
     size: "lg",
   },
@@ -111,8 +106,7 @@ export const HOME_CARDS: HomeCard[] = [
     description: "좋은 가정을 이루는 데 필요한 네 가지 기술을 강좌로 담았습니다.",
     to: "/curriculum",
     cta: "강좌 보기 →",
-    image:
-      "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80",
+    image: "/image/6-home-card-online-course.webp",
     imageAlt: "온라인 강의를 듣는 모습",
     size: "sm",
   },
@@ -122,8 +116,7 @@ export const HOME_CARDS: HomeCard[] = [
     description: "알아보기부터 축복식까지, 어떤 순서로 진행되는지 한눈에 확인하세요.",
     to: "/roadmap",
     cta: "로드맵 보기 →",
-    image:
-      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+    image: "/image/7-home-card-mass-blessing-group.webp",
     imageAlt: "여러 가정이 함께한 합동축복식",
     size: "sm",
   },
@@ -133,8 +126,7 @@ export const HOME_CARDS: HomeCard[] = [
     description: "축복을 결심하셨다면, 필요한 모든 절차를 한곳에서 시작하실 수 있습니다.",
     to: "/center",
     cta: "축복센터 가기 →",
-    image:
-      "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=800&q=80",
+    image: "/image/8-home-card-local-church.webp",
     imageAlt: "지역가정교회 안내",
     size: "sm",
   },
