@@ -28,14 +28,14 @@ export function Header() {
           <LogoMark />
         </Link>
 
-        <nav aria-label="주 메뉴" className="ml-auto hidden items-center gap-8 md:flex">
+        <nav aria-label="주 메뉴" className="ml-auto hidden items-center gap-5 lg:gap-7 md:flex">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
                 cn(
-                  "relative py-2 text-[15px] font-medium text-foreground/75 transition-colors hover:text-primary-deep",
+                  "relative whitespace-nowrap py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-primary-deep lg:text-[15px]",
                   isActive &&
                     "text-primary after:absolute after:inset-x-0 after:-bottom-[1px] after:h-[2px] after:rounded-full after:bg-primary",
                 )
