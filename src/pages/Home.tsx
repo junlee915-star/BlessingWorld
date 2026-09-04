@@ -10,12 +10,13 @@ import { StatBand } from "@/components/home/StatBand";
 import { RoadmapPreview } from "@/components/home/RoadmapPreview";
 import { TrustBadges } from "@/components/guide/TrustBadges";
 import { useAuth } from "@/lib/auth";
+import { SITE_URL } from "@/content/seo";
 
 const ORGANIZATION_JSON_LD = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "블레싱월드",
-  url: "https://blessingworld.example/",
+  url: `${SITE_URL}/`,
   description:
     "세계평화통일가정연합 한국협회 가정행복국 축복가정부가 운영하는 축복결혼·가정생활 통합 안내 서비스",
 };

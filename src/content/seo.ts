@@ -6,6 +6,9 @@ export interface RouteSeo {
   ogDescription?: string;
 }
 
+// 실제 도메인이 정해지면 이 값만 바꾸면 됩니다 — canonical URL과 JSON-LD가 여기를 참조합니다.
+export const SITE_URL = "https://blessingworld.example";
+
 const SITE_TITLE = "블레싱월드 — 축복결혼을 처음 만나는 곳";
 const SITE_DESCRIPTION =
   "축복결혼이 처음이신 분을 위한 따뜻한 안내소. 궁금한 것부터 하나씩, 블레싱월드가 함께합니다.";
