@@ -20,7 +20,9 @@ export function StatBand() {
     };
   }, []);
 
-  if (!stats || stats.length === 0) return null;
+  // 데이터가 아직 오지 않은 동안(로딩) 자리만 잡아 레이아웃 시프트(CLS)를 막습니다.
+  // 값+기준일이 모두 있는 지표가 하나도 없다고 확정되면(빈 배열) 섹션 자체를 접습니다.
+  if (stats && stats.length === 0) return null;
 
   return (
     <section className="bg-muted/60 py-16 md:py-24">
@@ -32,23 +34,35 @@ export function StatBand() {
         />
 
         <dl className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {stats.map((stat) => (
-            <div
-              key={stat.key}
-              className="rounded-2xl border border-border bg-card p-6 text-center shadow-card"
-            >
-              <dt className="text-sm font-medium text-muted-foreground">{stat.label}</dt>
-              <dd className="mt-3">
-                <span className="text-[40px] font-bold leading-none tabular-nums text-primary md:text-[48px]">
-                  {stat.value?.toLocaleString("ko-KR")}
-                </span>
-                <span className="ml-1 text-lg font-semibold text-primary-deep">{stat.unit}</span>
-                <p className="mt-3 text-[13px] text-muted-foreground">
-                  {formatBasisDate(stat.basisDate ?? "")}
-                </p>
-              </dd>
-            </div>
-          ))}
+          {!stats
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  aria-hidden="true"
+                  className="animate-pulse rounded-2xl border border-border bg-card p-6 text-center shadow-card"
+                >
+                  <div className="mx-auto h-4 w-24 rounded bg-muted" />
+                  <div className="mx-auto mt-4 h-10 w-20 rounded bg-muted" />
+                  <div className="mx-auto mt-3 h-3 w-16 rounded bg-muted" />
+                </div>
+              ))
+            : stats.map((stat) => (
+                <div
+                  key={stat.key}
+                  className="rounded-2xl border border-border bg-card p-6 text-center shadow-card"
+                >
+                  <dt className="text-sm font-medium text-muted-foreground">{stat.label}</dt>
+                  <dd className="mt-3">
+                    <span className="text-[40px] font-bold leading-none tabular-nums text-primary md:text-[48px]">
+                      {stat.value?.toLocaleString("ko-KR")}
+                    </span>
+                    <span className="ml-1 text-lg font-semibold text-primary-deep">{stat.unit}</span>
+                    <p className="mt-3 text-[13px] text-muted-foreground">
+                      {formatBasisDate(stat.basisDate ?? "")}
+                    </p>
+                  </dd>
+                </div>
+              ))}
         </dl>
       </div>
     </section>

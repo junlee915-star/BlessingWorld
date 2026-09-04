@@ -54,7 +54,7 @@ export function HeroCarousel() {
           )}
           style={{ transitionDuration: "1100ms" }}
           loading={i === 0 ? "eager" : "lazy"}
-          {...(i === 0 ? { fetchpriority: "high" } : {})}
+          fetchPriority={i === 0 ? "high" : "auto"}
           aria-hidden={i !== index}
         />
       ))}

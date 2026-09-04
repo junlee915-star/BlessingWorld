@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 
-import { OG_IMAGE_URL, ROUTE_SEO, SEO_DEFAULTS } from "@/content/seo";
+import { OG_IMAGE_URL, ROUTE_SEO, SEO_DEFAULTS, SITE_URL } from "@/content/seo";
 
 interface SEOProps {
   path: string;
@@ -34,7 +34,7 @@ export function SEO({ path, jsonLd, noindex, title: titleOverride, description: 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={ogTitle} />
       <meta name="twitter:description" content={ogDescription} />
-      <link rel="canonical" href={`https://blessingworld.example${path}`} />
+      <link rel="canonical" href={`${SITE_URL}${path}`} />
       {jsonLd?.map((entry, index) => (
         <script key={index} type="application/ld+json">
           {JSON.stringify(entry)}
