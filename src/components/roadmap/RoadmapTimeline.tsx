@@ -15,7 +15,8 @@ import {
   Flag,
 } from "lucide-react";
 
-import { WAITING_NOTE, type RoadmapStep } from "@/content/roadmap";
+import { ROADMAP_SERIES_NAMES, WAITING_NOTE, type RoadmapStep } from "@/content/roadmap";
+import { RoadmapTreeMotif } from "@/components/roadmap/RoadmapTreeMotif";
 import { cn } from "@/lib/utils";
 
 interface RoadmapTimelineProps {
@@ -44,6 +45,14 @@ function trackAlignOf(index: number): TrackAlign {
   return TRACK_SEQUENCE[index % TRACK_SEQUENCE.length];
 }
 
+// 정류장 칸(w-56/w-64)의 반대편 여백에 배경 나무를 심어 길가 풍경처럼 보이게 합니다.
+// TRACK_SEQUENCE 4칸 주기에 맞춰 매번 반대쪽에 놓아 카드와 겹치지 않게 합니다.
+const TREE_SIDE_SEQUENCE: Array<"left" | "right"> = ["right", "left", "left", "right"];
+
+function treeSideOf(index: number): "left" | "right" {
+  return TREE_SIDE_SEQUENCE[index % TREE_SIDE_SEQUENCE.length];
+}
+
 // 단계별로 놀이동산 안내판의 탈것 아이콘처럼 한눈에 구분되는 아이콘을 붙입니다.
 const STEP_ICONS: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   step_01: Compass,
@@ -68,6 +77,8 @@ export function RoadmapTimeline({ steps, currentStepKey, onSelectCurrent }: Road
         // 직전 정류장까지 이미 지나왔다면(=이 구간에 들어섰다면) 길을 밝혀 보여줍니다.
         const segmentLit = currentIndex >= 0 && index <= currentIndex;
         const Icon = STEP_ICONS[step.key] ?? MapPin;
+        const seriesName = ROADMAP_SERIES_NAMES[step.key];
+        const treeSide = treeSideOf(index);
 
         return (
           <li
@@ -79,7 +90,16 @@ export function RoadmapTimeline({ steps, currentStepKey, onSelectCurrent }: Road
               <PathConnector from={TRACK_X[trackAlignOf(index - 1)]} to={TRACK_X[align]} lit={segmentLit} />
             ) : null}
 
-            <div className={cn("flex", TRACK_JUSTIFY[align])}>
+            <div className={cn("relative flex", TRACK_JUSTIFY[align])}>
+              {/* 길가 풍경 — 단계가 오를수록 무성해지는 나무. 카드와 겹치지 않게 반대쪽 여백에 둡니다. */}
+              <RoadmapTreeMotif
+                stage={index + 1}
+                className={cn(
+                  "pointer-events-none absolute top-0 hidden h-full w-16 sm:block md:w-20",
+                  treeSide === "left" ? "left-0" : "right-0",
+                )}
+              />
+
               <div className="flex w-56 flex-col items-center text-center sm:w-64">
                 <div className="relative shrink-0">
                   {isCurrent ? (
@@ -124,7 +144,10 @@ export function RoadmapTimeline({ steps, currentStepKey, onSelectCurrent }: Road
                     isCurrent ? "border-accent-deep ring-1 ring-accent-deep/30" : "border-border",
                   )}
                 >
-                  <div className="flex flex-wrap items-center gap-2">
+                  {seriesName ? (
+                    <p className="text-xs font-semibold tracking-wide text-accent-deep">{seriesName}</p>
+                  ) : null}
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
                     <h3 className="text-base font-semibold text-foreground">
                       <span className="sr-only">{`${index + 1}단계 `}</span>
                       {step.title}
