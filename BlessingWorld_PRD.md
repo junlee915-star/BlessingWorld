@@ -1,38 +1,32 @@
-# 축복월드(Blessing World) 재구현 PRD
+# 블레싱월드(Blessing World) 서비스 명세서 (PRD)
 
-> **문서 목적**: 이 문서는 `https://blessinghome.lovable.app/` 를 동일하게 재구현하기 위한 **AI 코딩 도구 입력용 구현 명세서**입니다.
-> Lovable / Claude Code / Cursor / v0 등에 이 문서를 그대로 투입하면 동일한 서비스를 구축할 수 있도록 작성되었습니다.
+> **문서 성격**: 이 문서는 원래 `https://blessinghome.lovable.app/` 를 동일하게 재구현하기 위한 **AI 코딩 도구 입력용 구현 명세서**로 시작했습니다. 이후 실제 개발이 여러 차례의 재설계 — 특히 2026-08-26 "6축 개편"(축복의 씨앗/행복의 꽃/사랑의 기술/축복로드맵/축복센터/축복관리자) — 을 거치며 원본 사이트와의 유사성보다 **자체 서비스로서의 완성도**가 훨씬 커졌습니다.
 >
-> **작성일**: 2026-08-21
-> **분석 대상**: https://blessinghome.lovable.app/ (2026년 8월 기준)
-> **버전**: v1.0
+> 그래서 이 v2.0 개정판은 성격을 바꿉니다: §1~§11은 더 이상 "원본 실측값"이 아니라 **2026-09-05 기준 실제 코드(`src/`, `supabase/migrations/`, `DESIGN.md`)를 그대로 반영한 as-built 명세**입니다. 원본 사이트 분석 내용과, 이후 폐기된 기능(나눔의 열매·가정민원실 등)의 옛 명세는 참고용으로 §13에 그대로 보존했습니다.
+>
+> **최초 작성일**: 2026-08-21 (원본 사이트 재구현 명세, v1.0) · **개정일**: 2026-09-05 (실 구현 as-built 갱신, v2.0)
+> **기준 코드**: git 브랜치 `main`, 최근 커밋 `333068f`(로드맵 타임라인 재설계) 기준
 
 ---
 
-## 0. AI 코딩 도구 사용 안내 (먼저 읽을 것)
+## 0. 이 문서 사용 안내
 
-이 PRD는 다음 순서로 구현할 것을 권장합니다.
+이 문서는 이제 "0에서 새로 만들기"용이 아니라 **이미 운영 중인 코드베이스에 기능을 추가·수정할 때** 참고하는 현재 상태 스냅샷입니다. AI 코딩 도구에 투입할 때 권장 순서:
 
-1. **§3 기술 스택** → 프로젝트 스캐폴딩
-2. **§4 디자인 시스템** → `index.css` / `tailwind.config.ts` 토큰 정의
-3. **§5 공통 레이아웃** → Header / Footer / SEO 컴포넌트
-4. **§7 데이터 모델** → Supabase 스키마 마이그레이션
-5. **§6 화면별 명세 (P-01 ~ P-09)** → 라우트 순서대로 구현
-6. **§9 수용 기준** → 각 화면 완료 시 체크
+1. **§3 기술 스택** — 실제 설치된 패키지·버전을 그대로 사용 (임의 업그레이드 금지)
+2. **§4 디자인 시스템** — 반드시 기존 시맨틱 토큰(`bg-primary`, `text-accent-deep` 등)만 사용. 색상 하드코딩 금지
+3. **§2 정보구조** — 새 라우트는 기존 6축 구조와 리다이렉트 규칙(§2.2)을 따를 것
+4. **§7 데이터 모델** — 새 테이블/컬럼은 기존 RLS 패턴과 `is_staff_or_admin()` 헬퍼를 재사용
+5. **§6 화면별 명세** — 카피는 `src/content/*.ts` 원문을 그대로 옮긴 것입니다. 문구를 바꾸려면 이 문서가 아니라 콘텐츠 파일부터 고치고, 이 문서를 다시 갱신하십시오
+6. **§9 수용 기준** — 새 기능 완료 시 ✅ 표시 갱신
 
-> ⚠️ **정확도 고지**
-> - **텍스트 카피(§6)** 는 실제 사이트에서 추출한 **원문 그대로**입니다. 그대로 사용하십시오.
-> - **디자인 토큰(§4)** 은 원본의 CSS 번들 접근이 제한되어 **로고 파일명(`mark-lavender`)·톤앤매너·서비스 성격에 기반한 재구성안**입니다. 실제 사이트와 픽셀 단위로 동일해야 한다면 브라우저 개발자도구로 `:root` CSS 변수를 확인해 §4 표를 덮어쓰십시오.
-> - `/stories`(행복의 꽃)는 분석 시점에 **콘텐츠가 비어 있는 상태**였습니다. 해당 화면의 카드/리스트 명세는 **UI 셸(shell)과 카테고리·정렬 옵션은 실측**, 개별 카드 구조는 **설계 제안**입니다.
-> - `/guide`의 FAQ 9개 중 5개는 접힘 상태로 답변 본문을 확보하지 못했습니다. §6.2에 `[답변 본문 필요]` 로 표기했습니다.
->
-> **⚠️ 2026-08-24 이후 구현 범위에서 원본과 달라진 점** (원본 분석 내용인 §1~§9 본문은 그대로 두고, 실제 구현 시 아래처럼 대체·추가했습니다 — 상세는 §13 참고)
-> - **나눔의 열매(`/community`) 폐기 → 축복가치교육(`/curriculum`)으로 대체.** §6 P-04, §2.3 GNB가 이 문서에서도 이미 대체된 내용으로 수정되어 있습니다. 원본 나눔의 열매 명세는 §13.1에 보존해 두었습니다.
-> - **가정민원실(`/civil-affairs`) 폐기 → 지역가정교회(`/churches`)로 대체.** 서비스 카드 3장,
->   축복결혼 행정 안내, 운영 정보 블록은 삭제되고 지역 기반 교회 디렉터리만 남았습니다.
->   §6 P-05, §7 `churches` 테이블. 원본 가정민원실 명세는 §13.5에 보존.
-> - **관리자 로그인(`/admin/login`)과 Supabase Auth 기반 인증을 실제로 구현** — §8을 실제 구현(RequireAdmin, `profiles.role`, `is_staff_or_admin()`)에 맞게 갱신했습니다.
-> - 실제 Supabase 프로젝트에 연결되어 `courses`/`churches` 테이블까지 마이그레이션이 적용된 상태입니다. `community_*` 테이블은 삭제하지 않고 미사용 상태로 남아 있습니다(§7.2).
+> 저장소 루트의 `CLAUDE.md`가 아키텍처 규칙(콘텐츠/lib/페이지 3계층 분리, "Supabase 미설정은 정상 상태" 원칙 등)의 1차 출처입니다. 이 문서와 상충하면 `CLAUDE.md`를 따르십시오.
+
+> ⚠️ **알려진 콘텐츠 공백** (§10에도 정리)
+> - `/stories`(행복의 꽃) 기본 6건은 **가정행복국이 작성한 3인칭 에디토리얼**이며 실제 가정 인터뷰가 아닙니다(`familyName` 의도적으로 비움). 실제 인터뷰는 유튜브 영상 레일에만 있습니다.
+> - `/center/churches` 기본 3건은 **예시 데이터**(`(주소 입력 필요)`)입니다. 단, Supabase가 연결된 실 운영 환경에는 마이그레이션 `0015_seed_churches.sql`로 실제 지역교회 약 228건이 이미 입력되어 있습니다 — 이 공백은 **Supabase 미연결 시의 폴백에만** 해당합니다.
+> - 홈 "OUR FAMILIES" 수치 3종(`site_stats`)은 **값이 비어 있는 상태로 배포**되어 있어, 협회가 기준일과 함께 값을 입력하기 전까지 홈에서 이 섹션 자체가 렌더링되지 않습니다.
+> - `/values`(가치관 진단) 결과는 **`/center/apply` 신청서에 자동으로 첨부되지 않습니다**(§6 P-05a, §10 I-19). 두 화면이 독립적으로 존재합니다.
 
 ---
 
@@ -40,9 +34,9 @@
 
 ### 1.1 서비스 정의
 
-**축복월드(Blessing World)** 은 세계평화통일가정연합 가정행복국(가정행복국 축복가정부)이 운영하는 **축복결혼·가정생활 통합 안내 서비스**입니다.
+**블레싱월드(Blessing World)** 는 세계평화통일가정연합 한국협회 가정행복국 축복가정부가 운영하는 **축복결혼·가정생활 통합 안내 서비스**입니다.
 
-축복결혼에 처음 관심을 갖는 사람이 **① 알아보고 → ② 상담·교육을 받고 → ③ 만남과 축복을 준비하고 → ④ 가정을 이룬 뒤 공동체 안에서 살아가는** 전 여정을 하나의 웹사이트에서 지원합니다.
+축복결혼에 처음 관심을 갖는 사람이 **① 알아보고 → ② 배우고 → ③ 상담을 신청하고 → ④ 서류를 준비해 심사를 받고 → ⑤ 만남·축복식을 거쳐 가정을 이룬 뒤** 공동체 안에서 살아가는 전 여정을, 6개 축(축복의 씨앗·행복의 꽃·사랑의 기술·축복로드맵·축복센터·축복관리자)으로 나눠 하나의 웹사이트에서 지원합니다.
 
 ### 1.2 핵심 가치 제안
 
@@ -51,23 +45,28 @@
 | 대상 | 축복결혼을 전혀 모르는 일반인 ~ 이미 축복가정을 이룬 기존 구성원 |
 | 톤앤매너 | 따뜻함, 낮은 문턱, 비강요, 자발성 존중 |
 | 차별점 | 종교적 권유가 아닌 **정보 제공 중심**. "상담 무료 / 결정은 본인 / 언제든 중단 가능" 3원칙을 전면에 노출 |
-| 전환 목표 | `/onboarding` 안내 신청 폼 제출 (이름·연락처·성별·출생연도·지역) |
+| 전환 목표 | `/center/apply` 축복상담 신청 제출 (이름·성별·출생연도·지역·연락처·상담 방식) |
 
 ### 1.3 타깃 사용자 (Persona)
 
 | ID | 페르소나 | 니즈 | 주 진입 경로 |
 |---|---|---|---|
-| U-1 | **탐색자** — 축복결혼을 처음 들어본 20~30대 | "이게 뭔지, 부담 없이 알고 싶다" | `/` → `/guide` → `/onboarding` |
-| U-2 | **준비자** — 상담을 받고 축복을 준비 중인 사람 | "절차·서류·내 진행 현황을 알고 싶다"(§13.5, 미구현) | `/onboarding` |
-| U-3 | **축복가정** — 이미 가정을 이룬 기존 구성원 | "다른 가정 이야기를 보고, 더 배우고 싶다" | `/stories`, `/curriculum` |
-| U-4 | **가정 행정 이용자** — 출산·성화 등 행정 신청 필요자 | "HJ Baby Blessing, 성화감사장 신청" | `/` (홈 카드에서 바로 외부 신청 링크로 이동) |
-| U-5 | **운영자** — 가정행복국 담당자 | "신청 접수 확인, 지역 담당자 배정, 콘텐츠 관리" | 관리자 화면 |
+| U-1 | **탐색자** — 축복결혼을 처음 들어본 20~30대 | "이게 뭔지, 부담 없이 알고 싶다" | `/` → `/guide` → `/center/apply` |
+| U-2 | **자기이해 탐색자** — 가치관·상대 조건을 먼저 정리하고 싶은 사람 | "나는 어떤 사람과 잘 맞을지 부담 없이 확인하고 싶다" | `/values` |
+| U-3 | **준비자** — 상담·교육을 받고 축복을 준비 중인 사람 | "지금 내가 어느 단계인지, 다음엔 뭘 해야 하는지 알고 싶다" | `/roadmap`, `/curriculum`, `/mypage`(로그인 시) |
+| U-4 | **축복가정** — 이미 가정을 이룬 기존 구성원 | "다른 가정 이야기를 보고, 더 배우고 싶다" | `/stories`, `/curriculum` |
+| U-5 | **운영자** — 가정행복국 담당자 | "신청 접수 확인, 지역 담당자 배정, 콘텐츠·통계 관리" | `/admin/*` 8개 화면 |
 
-### 1.4 서비스 원칙 (UI 전반에 반복 노출)
+> U-3(준비자)의 "내 진행 현황" 니즈는 두 갈래로 나뉘어 구현되어 있습니다: 강좌 이수는 로그인 시 `/mypage`에서, 로드맵 8단계 중 현재 위치는 `/roadmap`에서 확인합니다. 신청서(`guidance_requests`) 상태 자체(접수됨/배정/연락함 등)는 **어느 화면에서도 신청자 본인에게 노출되지 않고**, 담당자만 `/admin/guidance`에서 봅니다(§10 I-20).
+
+### 1.4 서비스 원칙 (UI 전반에 반복 노출 — `TrustBadges` 컴포넌트)
 
 1. 상담은 언제나 **무료**
 2. 결정은 **본인**이 함
 3. 원할 때 **중단** 가능
+
+푸터·`/center` 안내 배너에는 추가로:
+
 4. 개인정보는 **안내 목적에만** 사용
 5. 신청 후 **영업일 기준 1~2일 이내** 지역 담당자 연락
 
@@ -75,362 +74,349 @@
 
 ## 2. 정보구조(IA) 및 라우팅
 
-### 2.1 사이트맵
+### 2.1 사이트맵 (실제 라우트, `src/App.tsx` 기준)
 
 ```
 블레싱월드 (/)
-├── /guide                          축복의 씨앗 — 축복결혼 안내
-├── /stories                        행복의 꽃 — 축복가정의 이야기
-│   └── /stories/:slug               (개별 스토리 상세) ※ 설계 제안
-├── /curriculum                     축복가치교육 — 축복교육 4강좌 (구 나눔의 열매 자리, §6 P-04)
-├── /churches                       지역가정교회 — 지역 기반 교회 디렉터리 (구 가정민원실 자리, §6 P-05)
-├── /onboarding                     처음 오셨나요? — 안내 신청 폼 (전환 목표)
-├── /privacy                        개인정보처리방침
-├── /terms                          이용약관
-├── /admin/login                    관리자 로그인·회원가입 (Supabase Auth)
-├── /admin/curriculum               [관리자] 축복가치교육(강좌) 관리
-├── /admin/churches                 [관리자] 지역가정교회 관리
-└── *                               404 Not Found
+├── /guide                       축복의 씨앗 — 가치·의미
+├── /stories                     행복의 꽃 — 축복가정 이야기 (목록)
+│   └── /stories/:slug            스토리 상세
+├── /curriculum                  사랑의 기술 — 강좌 목록
+│   └── /curriculum/:courseId     강좌 상세 (영상 + 확인 퀴즈)
+├── /roadmap                     축복로드맵 — 8단계 절차 + 준비도 진단
+├── /values                      가치관 진단 — 12문항
+├── /center                      축복센터 허브
+│   ├── /center/apply             축복상담 신청 (구 /onboarding)
+│   ├── /center/churches          지역가정교회 찾기 (구 /churches)
+│   └── /center/documents         제출서류·심사기준 (구 /documents)
+├── /mypage                      마이페이지 — 로그인 필요 (RequireAuth)
+├── /login                       로그인·회원가입
+├── /reset-password              비밀번호 재설정 — 로그인 필요 (재설정 메일 링크로 진입)
+├── /privacy                     개인정보처리방침
+├── /terms                       이용약관
+├── /admin/login                 관리자 로그인
+├── /admin/curriculum            [축복관리자] 사랑의 기술 관리 — RequireAdmin
+├── /admin/churches               [축복관리자] 지역가정교회 관리 — RequireAdmin
+├── /admin/stories                [축복관리자] 스토리 관리 — RequireAdmin
+├── /admin/guidance               [축복관리자] 신청 관리 — RequireAdmin
+├── /admin/faq                    [축복관리자] FAQ 관리 — RequireAdmin
+├── /admin/members                [축복관리자] 회원 관리(읽기전용) — RequireAdmin
+├── /admin/roadmap                [축복관리자] 로드맵 단계 관리 — RequireAdmin
+├── /admin/stats                  [축복관리자] 홈 수치 관리 — RequireAdmin
+└── *                            404 Not Found
 ```
 
-> `/community`, `/community/new`, `/community/:id`(나눔의 열매)와 `/civil-affairs`,
-> `/civil-affairs/blessing-marriage`(가정민원실)는 실제 구현에서 폐기되었습니다. 뒤의 둘은
-> `/churches`로 리다이렉트됩니다. 원본 명세는 각각 §13.1, §13.5 참고.
+원본 사이트에 있었던 "나눔의 열매"(`/community`)와 "가정민원실"(`/civil-affairs`)은 완전히 폐기되었습니다. 옛 명세는 §13.1, §13.5 참고.
 
-### 2.2 외부 링크 (동일 사이트가 아님, 새 탭으로 이동)
+### 2.2 리다이렉트 (북마크·검색 유입 보존)
 
-| 항목 | URL |
-|---|---|
-| HJ Baby Blessing | `https://hyojeongbaby-blessing.lovable.app/` |
-| 성화감사장 신청 | Google Forms (운영자가 관리하는 폼 URL) |
+| 구 경로 | 신 경로 | 비고 |
+|---|---|---|
+| `/onboarding` | `/center/apply` | 6축 개편 |
+| `/churches` | `/center/churches` | 6축 개편 |
+| `/documents` | `/center/documents` | 6축 개편 |
+| `/guide/curriculum` | `/curriculum` | 이전 개편 잔재 |
+| `/civil-affairs` | `/center/churches` | 가정민원실 폐기(§13.5) |
+| `/civil-affairs/blessing-marriage` | `/center/churches` | 가정민원실 폐기(§13.5) |
+| `/admin` | `/admin/login` | — |
 
-> ⚠️ 원본 사이트의 성화감사장 링크는 Google Forms **편집 URL(`/edit?usp=drive_web&ouid=...`)** 로 연결되어 있습니다. **이는 명백한 버그이며, 재구현 시 반드시 응답용 URL(`/viewform`)로 교체해야 합니다.** (§10 개선 제안 I-01 참조)
+`public/sitemap.xml`도 이 라우트 기준으로 함께 갱신되어 있어야 합니다.
 
-### 2.3 글로벌 내비게이션
+### 2.3 외부 링크 — **현재 없음**
 
-헤더 GNB는 **5개 항목 고정**. 앞 4개 항목의 순서 변경 금지.
+> ⚠️ **원본 대비 변경**: 원본 사이트와 v1.0 PRD에는 홈 카드 그리드에 "HJ Baby Blessing"·"성화감사장" 외부 링크 카드 2장이 있었고, v1.0 §10 I-01은 성화감사장 링크가 Google Forms **편집 URL**로 걸려 있던 버그를 지적했습니다. **실제 구현에서는 이 두 카드 자체가 홈 화면에서 완전히 삭제되었고**(6축 개편으로 홈 카드 그리드가 5축 카드로 전면 교체), 코드베이스 어디에도 `hyojeongbaby-blessing` 도메인이나 "성화감사장" 문자열이 남아있지 않습니다. 즉 I-01 버그는 "고쳐짐"이 아니라 **대상 기능 자체가 없어져 해당 없음**입니다. 재도입이 필요하면 응답용 URL(`/viewform`)로 새로 추가하십시오.
 
-| 순서 | 라벨 | 경로 | 영문 캡션(내부용) |
-|---|---|---|---|
-| 1 | 축복의 씨앗 | `/guide` | Blessing Guide |
-| 2 | 행복의 꽃 | `/stories` | Our Stories |
-| 3 | 축복가치교육 | `/curriculum` | Online Courses |
-| 4 | 지역가정교회 | `/churches` | Local Family Churches |
-| 5 | 제출서류 안내 | `/documents` | Required Documents |
+### 2.4 글로벌 내비게이션 (`src/content/nav.ts`)
 
-> 3번 항목은 원본의 "나눔의 열매"(`/community`) 자리를(§13.1), 4번 항목은 원본의
-> "가정민원실"(`/civil-affairs`) 자리를(§13.5) 대체합니다.
->
-> ⚠️ **원본 재구현 스펙과의 괴리**: 이 문서는 원래 기존 사이트를 재구현하기 위한 스펙으로
-> 작성되어 "GNB 4개 항목 고정, 순서 변경 금지"였습니다. 5번 항목(`/documents`)은
-> 2026-08-26 사용자 요청으로 **원본에 없던 새 기능**을 추가한 것이며, 협회 가정행복국·
-> 가정국이 배포한 "미혼1세/축복자녀 축복후보자 제출서류 및 심사기준(20260814)" 공문
-> 두 건을 콘텐츠로 옮긴 페이지입니다. §5.3, §9.5(AC-01), 부록 B 요약표도 함께 갱신했습니다.
+헤더 GNB는 **6개 항목**. 순서는 "가치(씨앗) → 사례(꽃) → 학습(기술) → 절차(로드맵) → 행동(센터)"라는 사용자 의사결정 순서를 반영하며, 앞 5개는 순서 변경 금지. 6번째(가치관 진단)는 2026-08-28에 "축복상담 신청과 별개로 누구나 부담 없이 접근"하도록 GNB 최상단에 추가되었습니다.
 
-- 좌측: 로고 마크(`mark-lavender`) + 워드마크 "블레싱월드" → `/` 링크
-- 로고 `alt` 텍스트: `블레싱월드 마크`
-- 모바일(<768px): 햄버거 메뉴 → 드로어(Sheet)로 5개 항목 세로 나열
-- 스크롤 시 헤더 고정(sticky) + 배경 blur
+| 순서 | 라벨 | 경로 | 영문 캡션 | 하위 경로도 활성 표시 |
+|---|---|---|---|---|
+| 1 | 축복의 씨앗 | `/guide` | The Seed | — |
+| 2 | 행복의 꽃 | `/stories` | Our Stories | ✅ |
+| 3 | 사랑의 기술 | `/curriculum` | The Art of Love | ✅ |
+| 4 | 축복로드맵 | `/roadmap` | Your Roadmap | — |
+| 5 | 축복센터 | `/center` | Blessing Center | ✅ (`/center/apply` 등에서도 활성) |
+| 6 | 가치관 진단 | `/values` | Values Check | — |
+
+GNB와 별개로 우측에 **계정 진입점**과 **주 전환 CTA 버튼**이 항상 노출됩니다(`PRIMARY_CTA` 상수, 헤더·모바일 시트·홈 히어로가 공유):
+
+- 로그인 상태: `{표시이름}님` (표시 이름 없으면 "마이페이지") → `/mypage`
+- 비로그인 상태: `로그인` → `/login`
+- CTA 버튼: **"축복상담 신청"** → `/center/apply` (primary 버튼, 모바일에서는 하단 고정 바로도 별도 노출, §5.3)
+
+레이아웃/동작:
+- 좌측: 로고 마크 + 워드마크 "블레싱월드"(`homeLabel`: "블레싱월드 홈") → `/`
+- 로고 `alt`: `블레싱월드 마크`
+- 모바일(`<768px`): 햄버거 → `Sheet` 드로어로 6개 항목 + 계정 진입점 + CTA 버튼을 세로 나열
+- `sticky top-0 z-50`, 스크롤 시 배경 blur
 
 ---
 
 ## 3. 기술 스택 및 아키텍처
 
-### 3.1 프론트엔드
+### 3.1 실제 설치된 패키지 (`package.json`, `blessing-world@0.1.0`)
 
 ```
-- 빌드: Vite
-- 언어: TypeScript
-- 프레임워크: React 18
-- 라우팅: react-router-dom v6 (BrowserRouter)
-- 스타일: Tailwind CSS + CSS 변수 기반 디자인 토큰
-- UI 컴포넌트: shadcn/ui (Radix UI 기반)
-- 아이콘: lucide-react
-- 폼: react-hook-form + zod (@hookform/resolvers)
-- 서버 상태: @tanstack/react-query
-- 토스트: sonner
-- 애니메이션: tailwindcss-animate (+ 필요 시 framer-motion)
-- 메타 태그: react-helmet-async
+프레임워크: React 18.3.1 + react-dom 18.3.1
+빌드:     Vite 5.4.8 (@vitejs/plugin-react 4.3.2)
+언어:     TypeScript 5.6.2
+라우팅:   react-router-dom 6.26.2 (BrowserRouter ↔ HashRouter, §3.3)
+스타일:   Tailwind CSS 3.4.13 + tailwindcss-animate 1.0.7
+UI:       Radix UI 프리미티브(accordion/dialog/label/radio-group/select/tabs/toast/tooltip)
+          + class-variance-authority 0.7.0, clsx 2.1.1, tailwind-merge 2.5.2 (shadcn/ui 패턴)
+아이콘:   lucide-react 0.446.0
+폼:       react-hook-form 7.53.0 + zod 3.23.8 + @hookform/resolvers 3.9.0
+서버상태: @tanstack/react-query 5.59.0
+백엔드:   @supabase/supabase-js 2.45.4
+토스트:   sonner 1.5.0
+메타태그: react-helmet-async 2.0.5
 ```
 
-### 3.2 백엔드
+> **framer-motion은 설치되어 있지 않습니다.** v1.0 PRD가 "필요 시" 언급했던 애니메이션 라이브러리는 실제로 도입되지 않았고, 애니메이션은 Tailwind `keyframes`(`fade-in-up`, `accordion-down/up`)만으로 구현되어 있습니다.
+
+```json
+"scripts": {
+  "dev": "vite",
+  "build": "tsc -b && vite build",
+  "build:preview": "tsc -b && node scripts/build-artifact-preview.mjs",
+  "lint": "eslint .",
+  "preview": "vite preview"
+}
+```
+
+### 3.2 백엔드 — Supabase (옵셔널, §CLAUDE.md 참고)
+
+- Postgres + Auth(이메일/비밀번호) + RLS(전 테이블 필수) + Edge Function 1개(`purge-guidance-requests`, 개인정보 자동 파기)
+- `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`가 비어 있으면 `supabase`는 `null`이 되고, 모든 기능이 `src/content/*.ts` 기본값 또는 `localStorage`로 조용히 대체됩니다 — 이는 **의도된 영구 설계**이지 임시 부트스트랩 상태가 아닙니다.
+
+### 3.3 라우팅 구현 (`src/App.tsx`)
 
 ```
-- BaaS: Supabase
-  - Postgres (데이터)
-  - Auth (이메일/비밀번호 + 소셜 선택)
-  - Storage (스토리/나눔 이미지)
-  - Row Level Security (RLS) 필수
-  - Edge Functions (알림 발송, 관리자 통계)
+Router = import.meta.env.VITE_USE_HASH_ROUTER === "true" ? HashRouter : BrowserRouter
 ```
 
-### 3.3 디렉터리 구조 (권장)
+- 기본은 `BrowserRouter`(서버 사이드 리라이트가 있는 실 배포용). GitHub Pages·artifact-preview 빌드처럼 딥링크 리라이트가 불가능한 정적 호스팅은 `HashRouter`를 씁니다.
+- HashRouter + Supabase Auth 리다이렉트 충돌(`#access_token=...`을 HashRouter가 라우트로 오인)은 `src/lib/authHashRedirect.ts`가 React 마운트 전에 가로채 해결합니다.
+- 전 페이지가 `React.lazy` 코드 스플리팅 대상입니다(번들 전체를 합치면 gzip 216KB로 200KB 예산을 초과한다는 실측 코멘트 근거).
+- 가드: `RequireAuth`(`/mypage`, `/reset-password`), `RequireAdmin`(`/admin/*` 8개 하위 라우트 전부, `/admin/login` 자체는 제외).
+
+### 3.4 디렉터리 구조 (실제)
 
 ```
 src/
 ├── components/
 │   ├── ui/                  # shadcn/ui 프리미티브
-│   ├── layout/
-│   │   ├── Header.tsx
-│   │   ├── Footer.tsx
-│   │   └── PageLayout.tsx
-│   ├── common/
-│   │   ├── SEO.tsx              # noindex 옵션 포함(관리자 화면용)
-│   │   ├── SectionHeading.tsx   # 영문 캡션 + 국문 제목 + 설명 3단 구조
-│   │   ├── EyebrowLabel.tsx     # "BLESSING GUIDE" 같은 대문자 라벨
-│   │   ├── EmptyState.tsx
-│   │   ├── ComingSoon.tsx
-│   │   ├── LogoMark.tsx
-│   │   └── ScrollToTop.tsx
-│   ├── home/
-│   │   ├── HeroCarousel.tsx
-│   │   ├── IntroTriad.tsx
-│   │   └── FeatureCardGrid.tsx
-│   ├── guide/
-│   │   ├── WhatIsBlessing.tsx / ValuePillars.tsx / StepJourney.tsx
-│   │   ├── FaqAccordion.tsx / TrustBadges.tsx / GuideFinalCta.tsx
-│   └── admin/
-│       ├── AdminHeader.tsx      # 관리 화면 공통 헤더(로그인 정보·로그아웃·페이지 탭)
-│       └── RequireAdmin.tsx     # /admin/* 라우트 가드
-├── pages/
-│   ├── Home.tsx / Guide.tsx / Curriculum.tsx / Stories.tsx / StoryDetail.tsx
-│   ├── Churches.tsx          # 지역가정교회 디렉터리 — §6 P-05 (가정민원실 대체)
-│   ├── Onboarding.tsx / Privacy.tsx / Terms.tsx / NotFound.tsx
-│   └── admin/
-│       ├── Login.tsx            # 로그인 + 회원가입
-│       ├── CourseAdmin.tsx      # 축복가치교육(강좌) 관리
-│       └── ChurchAdmin.tsx      # 지역가정교회 관리
-├── content/                 # 정적 카피 상수 (i18n 전환 대비) — curriculum.ts, churches.ts 포함
-├── lib/
-│   ├── auth.tsx              # AuthProvider/useAuth — 세션·profiles.role 전역 상태
-│   ├── courses.ts            # 강좌 CRUD (Supabase 우선, 미연결 시 localStorage 대체)
-│   ├── churches.ts           # 지역가정교회 CRUD (courses.ts와 동일 패턴)
-│   └── utils.ts
+│   ├── layout/               Header.tsx / Footer.tsx / PageLayout.tsx / MobileCtaBar.tsx / ScrollToTop.tsx
+│   ├── common/                SEO.tsx / SectionHeading.tsx / EmptyState.tsx / ComingSoon.tsx / LogoMark.tsx …
+│   ├── auth/                  AuthForm.tsx(로그인·회원가입 공용) / RequireAuth.tsx
+│   ├── admin/                  AdminHeader.tsx / RequireAdmin.tsx / QuizEditor.tsx
+│   ├── home/                   HeroCarousel / IntroTriad / StatBand / FeatureCardGrid / RoadmapPreview / HomeCtaSection
+│   ├── guide/                  WhatIsBlessing / ValuePillars / RoadmapBanner / FaqAccordion / TrustBadges / GuideFinalCta
+│   ├── curriculum/             CourseQuiz.tsx
+│   ├── roadmap/                RoadmapTimeline / ReadinessChecker
+│   ├── stories/                VideoRail.tsx
+│   └── apply/                  ValuesAssessmentSection.tsx (standalone + embedded variant, §10 I-19)
+├── pages/                    Home / Guide / Curriculum / CourseDetail / Roadmap / Values / Stories / StoryDetail /
+│                             Center / Onboarding / Churches / Documents / MyPage / Login / ResetPassword /
+│                             Privacy / Terms / NotFound / admin/*(8개)
+├── content/                  home.ts nav.ts footer.ts seo.ts guide.ts curriculum.ts roadmap.ts center.ts
+│                             documents.ts stories.ts familyVideos.ts valuesAssessment.ts faq.ts privacy.ts
+│                             terms.ts regions.ts
+├── lib/                      auth.tsx authHashRedirect.ts courses.ts churches.ts stories.ts faq.ts guidance.ts
+│                             guidanceAdmin.ts roadmap.ts siteStats.ts members.ts courseCompletions.ts
+│                             blessingProgress.ts utils.ts
 ├── hooks/  ├── integrations/supabase/
 └── App.tsx / main.tsx / index.css
 ```
 
-> `community/` 컴포넌트 폴더와 `Community.tsx`/`CommunityDetail.tsx`/`CommunityNew.tsx`는 나눔의
-> 열매 폐기와 함께(§13.1), `CivilAffairs.tsx`/`BlessingMarriage.tsx`와 `civil-affairs/` 컴포넌트
-> 폴더는 가정민원실 폐기와 함께(§13.5) 삭제되었습니다.
+`community/`·`CivilAffairs.tsx` 계열 파일은 §13.1·§13.5 폐기와 함께 삭제되었습니다.
 
-### 3.4 카피 관리 원칙
+### 3.5 카피 관리 원칙
 
-모든 한국어 카피는 **JSX에 하드코딩하지 말고** `src/content/*.ts` 상수 파일에 분리합니다.
-운영자가 개발자 도움 없이 문구를 수정할 여지를 남기고, 향후 CMS 전환·다국어 확장을 쉽게 하기 위함입니다.
+모든 한국어 카피는 JSX 하드코딩 없이 `src/content/*.ts` 상수로 분리되어 있습니다. §6의 모든 카피는 이 원칙에 따라 콘텐츠 파일에서 그대로 가져온 것입니다.
 
 ---
 
 ## 4. 디자인 시스템
 
-> 아래 토큰은 **재구성안**입니다(§0 정확도 고지 참조). 원본과 픽셀 일치가 필요하면 실측값으로 교체하십시오.
+`DESIGN.md`가 토큰 원천(canonical source)이며, 이름은 **"Sacred Union"**(스타일: Minimalist-Classical)입니다. v1.0 PRD가 가정했던 "라벤더 계열"은 **더 이상 사실이 아닙니다** — 실제 구현은 딥 퍼플 + 샴페인 골드의 Material Design 3 스타일 팔레트입니다.
 
 ### 4.1 컨셉
 
-- 서비스명 **블레싱월드(Blessing World)** — "축복(Blessing)이 시작되는 곳"이라는 의미
-- 로고 마크 파일명이 `mark-lavender` → **라벤더 계열이 브랜드 프라이머리**
-- 전체 톤: 크림/아이보리 배경 위 라벤더 + 뮤트 골드. 채도 낮고 여백 넉넉한 **에디토리얼 레이아웃**
-- 종교기관 특유의 무게감을 피하고, 웨딩/라이프스타일 매거진에 가까운 인상
+- "축복(Blessing)"을 "디지털 성소(digital sanctuary)"로 표현 — 현대적 세련됨과 영적 경외감의 교차점
+- Primary(딥 퍼플) = 지혜·헌신·결합의 신성함, Accent(샴페인 골드) = 지속되는 가치와 우아함, Background(웜 아이보리/에테리얼 라벤더) = 유기적이고 양피지 같은 질감
+- 레이아웃: 12컬럼 Fixed Grid, 데스크톱 최대 1200px, 섹션 패딩 120px 원칙(모바일은 20px로 축소)
 
-### 4.2 컬러 토큰 (HSL, `index.css` `:root`)
+### 4.2 컬러 토큰 (실제 `src/index.css` `:root`, HSL)
 
 ```css
 :root {
   /* Base */
-  --background: 40 33% 98%;        /* #FCFAF7 웜 아이보리 */
-  --foreground: 265 15% 20%;       /* #322D3B 딥 플럼 그레이 */
+  --background: 285 100% 98%;      /* #FDF7FF */
+  --foreground: 264 8% 12%;        /* #1D1B20 */
 
-  /* Brand — Lavender */
-  --primary: 265 38% 58%;          /* #8367B8 라벤더 */
+  /* Brand — Primary (Sacred Union Purple) */
+  --primary: 257 43% 38%;          /* #4F378A */
   --primary-foreground: 0 0% 100%;
-  --primary-soft: 265 45% 94%;     /* #EDE7F6 라벤더 틴트 (배지/호버) */
-  --primary-deep: 265 42% 38%;     /* #57388A 강조 텍스트 */
+  --primary-soft: 261 100% 93%;    /* #E9DDFF */
+  --primary-deep: 262 100% 18%;    /* #22005D */
 
-  /* Accent — Muted Gold */
-  --accent: 41 55% 56%;            /* #CBA24E 뮤트 골드 */
-  --accent-foreground: 265 20% 18%;
-  --accent-soft: 41 60% 94%;       /* #FAF2E0 */
+  /* Accent — Champagne Gold */
+  --accent: 46 65% 52%;            /* #D4AF37 */
+  --accent-foreground: 180 2% 11%; /* #1B1C1C — 흰 글자 대비 2.1:1이라 채택 안 함, 차콜은 8.1:1 */
+  --accent-soft: 44 100% 77%;      /* #FFE088 */
+  --accent-deep: 48 100% 23%;      /* #745C00 */
 
   /* Neutral */
   --card: 0 0% 100%;
-  --card-foreground: 265 15% 20%;
-  --muted: 40 20% 95%;             /* #F5F2ED */
-  --muted-foreground: 265 8% 46%;  /* #74707C 보조 텍스트 */
-  --border: 40 18% 89%;            /* #E8E3DB */
-  --input: 40 18% 89%;
-  --ring: 265 38% 58%;
+  --card-foreground: 180 2% 11%;
+  --muted: 285 44% 96%;            /* #F8F2FA */
+  --muted-foreground: 260 8% 29%;  /* #494551 */
+  --border: 270 13% 80%;           /* #CBC4D2 */
+  --input: 270 13% 80%;
+  --ring: 257 43% 38%;
 
-  /* Semantic */
-  --destructive: 0 65% 55%;
+  /* Semantic — DESIGN.md에 없는 기능색은 기존 값 유지 */
+  --destructive: 0 75% 42%;        /* #BA1A1A */
   --success: 152 45% 42%;
   --warning: 38 85% 55%;
-
-  --radius: 0.875rem;              /* 14px — 카드 기본 */
 }
 ```
 
-**컬러 사용 규칙**
+다크모드 블록은 없습니다(`tailwind.config.ts`의 `darkMode: ["class"]`만 설정되어 있고 실제 `.dark` 오버라이드는 없음).
 
-| 용도 | 토큰 |
+**Tailwind 노출** (`tailwind.config.ts`, 전부 `hsl(var(--x))`):
+
+| Tailwind 키 | 변형 |
 |---|---|
-| 페이지 배경 | `background` |
-| 카드/모달 배경 | `card` (흰색) |
-| 주요 CTA 버튼 | `primary` 배경 + 흰 글자 |
-| 보조 CTA 버튼 | `outline` + `primary` 테두리/글자 |
-| 섹션 구분 배경(교차) | `muted` |
-| 영문 eyebrow 라벨 | `accent` 또는 `primary` + `tracking-[0.2em]` + `uppercase` |
-| 카테고리 배지 | `primary-soft` 배경 + `primary-deep` 글자 |
-| 안내/유의 문구 박스 | `accent-soft` 배경 + `accent-foreground` 글자 |
+| `primary` | `DEFAULT` `foreground` `soft` `deep` |
+| `accent` | `DEFAULT` `foreground` `soft` `deep` |
+| `card` | `DEFAULT` `foreground` |
+| `muted` | `DEFAULT` `foreground` |
+| `destructive` | `DEFAULT` + `foreground`(하드코딩 `0 0% 100%`) |
+| `success` / `warning` | `DEFAULT`만 (foreground 변형 없음) |
+| `border` `input` `ring` `background` `foreground` | 평면 토큰 |
 
-**다크모드**: 원본에 다크모드 없음. 구현하지 않음(또는 `prefers-color-scheme` 대응 시 §4.2 역전 팔레트 별도 정의).
+> DESIGN.md의 Material 스타일 `secondary`/`tertiary`/`surface-container-*` 계열 토큰은 대부분 채택되지 않았고, `accent`/`accent-soft`/`accent-deep` 3개로 축약되어 있습니다.
 
-### 4.3 타이포그래피
+> ⚠️ **알려진 불일치** (v1.0의 §0 정확도 고지 관례를 계승해 기록)
+> - `--background`(#FDF7FF)는 DESIGN.md 프론트매터의 `surface-bright`/`background` 값과 같지만, DESIGN.md 본문 산문은 "Warm Ivory(#FBF9F8)가 UI의 기초"라고 설명합니다. **코드와 문서 산문이 실제로 다른 배경색을 가리킵니다.**
+> - DESIGN.md 본문은 "Primary(Spiritual Purple) = #6750a4"라고 쓰지만, 프론트매터 토큰과 실제 `--primary` CSS 값은 `#4F378A`입니다(`#6750a4`는 프론트매터의 `primary-container`/`surface-tint`에 해당). 코드/프론트매터가 우선한다고 간주하십시오.
+> - DESIGN.md 프론트매터는 타이포그래피 본문 폰트를 **Plus Jakarta Sans**로 지정하지만, 실제 `tailwind.config.ts`는 `sans: ["Noto Sans KR", "system-ui", "sans-serif"]`만 정의합니다. Plus Jakarta Sans는 어디에도 로드되어 있지 않습니다. `CLAUDE.md`가 명시한 "Noto Sans KR / Noto Serif KR"이 실제 구현입니다.
+> - `--radius` CSS 변수는 더 이상 존재하지 않습니다(v1.0의 `0.875rem`은 폐기). `tailwind.config.ts` 코멘트에 따르면 DESIGN.md의 `rounded` 스케일이 Tailwind 기본 스케일과 동일해 별도 오버라이드가 불필요하다고 판단했습니다 — 즉 카드 등은 `rounded-2xl` 같은 Tailwind 기본 유틸리티를 직접 씁니다.
+> - 문서화된 `.stat-figure`/`.stat-basis` 유틸리티 클래스나 `--pillar-*`(축별 식별색) 커스텀 프로퍼티는 **코드베이스 어디에도 없습니다** — `docs/2026-08-26_6축개편_설계.md`가 제안했던 아이디어이지만 채택되지 않았습니다. 홈의 `StatBand`는 일반 Tailwind 유틸리티로 직접 구현되어 있습니다.
+
+### 4.3 타이포그래피 (`tailwind.config.ts` + Google Fonts)
 
 ```
-본문/제목 공통: 'Pretendard Variable', Pretendard, -apple-system,
-               'Noto Sans KR', system-ui, sans-serif
-영문 eyebrow:  'Inter', sans-serif — uppercase, letter-spacing 0.2em, 12px, semibold
+본문/UI:   'Noto Sans KR', system-ui, sans-serif
+헤드라인·인용구: 'Noto Serif KR', 'Noto Serif', serif
 ```
 
-| 스타일 | 크기(데스크톱) | 크기(모바일) | 굵기 | 행간 |
-|---|---|---|---|---|
-| Display (히어로) | 48px | 30px | 700 | 1.25 |
-| H1 (페이지 제목) | 40px | 28px | 700 | 1.3 |
-| H2 (섹션 제목) | 30px | 24px | 700 | 1.35 |
-| H3 (카드 제목) | 20px | 18px | 600 | 1.4 |
-| Body | 17px | 16px | 400 | 1.75 |
-| Body-sm (보조) | 15px | 14px | 400 | 1.7 |
-| Caption | 13px | 13px | 500 | 1.6 |
-| Eyebrow | 12px | 11px | 600 | 1.4 |
-
-> **한국어 가독성 필수 규칙**
-> - 모든 문단에 `word-break: keep-all;` 적용 (어절 단위 줄바꿈)
-> - 본문 행간 최소 1.7
-> - 문단 최대 폭 `max-w-[62ch]`
+- 한국어 가독성 규칙(v1.0 계승, 여전히 유효): 문단 `word-break: keep-all`, 본문 행간 ≥1.7, 문단 최대 폭 `max-w-prose`(Tailwind `maxWidth.prose: "62ch"`로 커스텀).
 
 ### 4.4 레이아웃 · 스페이싱
 
 | 항목 | 값 |
 |---|---|
-| 컨테이너 최대폭 | `max-w-6xl` (1152px), 좌우 패딩 `px-5 md:px-8` |
-| 섹션 상하 여백 | `py-16 md:py-24` |
-| 카드 그리드 | `grid gap-6 md:grid-cols-2 lg:grid-cols-3` |
-| 카드 라운드 | `rounded-2xl` |
-| 카드 그림자 | `shadow-[0_2px_16px_-4px_rgba(50,45,59,0.08)]`, hover 시 `shadow-lg` + `-translate-y-1` |
-| 전환 | `transition-all duration-300 ease-out` |
+| 컨테이너 | `container`: `center: true`, `padding: 1.25rem`, 커스텀 `2xl` 브레이크포인트 = **1152px** |
+| 카드 그림자 | `shadow-card`: `0 8px 30px -12px rgba(79,55,138,.14)` |
+| 강조 글로우 | `shadow-glow`: `0 32px 80px -16px rgba(103,80,164,.1)` |
+| 애니메이션 | `fade-in-up`(0.6s ease-out both), `accordion-down`/`accordion-up`(0.2s ease-out, Radix 아코디언용) |
 
-### 4.5 반응형 브레이크포인트
+### 4.5 이미지
 
-| 이름 | 폭 | 주요 변화 |
-|---|---|---|
-| Mobile | < 640px | 1단, 햄버거 메뉴, 히어로 이미지 4:5 비율 |
-| Tablet | 640 ~ 1023px | 2단 그리드, GNB 노출 시작(768px~) |
-| Desktop | ≥ 1024px | 3단 그리드, 히어로 16:9 |
-
-### 4.6 이미지 애셋 요구사항
-
-| 키 | 용도 | 설명(alt) | 비율 |
-|---|---|---|---|
-| `blessing-ceremony-editorial` | 히어로 슬라이드 1 | `다양한 국적의 부부들이 함께 참여한 합동축복식` | 16:9 |
-| `hero-couple` | 히어로 슬라이드 2 | `따뜻하게 미소짓는 축복가정 부부` | 16:9 |
-| `hero-community-sharing` | 히어로 슬라이드 3 | `나눔장터에서 서로 나누는 사람들` | 16:9 |
-| `home-family-time` | 홈 카드(행복의 꽃) | `집에서 함께 시간을 보내는 축복가정` | 4:3 |
-| `home-sharing-market` | 홈 카드(나눔의 열매) | `나눔장터에서 서로 나누는 사람들` | 4:3 |
-| `ca-blessing-2027` | 홈 카드(축복결혼) | `2027 축복결혼 안내` | 4:3 |
-| `ca-baby-blessing` | 홈 카드(HJ Baby) | `HJ Baby Blessing 가정의 따뜻한 모습` | 4:3 |
-| `ca-seonghwa` | 홈 카드(성화감사장) | `성화감사장 안내` | 4:3 |
-| `mark-lavender.png` | 로고 마크 | `블레싱월드 마크` | 1:1 |
-
-- 포맷: WebP 우선, PNG 폴백
-- `loading="lazy"` (히어로 첫 슬라이드는 `eager` + `fetchpriority="high"`)
-- 인물 사진은 **초상권 동의를 받은 이미지만** 사용
+`src/content/home.ts`의 `HERO_SLIDES`에 히어로 3장의 실제 alt 텍스트가 있습니다(합동축복식·미소짓는 부부·웃는 가족). 나머지 페이지는 대부분 아이콘(lucide-react) 기반이며 사진 애셋 의존도가 v1.0 대비 낮습니다.
 
 ---
 
 ## 5. 공통 컴포넌트
 
-### 5.1 `<Header />`
+### 5.1 `<Header />` (`src/components/layout/Header.tsx`)
+
+- `position: sticky; top: 0; z-index: 50`, 배경 blur
+- 좌측 로고(`LogoMark`) → `/`, 중앙 6개 GNB(§2.4), 우측 계정 진입점 + "축복상담 신청" 버튼
+- 활성 라우트 강조는 `NavLink` + `matchPrefix`(하위 경로 포함 강조)
+- 모바일: 햄버거 → `Sheet` 드로어에 동일 항목 세로 배치
+
+### 5.2 `<Footer />` (`src/content/footer.ts`, `src/components/layout/Footer.tsx`)
+
+상수:
+
+| 상수 | 값 |
+|---|---|
+| `ORG_NAME` | 세계평화통일가정연합 한국협회 |
+| `ORG_DEPARTMENT` | 가정행복국 축복가정부 |
+| `RESPONSE_TIME` | 영업일 기준 1~2일 이내 |
+| `CONTACT_PHONE_DISPLAY` / `_TEL` | 02-3271-0480 / `tel:0232710480` |
+| `CONTACT_HOURS` | 평일 09:00–18:00 |
+
+구조:
 
 ```
-[로고마크][블레싱월드]                    축복의 씨앗  행복의 꽃  축복가치교육  지역가정교회
+[로고] 블레싱월드
+
+블레싱월드는 세계평화통일가정연합 한국협회 가정행복국 축복가정부이 운영하는
+축복결혼·가정생활 통합 안내 서비스입니다.
+
+┌─────────────────────┬─────────────────────┐
+│ 운영기관              │ 답변 소요 시간         │
+│ 세계평화통일가정연합     │ 신청 후 영업일 기준     │
+│ 한국협회               │ 1~2일 이내 지역 담당자  │
+│ 가정행복국 축복가정부   │ 연락                  │
+├─────────────────────┼─────────────────────┤
+│ 개인정보 및 서비스 문의  │ 상담 중단·정보 삭제      │
+│ 세계평화통일가정연합     │ 담당자에게 요청하시면     │
+│ 한국협회               │ 연락을 중단하고 관련      │
+│ 가정행복국 축복가정부   │ 절차에 따라 개인정보를    │
+│                       │ 파기합니다.            │
+└─────────────────────┴─────────────────────┘
+
+© 2026 블레싱월드. All rights reserved.   개인정보처리방침   이용약관   관리자
 ```
 
-- `position: sticky; top: 0; z-index: 50`
-- 배경 `bg-background/85 backdrop-blur-md`, 하단 `border-b border-border`
-- 활성 라우트: `text-primary` + 하단 2px `primary` 언더라인
-- 모바일: 우측 햄버거 → shadcn `Sheet` 드로어
+> 🐛 **실제 코드에 있는 오탈자**: 브랜드 설명 문장이 "…가정행복국 축복가정부**이** 운영하는…"로 되어 있습니다(조사 오류, "가" 아닌 "이"). §10 I-21로 등재.
 
-### 5.2 `<Footer />` — **모든 페이지 공통, 카피 원문 그대로**
+"관리자" 링크는 `/admin/curriculum`으로 연결되며 `RequireAdmin`이 걸려 있어 비로그인/권한 없음 사용자는 로그인 화면 또는 권한 없음 화면을 보게 됩니다.
 
-```
-블레싱월드
+### 5.3 `<MobileCtaBar />` (신규, `src/components/layout/MobileCtaBar.tsx`)
 
-블레싱월드는 세계평화통일가정연합 가정행복국이 운영하는 축복결혼·가정생활 통합 안내 서비스입니다.
+- 모바일 전용(`md:hidden`) 화면 하단 고정 바. 버튼 하나: **"축복상담 신청"** → `/center/apply`
+- `/center/apply`, `/admin/*`, `/login`, `/reset-password` 경로에서는 숨김(신청서 작성 중·인증 화면에서 중복 CTA 방지)
+- `PageLayout`이 모든 페이지 하단에 자동으로 렌더링
 
-┌─────────────────────────┬─────────────────────────┐
-│ 운영기관                 │ 답변 소요 시간            │
-│ 세계평화통일가정연합       │ 신청 후 영업일 기준       │
-│ 가정행복국               │ 1~2일 이내 지역 담당자 연락│
-├─────────────────────────┼─────────────────────────┤
-│ 개인정보 및 서비스 문의    │ 상담 중단·정보 삭제       │
-│ 세계평화통일가정연합       │ 담당자에게 요청하시면      │
-│ 가정행복국               │ 연락을 중단하고 관련 절차에 │
-│                         │ 따라 개인정보를 파기합니다. │
-└─────────────────────────┴─────────────────────────┘
+### 5.4 `<SEO />` (react-helmet-async, `src/content/seo.ts`)
 
-개인정보처리방침    이용약관
-
-© 2026 블레싱월드. All rights reserved.
-```
-
-- 4개 정보 블록은 데스크톱 `grid-cols-2`(또는 `4`), 모바일 1단
-- 하단 링크: `/privacy`, `/terms`
-
-> ⚠️ **표기 불일치 주의**: 원본은 푸터에서는 `가정행복국`, `/civil-affairs`에서는 `세계평화통일가정연합 한국협회 / 가정행복지원국 축복가정부`로 표기가 다릅니다. 재구현 시 **하나로 통일**할 것 (§10 I-02). (`/civil-affairs` 자체는 실제 구현에서 폐기되었지만(§13.5), 표기 통일 원칙은 그대로 적용해 푸터·다른 화면 어디서나 같은 명칭을 씁니다. 2026-08-27 기준 공식 명칭은 `가정행복국`으로 확정했습니다.)
-
-### 5.3 `<SEO />` (react-helmet-async)
-
-라우트별 메타 태그. **원본 실측값 그대로 사용**.
+라우트별 메타 태그. 마이페이지/로그인/비밀번호재설정/404는 `noindex`.
 
 | 라우트 | `<title>` | `meta description` |
 |---|---|---|
-| `/` | 블레싱월드 — 축복결혼을 처음 만나는 곳 | 축복결혼이 처음이신 분을 위한 따뜻한 안내소. 궁금한 것부터 하나씩, 블레싱월드가 함께합니다. |
+| `/` (기본값) | 블레싱월드 — 축복결혼을 처음 만나는 곳 | 축복결혼이 처음이신 분을 위한 따뜻한 안내소. 궁금한 것부터 하나씩, 블레싱월드가 함께합니다. |
 | `/guide` | 축복의 씨앗 — 축복결혼 안내 | 축복결혼이 무엇인지, 그 가치와 의미부터 실제 준비 절차까지 처음 오신 분을 위한 안내. |
+| `/curriculum` | 사랑의 기술 — 축복가치교육 4강좌 | 사랑은 감정이 아니라 배울 수 있는 기술입니다. 4개의 강좌로 차근차근 익혀보세요. |
+| `/roadmap` | 축복로드맵 — 축복까지 가는 8단계 | 알아보기부터 축복식까지, 축복결혼이 어떤 순서로 진행되는지 8단계로 안내합니다. |
+| `/values` | 가치관 진단 12문항 — 블레싱월드 | 대화·가족·신앙·생활 4가지 영역 12문항으로 나의 성향과 잘 맞는 상대 스타일을 확인해보세요. |
 | `/stories` | 행복의 꽃 — 축복가정의 이야기 | 실제 축복가정의 인터뷰와 사례를 통해 축복결혼이 삶에서 어떻게 피어나는지 만나보세요. |
-| `/curriculum` | 축복가치교육 — 축복교육 4강좌 | 축복결혼이 궁금한 분들을 위한 4개의 강좌를 순서대로, 또는 골라서 들어보세요. |
-| `/churches` | 지역가정교회 — 블레싱월드 | 지역을 선택하면 담당 지역가정교회의 연락처를 안내해드려요. |
-| `/documents` | 제출서류 안내 — 축복후보자 제출서류 및 심사기준 | 미혼1세·축복자녀 축복후보자가 준비할 제출서류와 심사기준을 유형별로 확인해보세요. |
-| `/onboarding` | 처음 오셨나요? — 블레싱월드 안내 | 축복결혼이 처음이신 분을 위한 간단한 안내 신청 — 이름과 연락처만으로 시작할 수 있어요. |
+| `/center` | 축복센터 — 상담 신청·교회 찾기·서류 안내 | 축복을 결심하셨다면 여기서 시작하세요. 상담 신청, 지역가정교회 찾기, 제출서류 안내를 한곳에 모았습니다. |
+| `/center/apply` | 축복상담 신청 — 축복센터 | 이름과 연락처, 원하시는 상담 방식만 알려주시면 지역가정교회에서 연락드립니다. |
+| `/center/churches` | 지역가정교회 찾기 — 축복센터 | 지역을 선택하면 담당 지역가정교회의 연락처를 안내해드려요. |
+| `/center/documents` | 제출서류·심사기준 — 축복센터 | 미혼1세·축복자녀 축복후보자가 준비할 제출서류와 심사기준을 유형별로 확인해보세요. |
+| `/mypage` | 마이페이지 — 블레싱월드 | 내가 수강한 사랑의 기술 강좌 현황을 확인합니다. (noindex) |
+| `/login` | 로그인 — 블레싱월드 | 이메일과 비밀번호로 로그인하고, 내가 수강한 강좌를 확인해보세요. (noindex) |
+| `/reset-password` | 비밀번호 재설정 — 블레싱월드 | 새 비밀번호를 설정합니다. (noindex) |
+| `/privacy` | 개인정보처리방침 — 블레싱월드 | 블레싱월드 개인정보처리방침을 안내합니다. |
+| `/terms` | 이용약관 — 블레싱월드 | 블레싱월드 이용약관을 안내합니다. |
 
-**OG 태그 (공통 기본값 + 페이지 오버라이드)**
+`/guide`는 FAQPage JSON-LD(실제 조회한 FAQ로 생성), `/roadmap`은 HowTo JSON-LD(8단계 전체), `/`는 Organization JSON-LD를 추가로 방출합니다.
 
-```html
-<meta property="og:type" content="website" />
-<meta property="og:title" content="블레싱월드 — 축복결혼을 처음 만나는 곳" />
-<meta property="og:description" content="축복결혼이 처음이신 분을 위한 따뜻한 안내소. 궁금한 것부터 하나씩, 블레싱월드가 함께합니다." />
-<meta property="og:image" content="{OG_IMAGE_URL}" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="블레싱월드 — 축복결혼을 처음 만나는 곳" />
-<meta name="twitter:description" content="축복결혼이 처음이신 분을 위한 따뜻한 안내소. 궁금한 것부터 하나씩, 블레싱월드가 함께합니다." />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-```
+### 5.5 `<PageLayout />`
 
-- `/guide` 는 og:title `축복의 씨앗 — 축복결혼 안내`, og:description `축복결혼의 정의·가치·의미·사례·절차를 하나의 흐름으로 안내합니다.` 로 오버라이드
-- `/curriculum` 은 §P-04 SEO 표(위) 값을 그대로 사용 (오버라이드 없음)
-- `/stories` 는 og:description `축복결혼이 실제 삶에서 어떻게 피어나는지, 가정들의 이야기로 만나보세요.`
+모든 라우트를 감싸는 공통 셸: 스킵링크(**"본문 바로가기"**) → `<Header/>` → `<main>` → `<Footer/>` → 스페이서 `div` → `<MobileCtaBar/>`.
 
-### 5.4 `<SectionHeading />`
+### 5.6 `<SectionHeading />`
 
-원본이 전 페이지에서 반복 사용하는 3단 헤딩 패턴.
-
-```tsx
-<SectionHeading
-  eyebrow="BLESSING GUIDE"     // 영문 대문자, tracking-wide, accent 컬러
-  title="두 사람의 약속이 한 가정의 시작이 됩니다"
-  description="…"              // 선택
-  align="center"               // center | left
-/>
-```
+전 페이지 반복 3단 헤딩 패턴(변경 없음): `eyebrow`(영문 대문자) + `title` + 선택적 `description`.
 
 ---
 
@@ -438,434 +424,371 @@ src/
 
 ---
 
-### P-01. 홈 `/`
+### P-01. 홈 `/` (`src/pages/Home.tsx`, 콘텐츠 `src/content/home.ts`)
 
-**목표**: 첫 방문자에게 서비스 정체성을 3초 안에 전달하고 `/guide` 또는 `/onboarding`으로 유도.
+**목표**: 첫 방문자에게 서비스 정체성을 전달하고 `/center/apply` 또는 `/guide`로 유도. 6축 개편으로 섹션이 v1.0 대비 크게 늘었습니다.
 
-#### 섹션 구성 (위 → 아래)
+**섹션 구성 (위 → 아래)**
 
-**① 히어로 캐러셀**
+1. **HeroCarousel** — 3장 자동 롤링(5초, `prefers-reduced-motion` 시 정지) + 좌우 화살표/dot
+   - 이브로우 **"A WARM PLACE TO BEGIN"**
+   - H1 **"좋은 가정을 향한\n마음의 씨앗을 심어요"**
+   - 본문 **"축복결혼이 처음이신가요?\n궁금한 것부터 하나씩, 블레싱월드가 함께합니다."**
+   - CTA 2개: **"축복상담 신청 →"**(`/center/apply`, 채움) / **"축복결혼 알아보기 ↗"**(`/guide`, 아웃라인)
 
-- 이미지 3장 자동 롤링 (5초 간격, fade 전환, `prefers-reduced-motion` 시 자동재생 정지)
-- 좌우 화살표 + 하단 dot 인디케이터
-- 이미지 위 어두운 그라디언트 오버레이 + 텍스트
+2. **로그인 사용자 전용 배너** — 로그인 상태에서만 노출: **"내 준비 현황 보기 →"** → `/mypage`
 
-| 슬라이드 | alt 텍스트 |
-|---|---|
-| 1 | 다양한 국적의 부부들이 함께 참여한 합동축복식 |
-| 2 | 따뜻하게 미소짓는 축복가정 부부 |
-| 3 | 나눔장터에서 서로 나누는 사람들 |
+3. **IntroTriad** — 3카드: ①"축복결혼이란?"→"두 사람의 약속이 한 가정의 시작이 됩니다" ②"처음 오셨나요?"→"가정을 향한 마음, 여기서 함께 알아가요" ③"행복을 나누는 가정"→"가정의 행복은 나눌수록 깊어집니다" (본문은 v1.0과 동일 원문 유지)
 
-**② 인트로 3단 블록** — 카피 원문
+4. **StatBand**("OUR FAMILIES") — 이브로우 **"OUR FAMILIES"**, 제목 **"먼저 이 길을 걸어온 가정들이 있습니다"**, 본문 **"아래 수치는 협회가 집계해 공개한 값이며, 기준일을 함께 표기합니다."** `site_stats` 테이블에서 값·기준일이 **둘 다 있는 지표만** 카드로 렌더. 기본 3슬롯: 누적 축복가정(가정) / 올해 축복식 참여 가정(가정) / 사랑의 기술 이수자(명), 값 표기는 "YYYY.M.D 기준" 병기. **2026-09-05 기준 값이 전부 비어 있어 홈에서 이 섹션 자체가 보이지 않습니다.**
 
-```
-[1] eyebrow: 축복결혼이란?
-    title:   두 사람의 약속이 한 가정의 시작이 됩니다
-    body:    서로를 존중하고 책임 있는 사랑을 실천하며,
-             함께 행복한 가정을 만들어 가는 약속입니다.
+5. **FeatureCardGrid** — 비대칭 5카드, 5축과 1:1 대응 (v1.0의 HJ Baby Blessing·성화감사장 외부 링크 카드는 삭제됨, §2.3):
+   | 배지 | 제목 | CTA | 링크 |
+   |---|---|---|---|
+   | 축복의 씨앗 | 축복결혼이란 무엇인가요 | 가치 알아보기 → | `/guide` |
+   | 행복의 꽃 | 축복가정의 이야기 | 이야기 읽기 → | `/stories` |
+   | 사랑의 기술 | 배울 수 있는 사랑 | 강좌 보기 → | `/curriculum` |
+   | 축복로드맵 | 축복까지 가는 여덟 걸음 | 로드맵 보기 → | `/roadmap` |
+   | 축복센터 | 상담 신청·교회 찾기·서류 | 축복센터 가기 → | `/center` |
 
-[2] eyebrow: 처음 오셨나요?
-    title:   가정을 향한 마음, 여기서 함께 알아가요
-    body:    축복결혼이 궁금한 분부터 이미 가정을 이룬 분까지,
-             필요한 이야기와 도움을 편안하게 만나보세요.
+6. **RoadmapPreview** — 이브로우 **"YOUR ROADMAP"**, 제목 **"축복까지, 여덟 걸음"**, 본문 **"처음 세 걸음만 먼저 보여드릴게요. 지금 서 있는 자리에서 다음 하나만 보시면 됩니다."** 로드맵 8단계 중 앞 3단계(알아보기/배우기/상담 신청하기)만 카드로 보여주고 **"전체 로드맵 보기"** → `/roadmap`
 
-[3] eyebrow: 행복을 나누는 가정
-    title:   가정의 행복은 나눌수록 깊어집니다
-    body:    먼저 그 길을 걸어간 가정들의 이야기와
-             따뜻한 공동체를 만나보세요.
-```
+7. **TrustBadges** — "상담은 언제나 무료예요" / "결정은 본인이 해요" / "원할 때 중단할 수 있어요"
 
-**③ 메인 CTA 버튼 2개**
+8. **HomeCtaSection** (다크 밴드) — 이브로우 **"READY TO BEGIN"**, H2 **"축복결혼, 이제 첫걸음을 내딛어보세요"**, 본문 **"궁금한 것부터 하나씩, 블레싱월드가 끝까지 함께합니다."**, 동일 CTA 2개 반복
 
-| 라벨 | 스타일 | 링크 |
-|---|---|---|
-| `축복결혼 알아보기` | Primary (라벤더 채움) | `/guide` |
-| `축복결혼 안내 신청` | Outline (라벤더 테두리) | `/onboarding` |
-
-- 모바일: 세로 스택 + `w-full`
-
-**④ 콘텐츠 카드 그리드 (5장)**
-
-각 카드 구조: `[이미지] [카테고리 배지] [제목] [설명] [자세히 보기 →]`
-
-| # | 배지 | 제목 | 설명 | 링크 | CTA 라벨 |
-|---|---|---|---|---|---|
-| 1 | 행복의 꽃 | 가정의 이야기 | 실제 축복가정의 인터뷰와 사례를 통해 따뜻한 가정 문화를 만나보세요. | `/stories` | `자세히 보기 →` |
-| 2 | 축복가치교육 | 축복교육 4강좌 | 축복결혼이 궁금한 분들을 위한 4개의 강좌. 순서대로, 또는 궁금한 것부터 들어보세요. | `/curriculum` | `강좌 보기 →` |
-| 3 | 지역가정교회 | 가까운 지역가정교회 찾기 | 지역을 선택하면 담당 지역가정교회의 연락처를 안내해드려요. | `/churches` | `지역가정교회 찾기 →` |
-| 4 | 외부 서비스 | HJ Baby Blessing | 새 생명의 탄생을 축하하고, 탄생축하 지원을 신청하세요. | `https://hyojeongbaby-blessing.lovable.app/` (외부, `target="_blank" rel="noopener noreferrer"`) | `자세히 보기 →` |
-| 5 | 외부 서비스 | 성화감사장 | 성화하신 분을 기리는 성화감사장을 신청하세요. | Google Forms (외부) | `자세히 보기 →` |
-
-> 3번은 원본의 "2027 축복결혼"(→ `/civil-affairs/blessing-marriage`) 카드 자리를 대체합니다.
-> 4·5번의 배지는 원본에서 "가정민원실"이었으나, 가정민원실 자체가 폐기되어(§13.5) "외부
-> 서비스"로 바꿨습니다 — 두 카드 모두 원래도 외부 링크였으므로 동작에는 변화가 없습니다.
-
-- 그리드: `lg:grid-cols-3` (1·2번은 `lg:col-span-*`로 크게, 3~5번은 작게 — 매거진형 비대칭 배치 권장)
-- 외부 링크 카드에는 `ExternalLink` 아이콘 표시
-
-**⑤ 푸터** (§5.2)
+**데이터 원천**: `site_stats`(Supabase→localStorage→`DEFAULT_SITE_STATS`), 나머지는 정적 콘텐츠. 폼 없음.
 
 ---
 
-### P-02. 축복의 씨앗 `/guide`
+### P-02. 축복의 씨앗 `/guide` (`src/pages/Guide.tsx`, 콘텐츠 `src/content/guide.ts`)
 
-**목표**: 축복결혼의 개념·가치·절차를 하나의 스크롤 흐름으로 이해시키고 `/onboarding` 전환.
+**목표**: 축복결혼의 정의·가치만 다루고, **절차 설명은 하지 않음**(6축 개편 원칙 — 절차는 `/roadmap` 전담). v1.0에 있던 6단계 StepJourney 섹션은 삭제되고 `RoadmapBanner`로 대체되었습니다.
 
-#### 섹션 구성
+**섹션 구성**
 
-**① 히어로**
+1. **히어로** — 이브로우 **"BLESSING GUIDE"**, H1 **"사랑이 가정이 되고,\n가정이 평화가 됩니다"**, 해시태그 필 3개: `#조건 없이 주는` `#함께 배우고 성장하는` `#가정에서 세상으로`
 
-```
-eyebrow: BLESSING GUIDE
-title:   두 사람의 약속이 한 가정의 시작이 됩니다
-```
+2. **WhatIsBlessing** — 이브로우 **"WHAT IS THE BLESSING?"**, 사진 위 타이틀 **"결혼을 넘어,\n함께 살아갈 방향을 약속합니다"**
+   - 본문1 **"축복결혼은 두 사람이 서로의 다름을 존중하며, 사랑과 책임으로 함께 살아갈 삶을 약속하는 예식입니다."**
+   - 본문2 **"가정연합은 '가정'을 사랑을 배우고, 평화가 시작되는 가장 소중한 자리로 바라봅니다."**
+   - 인용구 **"완벽한 사람을 찾기보다, 함께 더 좋은 사람이 되어 갈 사람을 만나는 것.\n축복결혼은 그 진솔한 약속에서 시작됩니다."**
 
-바로 아래 **신뢰 배지 3개** (아이콘 + 짧은 문구, 가로 나열 / 모바일 세로)
+3. **ValuePillars**("OUR DIRECTION") — 제목 **"우리가 소중히 여기는 것"**, 리드 **"완벽한 가정보다 서로 배우고 성장하는 가정을 꿈꿉니다."**
+   | 가치 | 아이콘 | 설명 |
+   |---|---|---|
+   | 참사랑 | Heart | 먼저 주고, 더 주고 싶은 마음으로 서로를 대합니다. |
+   | 함께 성장하는 약속 | Sprout | 서로의 꿈을 응원하며, 오늘보다 더 넓은 내일로 함께 성장합니다. |
+   | 사랑의 터전 | Home | 사랑을 배우고 생명을 잇는 곳, 가정은 우리 삶의 가장 따뜻한 뿌리입니다. |
+   | 평화의 시작 | Users | 행복한 한 가정이 이웃을 밝히고, 세상을 따뜻하게 합니다. |
 
-```
-· 상담은 언제나 무료예요
-· 결정은 본인이 해요
-· 원할 때 중단할 수 있어요
-```
+   > v1.0의 4가치(존중·책임·성장·나눔)와 명칭·문구가 달라졌습니다 — 실제 구현 원문을 위 표로 대체하십시오.
 
-> 이 3개 배지는 페이지 최상단 + CTA 섹션 하단에 **두 번** 반복 노출됩니다.
+4. **RoadmapBanner**("TOGETHER, FOR FAMILY") — 제목 **"축복가정을 꿈꾸는 사람들과,\n좋은 사람이 되는 법을 배웁니다"**, 본문 **"축복결혼은 교육과 만남을 통해 사랑하는 법, 대화하는 법, 책임지는 법을 익히며 행복한 가정을 차근차근 준비해 가는 여정입니다."**, CTA **"축복로드맵 보기"** → `/roadmap`
 
-**② What is the Blessing?**
+5. **FaqAccordion**("FAQ") — 제목 **"처음 오신 분들이 자주 묻는 질문"**. `faqs` 테이블에서 `isDefaultVisible=true` 5개가 기본 노출, **"질문 더 보기 (N)"**로 나머지 6개 확장(총 11개, v1.0의 9개에서 늘어남 — 답변 미확보 문제는 전부 해소됨). 전문(`DEFAULT_FAQS`):
 
-```
-eyebrow: What is the Blessing?
-title:   결혼을 넘어, 함께 살아갈 방향을 약속합니다
+   | # | 기본노출 | 질문 | 답변 |
+   |---|---|---|---|
+   | 1 | ✅ | 축복결혼을 몰라도 상담받을 수 있나요? | 네. 종교적 배경이나 관련 지식이 없어도 상담받을 수 있습니다. 먼저 궁금한 점과 현재 상황을 듣고, 축복결혼의 의미와 과정을 이해하기 쉬운 말로 설명해 드립니다. |
+   | 2 | ✅ | 상담을 받으면 바로 결혼해야 하나요? | 아닙니다. 상담은 정보를 듣고 충분히 생각해 보는 과정입니다. 상담 후 참여하지 않아도 됩니다. |
+   | 3 | ✅ | 가정연합 회원이 아니어도 상담할 수 있나요? | 네. 상담은 신앙 여부와 관계없이 가능합니다. 축복식의 종교적 의미와 참여 조건은 미리 솔직하게 안내합니다. |
+   | 4 | ✅ | 축복결혼은 일반 결혼과 무엇이 다른가요? | 법적으로는 일반적인 결혼과 동일하게 혼인신고가 필요합니다. 축복결혼에는 부부가 하늘부모님을 중심으로 책임 있는 사랑과 가정의 가치를 실천하겠다고 약속하는 종교적 의미가 담겨 있습니다. |
+   | 5 | ✅ | 상담이나 교육을 받으면 교회에 가입해야 하나요? | 상담 신청만으로 교회 회원이 되거나 종교 활동 참여가 의무화되지는 않습니다. 축복결혼의 종교적 의미와 이후 활동은 별도로 설명하며, 참여 여부는 본인이 결정합니다. |
+   | 6 | (더보기) | 상담과 교육에 비용이 드나요? | 상담은 무료입니다. 언제든지 편하게 문의해주세요. 교육·행사에서 발생할 수 있는 비용을 신청 전에 안내합니다. |
+   | 7 | (더보기) | 배우자를 소개받을 수 있나요? | 만남을 희망하는 경우 가치관과 희망 조건을 확인한 뒤 가능한 절차를 안내합니다. 소개나 만남이 결혼을 의미하지 않으며, 상대방 선택과 관계 지속 여부는 두 사람의 자유로운 의사에 따릅니다. |
+   | 8 | (더보기) | 개인정보는 어디에 사용되나요? | 상담과 만남 진행에 필요한 최소한의 정보만 수집하며, 수집 항목·이용 목적·보관 기간·공유 범위를 신청 전에 안내합니다. 동의하지 않은 정보는 상대방이나 외부 기관에 제공하지 않습니다. |
+   | 9 | (더보기) | 상담이나 연락을 중간에 그만둘 수 있나요? | 네. 언제든 상담 중단이나 추가 연락 거부를 요청할 수 있습니다. 중단에 따른 불이익은 없습니다. |
+   | 10 | (더보기) | 부모님이나 담당자의 권유가 있어도 제가 원하지 않으면 거절할 수 있나요? | 네. 결혼과 축복식 참여는 당사자의 자유롭고 충분한 동의를 바탕으로 이루어져야 합니다. 본인이 원하지 않으면 진행하지 않으며, 고민이 있을 때는 별도로 상담할 수 있습니다. |
+   | 11 | (더보기) | 재혼이나 국제결혼도 상담할 수 있나요? | 개인의 상황에 따라 안내 과정과 확인 사항이 달라질 수 있습니다. 재혼, 자녀가 있는 경우, 국제결혼을 고려하는 경우에도 먼저 상담을 통해 가능한 절차를 확인할 수 있습니다. |
 
-body-1:  축복결혼은 단지 두 사람이 만나는 예식이 아닙니다.
-         서로의 다름을 존중하고, 어려움 속에서도 사랑을 선택하며,
-         행복한 가정을 함께 만들어 가겠다는 삶의 약속입니다.
+6. **GuideFinalCta** — 제목 **"축복을 향한 첫걸음,\n궁금함에서 시작해도 좋습니다"**, 본문 **"축복결혼이 낯설어도 괜찮습니다. 좋은 가정을 꿈꾸는 마음이 있다면, 지금부터 천천히 함께 알아가 보세요."**, CTA **"축복결혼 안내 신청하기"** → `/center/apply`, 배지 3개(무료 상담/1~2영업일 내 지역 안내/언제든 연락 중단 가능), 미세문구 + `/privacy` 링크
 
-body-2:  세계평화통일가정연합은 가정을 사랑과 평화가 시작되는
-         가장 소중한 자리로 바라봅니다.
+---
 
-blockquote:
-         "완벽한 사람을 찾기보다, 함께 성장할 사람을 만나는 것.
-          축복결혼은 그 진솔한 약속에서 시작됩니다."
-```
+### P-03. 사랑의 기술 `/curriculum`, `/curriculum/:courseId` (콘텐츠 `src/content/curriculum.ts`)
 
-- `blockquote`는 좌측 4px `accent` 세로선 + 이탤릭, `accent-soft` 배경 카드
+> v1.0의 "축복가치교육"에서 **명칭이 "사랑의 기술"로 전면 교체**되었고(6축 개편), **강좌 상세 페이지와 확인 퀴즈가 신규 추가**되었습니다.
 
-**③ Our Direction — 가치 4기둥**
+#### 3a. 목록 `/curriculum`
 
-```
-eyebrow: Our Direction
-title:   우리가 소중히 여기는 것
-lead:    완벽한 가정보다 서로 배우고 성장하는 가정을 꿈꿉니다.
-```
+1. 히어로 — 이브로우 **"THE ART OF LOVE"**, H1 **"사랑은 감정이 아니라\n배울 수 있는 기술입니다"**, 부제 **"축복가치교육 4강좌"**, 본문 **"좋은 가정을 이루는 데 필요한 네 가지 기술을 강좌로 담았습니다. 순서대로 들어도, 궁금한 강좌부터 골라 들어도 괜찮아요."**
+2. 진행 상태 위젯 — "N / M강 완료" + 진행률 바. 각주는 로그인 여부로 분기:
+   - 로그인: **"계정에 저장되고 있어요. [마이페이지]에서도 확인할 수 있어요."**
+   - 비로그인: **"이 진행 상태는 이 브라우저에만 저장돼요. [로그인]하면 다른 기기에서도 이어볼 수 있어요."**
+3. 강좌 목록(기본 4강좌, `DEFAULT_COURSES`):
 
-| 가치 | 설명 | 아이콘(lucide) |
-|---|---|---|
-| **존중** | 서로의 다름을 인정하고 있는 그대로의 삶을 귀하게 여깁니다. | `Heart` |
-| **책임** | 사랑을 말에만 두지 않고 배려와 돌봄으로 실천합니다. | `HandHeart` |
-| **성장** | 갈등을 피하기보다 함께 풀어가며 더 깊은 관계로 나아갑니다. | `Sprout` |
-| **나눔** | 우리 가정의 행복을 이웃과 나누며 더 따뜻한 세상을 만들어 갑니다. | `Users` |
+   | # | 제목 | 강사 | 시간 | 설명 |
+   |---|---|---|---|---|
+   | 1 | 1강. 축복결혼이란 무엇인가 | 가정행복국 | 25분 | 축복결혼의 정의와 역사, 왜 '축복'이라 부르는지를 소개합니다. |
+   | 2 | 2강. 참사랑과 가정의 가치 | 가정행복국 | 30분 | 참사랑의 의미와 가정이 사랑과 평화가 시작되는 자리인 이유를 배웁니다. |
+   | 3 | 3강. 참부모님의 삶과 축복의 역사 | 가정행복국 | 35분 | 참부모님의 삶의 여정과 축복결혼이 걸어온 역사를 함께 돌아봅니다. |
+   | 4 | 4강. 축복가정으로 살아가기 | 가정행복국 | 28분 | 축복을 받은 이후 가정생활에서 실천하는 태도와 준비를 안내합니다. |
 
-- 레이아웃: `md:grid-cols-2 lg:grid-cols-4`
+   각 카드: 순번 배지·제목·"이수 완료" 배지(완료 시)·강사/시간·설명·영상 없으면 **"강의 영상은 준비 중이에요. 먼저 강좌 소개를 확인해보세요."**·퀴즈 있으면 "확인 퀴즈 N문항"·**"강좌 열기"**(또는 "다시 보기") → `/curriculum/:id`
+4. 전체 완료 시 CTA — **"4강좌를 모두 들으셨나요?"** / **"이제 지역 담당자와 함께 다음 걸음을 이야기해보세요."** / **"축복결혼 안내 신청하기"** → `/center/apply?ref=curriculum`
 
-**④ Step by Step — 6단계 여정** ⭐ 핵심 섹션
+#### 3b. 상세 `/curriculum/:courseId` (신규)
 
-```
-eyebrow: Step by Step
-title:   천천히 배우고, 충분히 준비합니다
-lead:    축복결혼은 한 번의 신청으로 결정되는 과정이 아닙니다.
-         상담과 교육을 통해 나와 가정을 준비하고,
-         충분히 이해한 뒤 다음 걸음을 선택합니다.
-```
+- 브레드크럼 **"사랑의 기술 전체 강좌"** → `/curriculum`
+- 이브로우 `LESSON 0N`, 제목=강좌명, 부제=강사+시간
+- 영상: `videoUrl` 있으면 iframe, 없으면 준비중 플레이스홀더
+- **확인 퀴즈**(`quiz` 있을 때만, `CourseQuiz` 컴포넌트): 제목 **"확인 퀴즈"**, 리드 **"맞히는 것이 목적이 아니라, 방금 들은 내용을 한 번 되짚어보는 시간입니다. 몇 번이든 다시 풀 수 있어요."** 객관식, 제출 버튼 **"채점하기"**. 합격(`passScore`, 기본 60%): **"잘 이해하셨어요. 이수 처리해드릴게요."** / 불합격: **"조금만 더 살펴볼까요? 강의를 다시 보고 한 번 더 풀어보세요."**. **"다시 풀기"**로 무제한 재응시, 점수 랭킹·공개 없음.
+- 퀴즈 없으면: **"다 들으셨나요?"** 카드 + **"다 들었어요"** 토글 버튼으로 이수 처리.
+- 완료 시 로그인 사용자는 `course_completions`(Supabase)에도 기록. 실패 시 토스트 **"계정에 저장하지 못했어요. 이 브라우저에는 반영되었어요."**
+- 하단: 다음 강좌가 있으면 **"다음 강좌: {제목}"**, 마지막 강좌면 **"축복상담 신청하기"**(`/center/apply?ref=curriculum`) + 항상 **"축복로드맵에서 내 위치 보기"**(`/roadmap`)
+- 강좌 없음: SEO `noindex`, **"강좌를 찾을 수 없어요"**, **"전체 강좌 보기"** → `/curriculum`
 
-6단계는 **3개 그룹**으로 묶임. 각 그룹은 그룹 제목 + 그룹 설명 + 스텝 카드 2개.
+**데이터 원천**: `courses`(Supabase, `order_no`순, `is_published=true`만) → localStorage → `DEFAULT_COURSES`. 완료 여부는 localStorage(비로그인) + `course_completions`(로그인).
 
-| 그룹 | 그룹 제목 | 그룹 설명 | 스텝 |
+---
+
+### P-04. 축복로드맵 `/roadmap` (신규, 콘텐츠 `src/content/roadmap.ts`)
+
+**목표**: "축복까지 가는 절차"를 8단계로 시각화. v1.0의 `/guide` 6단계 StepJourney를 대체·확장(6단계→8단계, 심사와 매칭·약혼을 분리).
+
+1. 히어로 — 이브로우 **"YOUR ROADMAP"**, H1 **"축복까지, 여덟 걸음"**, 본문 **"한 번에 다 준비하지 않아도 괜찮습니다. 지금 서 있는 자리에서 다음 한 걸음만 보시면 됩니다."**
+
+2. **RoadmapTimeline** — 좌/중/우/중 번갈아 배치되는 굽이진 경로(놀이공원 동선 스타일, 최근 커밋 `333068f`로 재설계) + 8개 정거장. "지금 여기" 배지는 로그인 사용자의 `blessing_progress`(담당자가 `/admin/guidance`에서 기록) 우선, 없으면 방문자가 직접 고른 로컬 선택값(`getLocalCurrentStep`)을 씁니다. 아무 정보도 없으면 어떤 단계도 강조하지 않습니다(1단계를 기본값으로 삼지 않음).
+
+   | # | 제목 | 설명 | 연결 링크 |
+   |---|---|---|---|
+   | 1 | 알아보기 | 축복결혼과 내가 꿈꾸는 가정에 대해 편안히 알아봅니다. 결심하지 않아도 괜찮은 단계입니다. | 축복의 씨앗 보기 → `/guide` |
+   | 2 | 배우기 | 교육을 통해 참사랑과 축복가정의 의미를 배우고, 행복한 가정을 위한 기준을 세웁니다. 사랑을 표현하고 갈등을 풀어 가는 법도 함께 익힙니다. | 사랑의 기술 4강좌 → `/curriculum` |
+   | 3 | 상담 신청하기 | 온라인 신청서를 작성하면 가까운 지역가정교회에서 연락드립니다. 상담은 무료이고 언제든 중단할 수 있습니다. | 축복상담 신청하기 → `/center/apply` |
+   | 4 | 상담 받기 | 지역 담당자와 지금의 고민과 상황을 나누며, 나에게 필요한 준비를 함께 살펴봅니다. 방문·전화·화상 중 편한 방식을 고르실 수 있습니다. | 우리 지역 교회 찾기 → `/center/churches` |
+   | 5 | 서류 준비하기 | 축복후보자 유형에 맞는 서류를 준비합니다. 아래 준비도 진단으로 남은 서류를 먼저 확인해보세요. | 제출서류·심사기준 보기 → `/center/documents` |
+   | 6 | 심사 | 제출한 서류로 축복후보자 심사를 받습니다. 보완이 필요하면 담당자가 안내드립니다. | — |
+   | 7 | 매칭·약혼 | 같은 마음으로 가정을 꿈꾸는 사람과 대화하며 서로를 알아가고, 두 사람의 뜻을 확인합니다. (`waiting: true`) | "이 단계는 기다리는 시간입니다. 진행이 멈춘 것이 아니니, 연락이 올 때까지 편히 기다려 주세요." |
+   | 8 | 축복식 | 두 사람의 뜻을 모아 축복을 준비하고, 행복한 가정의 첫걸음을 내딛습니다. | — |
+
+   기간 배지는 실제 확정값이 없는 한 표시하지 않습니다(추정치 표기 금지 원칙).
+
+3. **ReadinessChecker**("축복 준비도 진단", `READINESS Check`) — 유형 탭(미혼1세/축복자녀 축복후보자) 전환 → `/center/documents`의 체크리스트 항목을 그대로 체크박스로 노출 → "N/M" 카운터 + 진행률 바 + 남은 서류 최대 5건 나열(+"외 N건"). 전부 체크 시 **"필요한 서류를 모두 체크하셨어요. 심사기준까지 한 번 더 확인해보세요."** 버튼 **"심사기준 자세히 보기"** → `/center/documents`. **체크 상태는 컴포넌트 메모리에만 있고 localStorage에도 저장하지 않으며 서버 전송도 없습니다** — 안내문 **"체크한 내용은 이 브라우저에만 남고 어디에도 전송되지 않습니다."**
+
+4. 최종 CTA — **"다음 한 걸음이 궁금하다면"** / **"지금 어느 단계에 계시든, 상담에서 남은 과정을 함께 정리해드립니다."** / **"축복상담 신청하기"** → `/center/apply`
+
+**데이터 원천**: `roadmap_steps`(Supabase→localStorage→`DEFAULT_ROADMAP_STEPS`), 현재 단계는 `blessing_progress`(로그인 시) 또는 로컬 자가선택.
+
+---
+
+### P-05. 축복센터 `/center` (신규 허브) + 하위 3개
+
+#### 5-0. 허브 `/center` (`src/pages/Center.tsx`, 콘텐츠 `src/content/center.ts`)
+
+정적 허브 페이지, 데이터 페칭·폼 없음.
+
+1. 히어로 — 이브로우 **"BLESSING CENTER"**, H1 **"축복을 결심하셨다면, 여기서 시작하세요"**, 본문 **"상담 신청부터 지역가정교회 찾기, 제출서류 확인까지 한곳에 모았습니다."**
+2. 3카드 진입 그리드:
+   | 배지 | 아이콘 | 제목 | 설명 | CTA | 링크 |
+   |---|---|---|---|---|---|
+   | STEP 03 | ClipboardList | 축복상담 신청 | 이름과 연락처, 편한 상담 방식만 알려주시면 가까운 지역가정교회에서 연락드립니다. | 신청서 작성하기(채움) | `/center/apply` |
+   | STEP 04 | MapPin | 지역가정교회 찾기 | 우리 지역 담당 가정교회의 위치와 연락처를 확인하고 직접 문의하실 수 있습니다. | 우리 지역 찾기(아웃라인) | `/center/churches` |
+   | STEP 05 | FileCheck | 제출서류·심사기준 | 축복후보자 유형별로 준비할 서류와 심사기준을 원문 그대로 확인하실 수 있습니다. | 서류 확인하기(아웃라인) | `/center/documents` |
+3. 안내 밴드(ShieldCheck) — **"상담 전에 알아두시면 좋아요"**: "상담은 무료입니다"(어떤 비용도 청구되지 않습니다) / "결정은 본인이 합니다"(상담을 받았다고 축복을 신청해야 하는 것은 아닙니다) / "언제든 중단할 수 있습니다"(연락을 원하지 않으시면 바로 중단해드립니다)
+4. 각주 — **"온라인 신청이 어려우시면 02-3271-0480로 전화 주세요. 평일 09:00–18:00"**
+
+#### 5a. 축복상담 신청 `/center/apply` (`src/pages/Onboarding.tsx`) ⭐ 전환 핵심
+
+> v1.0의 **5단계 위저드**(성별→출생년도→지역→연락처→완료)는 실제 구현에서 **한 화면 7필드 폼**으로 전면 교체되었습니다(6축 개편 §1.6 — 이탈 지점을 5단계에 분산시키지 않고 1단계로 모으기 위함). 스텝 인디케이터·`beforeunload` 이탈 방지·스텝별 자동 포커스는 사라졌고, 제출 실패 시 첫 오류 필드로 스크롤합니다.
+
+1. 히어로(Sparkles 아이콘) — 이브로우 **"BLESSING CENTER"**, H1 **"축복상담 신청"**, 본문 **"아래 항목만 알려주시면 가까운 지역가정교회에서 연락드립니다. 상담은 무료이고, 원하지 않으시면 언제든 중단하실 수 있어요."**, 마이크로카피 **"30초면 끝나요"**, 바로가기 버튼 2개: **"가치관 진단 먼저 해보기 →"**(`/values`), **"축복로드맵 먼저 보기 →"**(`/roadmap`)
+2. 교육 이수 배너(`?ref=curriculum` 또는 완료 강좌 존재 시): 전체 완료면 **"사랑의 기술 {N}강좌를 모두 들으셨네요. [이수 완료] 이수 내역을 담당자에게 함께 전달해드릴게요."**, 아니면 **"사랑의 기술 {N}강좌를 들으셨어요. 이수 내역을 함께 전달해드릴게요."**
+3. **단일 화면 폼**:
+
+   | 필드 | 타입 | 검증 |
+   |---|---|---|
+   | (허니팟) `website` | 숨김 input | 채워지면 스팸으로 간주, 조용히 성공 처리 |
+   | 이름 | text | 2~20자 |
+   | 성별 | 토글 버튼(여성/남성) | 필수 |
+   | 출생년도 | number | 정수, 1940 ≤ n ≤ (올해−18) |
+   | 시·도 / 시·군·구 | select 2단 | 둘 다 필수 |
+   | 휴대전화 번호 | tel, `010-0000-0000` 자동 하이픈 | 정규식 `^01[0-9]-\d{3,4}-\d{4}$` |
+   | 상담 방식 | 카드 3개(교회 방문/전화/화상) | 필수 |
+   | 이메일 (선택) | email | 형식만 검증 |
+   | 개인정보 동의 | 체크박스 + `/privacy` 링크 | 필수 |
+
+   상담 방식 카드 문구: **"교회 방문"**(가까운 지역가정교회에서 직접 만나요) / **"전화"**(통화로 편하게 이야기해요) / **"화상"**(영상통화로 얼굴 보며 이야기해요)
+
+   제출 버튼 **"축복상담 신청하기"**(제출 중 "접수하는 중…")
+
+4. 하단 **"온라인 접수가 어려우시면 02-3271-0480로 바로 안내받으실 수 있어요."** + `TrustBadges`
+
+**동작/검증**
+- 입력값은 `sessionStorage`(`blessingworld:onboarding:draft`)에 자동 저장, 새로고침 시 복원, 제출 성공 시 삭제
+- 서버 저장: `submitGuidanceRequest()` → `guidance_requests`(§7). 페이로드에 `consultMethod`, `source`(`curriculum`|`web`), `completedCourses` 포함
+- **가치관 진단 결과는 이 폼에 첨부되지 않습니다** — `/values`로의 바로가기 버튼만 있고, `ValuesAssessmentSection`의 "embedded" 변형(결과 첨부 체크박스 포함)이 실제로는 렌더되지 않는 죽은 코드 경로입니다(§10 I-19)
+- 실패 토스트: 미설정(`not_configured`) → 전화 안내 / 24시간 내 중복 전화번호(`duplicate_phone`, DB 트리거) → **"이미 24시간 이내에 접수된 신청이 있어요…"** / 클라이언트 레이트리밋(시간당 3회, `rate_limited`) → **"짧은 시간 동안 신청이 여러 번 접수되었어요…"** / 일반 오류
+- 성공 시: 토스트 **"신청이 접수되었어요. 영업일 기준 1~2일 이내에 연락드릴게요."**, 화면 전환(체크 아이콘) **"신청이 접수되었어요"** + 버튼 **"다음 단계 확인하기"**(`/roadmap`) / **"사랑의 기술 배우기"**(`/curriculum`)
+
+#### 5b. 지역가정교회 찾기 `/center/churches` (`src/pages/Churches.tsx`)
+
+1. `SectionHeading`: 이브로우 **"지역가정교회"**, 제목 **"가까운 지역가정교회를 찾아보세요"**, 설명 **"지역을 선택하면 담당 지역가정교회의 연락처를 안내해드려요. 목록에 없는 지역은 대표 연락처로 문의해주세요."**
+2. 시·도 → 시·군·구 2단 select(등록된 값만 동적 채움)
+3. 결과 카드: 지역 태그·교회명·주소(네이버 지도 검색 링크)·전화(`tel:`)·담당자
+   - 빈 지역: **"이 지역에는 아직 등록된 지역가정교회 정보가 없어요. 대표 연락처로 문의해주세요."**
+4. 각주 — **"목록에 없는 지역이거나 더 궁금한 점이 있으시면 대표 연락처 02-3271-0480(평일 09:00–18:00)로 문의해주세요."**
+
+**데이터**: `churches`(Supabase, `is_published=true`만) → localStorage → `DEFAULT_CHURCHES`(예시 3건, §0 알려진 공백). 실 운영 DB에는 마이그레이션 `0015`로 실제 약 228건이 입력되어 있습니다(§7.2).
+
+#### 5c. 제출서류·심사기준 `/center/documents` (`src/pages/Documents.tsx`, 콘텐츠 `src/content/documents.ts`)
+
+> 협회 가정행복국·가정국이 배포한 두 공문("미혼1세 축복후보자 제출서류 및 심사기준(20260814)", "축복자녀 축복후보자 제출서류 및 심사기준(20260814)")의 원문을 그대로 옮긴 페이지입니다. **문구를 요약·변경하지 마십시오.**
+
+1. 히어로 — 이브로우 **"REQUIRED DOCUMENTS"**, H1 **"축복을 준비하는 분들을 위한 제출서류·심사기준"**, 본문 **"축복후보자 유형에 따라 준비할 서류와 심사기준이 다릅니다. 해당하는 유형을 선택해 순서대로 확인해보세요."**
+2. 탭 2개, 각 탭은 `DocumentChecklist`로 항목 렌더:
+
+**탭 1 — 미혼1세 축복후보자** (자격 "만 20세 이상", 기준일 "2026.08.14. 기준", 발행 "협회 가정행복국")
+
+| # | 항목 | 기준/내용 | 비고 |
 |---|---|---|---|
-| A | **알아보기** | 가정을 향한 마음을 천천히 나눕니다 | 01, 02 |
-| B | **배우고 자라기** | 사랑과 관계를 배우며 나를 준비합니다 | 03, 04 |
-| C | **만남과 가정의 시작** | 함께할 사람을 만나, 새로운 가정을 시작합니다 | 05, 06 |
+| 1 | 입회원서 | 접수일자 기준으로 입교한지 6개월 이상 | — |
+| 2 | 축복후보자 신청서 | 목회자소견서와 자기소개서(5줄 이상) 상세히 작성 | 후보자·목회자 자필작성 및 서명 |
+| 3 | 축복결혼행사 참여 서약서 및 축복헌금 환불관련 서약서 | 본인 서명란 기입(양식 하나로 통합) | 믿음의 부모 서명 필요 |
+| 4＊ | 가족관계증명서, 혼인관계증명서 | 가족관계증명서: '상세' 본인 명의 발급 / 혼인관계증명서: '상세'로 첨부 | 유효기간 12개월 |
+| 5 | 축복헌금 납부 | '행정지원센터 하나로' 가상계좌로 입금 | — |
+| 6 | 예배 및 십일조 생활 | 예배: 6개월 연속, 월 2회 이상 / 십일조: 6개월 연속, 월 1회 유지(월 1회 이상 입력사항은 시스템 인식 불가) / 전산 입력일 기준이므로 월말 예배는 반드시 그 달 내 입력 | 교구 상신일 기준 3개월 |
+| 7 | 3일 금식 또는 9일 조식 금식 | 목회자 확인 후 '하나로'에 날짜 입력 | — |
+| 8 | 축복전 40일 정성 | 개인정성으로 진행 | — |
+| 9-1 | [이수교육] 참부모론 및 원리교육 20강좌 이상 | ① 참부모론 입문 10강 ② 참부모론 6강+한민족 선민 대서사시 6강+창조원리 중심 강의 등 10강 이상. 대면 교육. 인정 경로: 교구/교회주관, 청평 40일수련, 미래인재국 주관 수련 | 유효기간 3년 · 정식구 레벨1 유지 시 유효기간 없음 |
+| 9-2 | [이수교육] 참부모님 생애노정 8강좌 | 교구주관 8강좌(교회주관은 교구 문의 후 진행), 청평 40일 수련 또는 미래인재국 주관 수련 | — |
+| 9-3 | [이수교육] 축복 교육 | 교구주관, 교구상담지는 '가정행복국 이메일'로 송부 | — |
+| 10 | 건강진단서(B형간염·에이즈검사 포함) | 필수검사: 신체계측, 소변검사, 흉부X선, 혈액검사, 에이즈(HIV), 간기능(B형간염). B형간염 항체 없으면 접종 후 확인증 첨부 | 유효기간 12개월(전 연령) · 금주·금연 확인 |
+| 11＊ | 소득증빙자료 | 회사원: 재직증명서·원천징수영수증(입사 1년 미만은 원천징수부) / 개인사업자: 사업자등록증·소득금액증명원 / 농축수임업: 출하증명서 또는 통장거래내역 등 / 지역건강보험: 자격득실확인서·납부확인서 / 국제축복 희망자는 F-6 비자 요건 강화로 최근 1년 소득증명 추가 필요 | 유효기간 12개월 · 홈택스·건강보험 사이트 발급 |
+| 12 | 최종학력증명서, 재학증명서(재학생) | 고졸 미만 학력자는 상대 확정 시 협회 상신 가능 | 유효기간 12개월 |
+| 13 | 사진 | 상반신 1매, 전신 1매(국제축복희망자) — 넥타이·정장·구두 정자세 | 규격 20×25cm · 300~500dpi |
 
-| No | 스텝 제목 | 스텝 설명 |
-|---|---|---|
-| 01 | 축복 알아보기 | 축복결혼의 의미와 전체 과정을 이해합니다. |
-| 02 | 첫 상담 | 지역 담당자와 현재 상황과 궁금한 점을 이야기합니다. |
-| 03 | 축복교육 | 가정연합의 가치와 참부모님의 삶, 축복가정의 의미를 배웁니다. |
-| 04 | 나를 준비하기 | 관계와 생활, 건강과 책임감을 돌아보며 가정생활을 준비합니다. |
-| 05 | 만남 준비와 소개 | 필요한 교육을 마친 뒤, 같은 기준으로 준비된 상대와의 만남을 안내받습니다. |
-| 06 | 축복 신청과 가정 출발 | 두 사람의 뜻을 확인하고 필요한 서류와 예식, 이후의 가정생활을 준비합니다. |
+footnote: "한-한 확정의 경우 4·11·12번은 쌍방합의서로 대체 가능(양측 서명 날인 필수). 단, 국제축복 확정은 쌍방합의서 불가하며 13번은 국제축복 후보자만 준비."
 
-**구현 지침**
-- 데스크톱: 좌측 세로 타임라인 라인 + 각 스텝에 원형 번호 노드
-- 모바일: 세로 스택 카드, 번호는 카드 좌상단 배지
-- 번호(`01`~`06`)는 큰 폰트(32px) + `primary` 컬러 + 낮은 opacity(0.3) 장식 처리
-- 스크롤 진입 시 `fade-in-up` 순차 애니메이션 (stagger 80ms)
+**탭 2 — 축복자녀 축복후보자** (자격 "만 20세 이상", 기준일 "2025.10.16. 기준", 발행 "협회 가정국")
 
-**⑤ FAQ 아코디언**
+| # | 항목 | 기준/내용 | 비고 |
+|---|---|---|---|
+| 1 | 축복후보자 신청서 | 자필서명, 전 항목 작성 | — |
+| 2 | 축복후보자 서류 확인 및 담임목회자 추천서 | 후보자·목회자 자필작성 및 서명 | — |
+| 3 | 축복결혼행사 참여 및 축복헌금 환불 서약서 | 본인·부모 서명 필요 | — |
+| 4＊ | 가족관계증명서, 혼인관계증명서 | (탭1과 동일) | 유효기간 12개월 |
+| 5 | 축복헌금 납부 | '행정지원센터 하나로' 가상계좌로 입금 | — |
+| 6 | 예배 및 십일조 생활 | 예배: 3개월 연속, 월 2회 이상 / 십일조: 3개월 연속, 월 1회 유지 | 교구 상신일 기준 3개월 |
+| 7 | 3일 금식 | 목회자 확인 후 '하나로'에 날짜 입력 | 특별한 사유 시 9일 조식 금식 |
+| 8 | 축복전 40일 정성 | 개인정성으로 진행 | — |
+| 9-1 | [이수교육] 참부모론 및 원리교육 20강좌 이상 | (탭1과 동일, 강좌 확인은 가정행복국 문의) | — |
+| 9-2 | [이수교육] 참부모님 생애노정 8강좌 | (탭1과 동일, 강좌 확인은 가정행복국 문의) | — |
+| 9-3 | [이수교육] 축복 교육 | 교구주관, 교구상담지는 '가정행복국 이메일'로 송부 | — |
+| 10 | "축복자녀" 축복을 위한 부모교육 | 협회 및 교구 주관 | — |
+| 11 | 건강진단서(B형간염·에이즈검사 포함) | (탭1과 동일 항목) | 유효기간 12개월(전 연령) |
+| 12 | 재직증명서 | 회사원: 재직증명서 / 학생: 재학증명서 / 취업준비중: 졸업증명서 | 유효기간 12개월 |
+| 13 | 가정회비 납부 | 각 교회 '하나로' 행정시스템으로 식구 납부 확인·가상계좌 납부. CMS 2개월분(3만원)+미납금 1년분(18만원). 부모(성화·휴면·분파 등) 납부 불가 시 면제 | 축복가정 가정회비 행정안내 참고 |
 
-```
-eyebrow: FAQ
-title:   처음 오신 분들이 자주 묻는 질문
-```
+footnote: "상대확정의 경우 4·12번은 쌍방합의서로 대체 가능(양측 서명 날인 필수). 단, 국제축복 확정은 쌍방합의서 불가."
 
-- shadcn `Accordion` (`type="single" collapsible`)
-- **기본 5개 노출 + `질문 더 보기 (4)` 버튼 클릭 시 나머지 4개 추가 노출** (총 9개)
-- 첫 항목은 기본 펼침 상태
-
-| # | 질문 | 답변 |
-|---|---|---|
-| 1 | 축복결혼을 전혀 몰라도 상담할 수 있나요? | 네. 처음 오시는 분도 편안하게 이야기 나눌 수 있습니다. 지역 담당자가 눈높이에 맞춰 안내해 드립니다. |
-| 2 | 상담을 받으면 바로 결혼해야 하나요? | `[답변 본문 필요]` — 취지: 상담과 결혼 결정은 별개이며 언제든 중단 가능함을 안내 |
-| 3 | 가정연합 회원이 아니어도 상담할 수 있나요? | `[답변 본문 필요]` — 취지: 회원 여부와 무관하게 상담 가능 |
-| 4 | 축복을 준비하려면 어떤 교육을 받나요? | `[답변 본문 필요]` — 취지: 축복교육 과정 개요 안내 |
-| 5 | 배우자를 소개받을 수도 있나요? | `[답변 본문 필요]` — 취지: 교육 이수 후 만남 안내 절차 설명 |
-| 6~9 | `[질문·답변 본문 필요]` | 원본에서 접힘 상태로 확보 불가 |
-
-> ✅ **구현 시 조치**: 운영 담당자(가정행복국)로부터 2~9번 답변 원문을 확보해 `src/content/faq.ts`에 채울 것. 확보 전까지는 5개만 노출.
-
-**⑥ 최종 CTA 섹션**
-
-```
-title: 축복을 향한 첫걸음, 궁금함에서 시작해도 좋습니다
-body:  축복결혼이 낯설어도 괜찮습니다. 좋은 가정을 꿈꾸는 마음이 있다면,
-       지금부터 천천히 함께 알아가 보세요.
-
-[버튼] 축복결혼 안내 신청하기  →  /onboarding
-
-하단 배지 3개:
-  · 무료 상담
-  · 1~2영업일 내 지역 안내
-  · 언제든 연락 중단 가능
-
-미세 문구: 개인정보는 안내 목적에만 사용됩니다. [개인정보처리방침] → /privacy
-```
-
-- 섹션 배경: `primary-soft` 또는 부드러운 라벤더 그라디언트
+3. 최종 CTA — **"서류 준비, 혼자 고민하지 않아도 괜찮아요"** / **"빠뜨린 서류나 궁금한 심사기준이 있다면 지역 담당자에게 직접 확인해보세요."** / **"축복결혼 안내 신청하기"** → `/center/apply`
 
 ---
 
-### P-03. 행복의 꽃 `/stories`
+### P-06. 행복의 꽃 `/stories`, `/stories/:slug` (콘텐츠 `src/content/stories.ts`, `familyVideos.ts`)
 
-**목표**: 실제 축복가정의 인터뷰·사례 아카이브.
+> v1.0 시점 콘텐츠 0건이었던 공백은 해소되어 기본 6건이 채워져 있으나, **이 6건은 가정행복국이 3인칭으로 작성한 에디토리얼**이며 실제 가정의 1인칭 인터뷰가 아닙니다(`familyName` 의도적 공백). 실제 인터뷰는 유튜브 영상 레일에만 있습니다.
 
-#### 실측 확인 사항
-- 히어로: `eyebrow: Our Stories` / `title: 행복의 꽃` / `sub: 서로를 이해하고 함께 성장해 온 축복가정의 진솔한 이야기를 만납니다.`
-- 분석 시점 기준 **스토리 콘텐츠 0건 (빈 상태)**
+#### 6a. 목록 `/stories`
 
-#### 설계 명세 (제안)
+1. 히어로 — 이브로우 **"OUR STORIES"**, H1 **"행복의 꽃"**, 부제 **"축복가정의 실제 이야기와 인터뷰를 만나보세요."**
+2. 아카이브 헤딩 — 이브로우 **"STORIES & INSPIRATIONS"**, 제목 **"아름다운 가정 이야기"**, 본문 **"서로를 이해하고 함께 성장해 온 축복가정의 일상에서 길어 올린 이야기입니다."**
+3. 카테고리 탭(전체/인터뷰/사례/영상) + 정렬(최신순/조회 많은순)
+4. 카드 그리드(12건씩 "더 보기"): 커버(없으면 Flower2 아이콘)·카테고리 배지·`blessingType` 배지·제목(있으면 `quote`를 큰따옴표로)·요약(2줄)·마스킹된 가정명 또는 지역+날짜·조회수
+   - 전체 0건: **"첫 번째 이야기를 준비하고 있어요"** / **"곧 축복가정들의 진솔한 이야기를 만나보실 수 있습니다."** / **"축복결혼 알아보기"** → `/guide`
+   - 카테고리 0건: **"이 카테고리에는 아직 이야기가 없어요"** / **"다른 카테고리를 선택하시거나, 전체 이야기를 둘러보세요."**
 
-**① 히어로** — 위 실측 카피 그대로
+   기본 6건(제목 / 인용구 / 유형):
+   | 제목 | 인용구 | blessing_type |
+   |---|---|---|
+   | 대화가 멈추는 자리에서 시작되는 것 | "말을 잘하는 것보다, 말이 멈춘 자리를 견디는 편이 더 어렵습니다." | 대화와 관계 |
+   | 평범한 하루가 가정을 만듭니다 | "가정은 특별한 날이 아니라 반복되는 하루로 지어집니다." | 일상 |
+   | 서로 다른 집에서 자란 두 사람 | "다름은 고쳐야 할 문제가 아니라, 먼저 이해해야 할 사실입니다." | 대화와 관계 |
+   | 같이 멈추는 시간 | "함께 기도하는 시간은 서로를 설득하지 않아도 되는 유일한 시간입니다." | 기도와 묵상 |
+   | 다툰 뒤에 남는 것 | "관계의 질은 싸우지 않는 데 있지 않고, 다툰 뒤에 무엇을 하는가에 있습니다." | 대화와 관계 |
+   | 문을 여는 가정 | "가정의 행복은 지킬수록 줄고, 나눌수록 늘어납니다." | 나눔 |
 
-**② 필터 바**
-- 카테고리 탭: `전체` / `인터뷰` / `사례` / `영상`
-- 정렬: `최신순` / `조회 많은순`
+   (전문 본문은 `src/content/stories.ts` 참고 — 길이가 길어 이 문서에는 옮기지 않았습니다.)
 
-**③ 스토리 카드 그리드** (`md:grid-cols-2 lg:grid-cols-3`)
+5. **VideoRail** 2줄(유튜브 링크만, 임베드 아님):
+   - **"BLESSED FAMILY INTERVIEW / 축복가정 인터뷰"**(4건, 실제 가정 인터뷰) — "전체 보기"는 재생목록으로
+   - **"FAMILY WORSHIP / 우리 가족 행복한 날 가정예배"**(2건)
 
-카드 구조:
-```
-[썸네일 4:3]
-[카테고리 배지]
-[제목 — 2줄 클램프]
-[요약 — 3줄 클램프]
-[가정명 or 지역 · 게시일]
-```
+#### 6b. 상세 `/stories/:slug`
 
-**④ 빈 상태 (필수 구현)**
+- 커버(또는 Flower2 아이콘) → 카테고리 배지 → 제목(H1) → 마스킹 가정명/지역 + 날짜 → 본문 → **"공유하기"**(Web Share API, 미지원 시 링크 복사) → 이전/다음 이야기 → 하단 CTA **"이 이야기처럼, 당신의 축복결혼도 시작될 수 있어요."** + **"축복결혼 안내 신청하기"** → `/center/apply`
+- 없는 slug: **"이야기를 찾을 수 없어요"** / **"요청하신 글(slug)을 찾을 수 없어요. 삭제되었거나 아직 게시되지 않은 글일 수 있습니다."** + **"행복의 꽃으로 돌아가기"**
 
-현재 콘텐츠가 없으므로 **`EmptyState` 컴포넌트가 반드시 있어야 함**.
-
-```
-[아이콘: Flower2]
-첫 번째 이야기를 준비하고 있어요
-곧 축복가정들의 진솔한 이야기를 만나보실 수 있습니다.
-
-[버튼] 축복결혼 알아보기 → /guide
-```
-
-**⑤ 상세 페이지 `/stories/:slug`**
-- 커버 이미지 → 제목 → 메타(가정/지역/게시일) → 본문(리치텍스트) → 공유 버튼 → 이전/다음 스토리 → 관련 CTA(`/onboarding`)
+**데이터**: `stories`(Supabase, `is_published=true`, 발행일 최신순) → localStorage → `DEFAULT_STORIES`.
 
 ---
 
-### P-04. 축복가치교육 `/curriculum` (실제 구현본 — 원본 나눔의 열매를 대체)
+### P-07. 가치관 진단 `/values` (신규, 콘텐츠 `src/content/valuesAssessment.ts`)
 
-> 원본 사이트의 "나눔의 열매"(`/community`, 지역 나눔장터) 자리는 실제 구현에서 **축복가치교육**으로
-> 대체되었습니다. 원본 나눔의 열매 명세는 §13.1에 그대로 보존해 두었습니다.
+**목표**: 정답 없는 12문항 자가진단으로 상담 대화의 소재를 제공. `/center/apply`와 독립적으로 GNB 최상단에 노출(§2.4).
 
-**목표**: 축복결혼에 관심 있는 사람에게 축복교육 4강좌를 순서대로(또는 원하는 강좌부터) 듣게 하고,
-`/guide`의 "축복교육" 단계(StepJourney 3단계)와 연결해 `/onboarding` 전환으로 이어지게 함.
+1. 히어로 — 이브로우 **"VALUES ASSESSMENT"**, H1 **"가치관 진단 12문항"**, 본문 **"정답은 없습니다. 지금 드는 방식을 그대로 골라주세요. 진단은 상담 담당자에게만 보이며, 다른 회원에게 공개되지 않습니다."**
+2. 진단 위젯(`standalone` 변형): 소요시간 배지 **"총 3분 소요"**, 진행 카운터 "N/12". 4개 영역 × 3문항, 5점 리커트(전혀 아니다/아닌 편이다/보통이다/그런 편이다/매우 그렇다):
 
-#### 섹션 구성
+   | 영역 | 문항 |
+   |---|---|
+   | 대화와 갈등 | 갈등이 생기면 그날 안에 이야기해서 푸는 편이다 / 속상한 일이 있으면 상대가 묻기 전에 먼저 말하는 편이다 / 의견이 다를 때는 결론보다 서로의 이유를 듣는 시간이 더 중요하다 |
+   | 가족과 관계 | 결혼 후에도 양가 부모님과 가까이 지내고 싶다 / 명절과 가족 행사는 두 사람이 함께 정하는 일정에 맞추고 싶다 / 배우자의 가족과도 편하게 연락하며 지내고 싶다 |
+   | 신앙과 삶의 방향 | 가정의 신앙생활은 부부가 함께 이어가고 싶다 / 중요한 결정을 내릴 때 기도하거나 마음을 정리하는 시간을 갖는다 / 가정을 통해 이웃과 공동체에 기여하고 싶다 |
+   | 생활과 계획 | 가계는 두 사람이 함께 관리하고 함께 결정하고 싶다 / 결혼 후 맞벌이를 이어가며 집안일을 나누고 싶다 / 자녀 계획은 두 사람의 준비가 되었을 때 시작하고 싶다 |
 
-**① 히어로**
-```
-eyebrow: BLESSING EDUCATION
-title:   축복교육 4강좌로 차근차근 알아가요
-body:    축복결혼이 궁금한 분들을 위한 4개의 강좌입니다.
-         순서대로 들어도, 궁금한 강좌부터 골라 들어도 괜찮아요.
-```
+3. 12문항 전부 응답 시 결과 노출 — **"진단 결과"** / **"정답이 아니라 성향의 차이예요. 상담에서 이야기 나눌 때 참고해보세요."** 영역별 평균(1~5) → 3 초과면 A, 이하면 B 스타일로 분류, 스타일명 + 설명 + "나에게 잘 맞는 상대 스타일" 제안 노출:
 
-**② 내 진행 상태**
-- `완료 강좌 수 / 전체 강좌 수` 표시 + 진행률 바
-- 진행 상태는 **로그인 없이 이 브라우저의 `localStorage`에만** 저장(§5.4). 다른 기기·브라우저에서는
-  초기화됨을 안내 문구로 명시.
+   | 영역 | A | B |
+   |---|---|---|
+   | 대화와 갈등 | 즉시 대화형 | 숙고 후 대화형 |
+   | 가족과 관계 | 가족 중심형 | 독립적 관계형 |
+   | 신앙과 삶의 방향 | 신앙 동행형 | 개인 신앙형 |
+   | 생활과 계획 | 동행 계획형 | 역할 존중형 |
 
-**③ 강좌 목록** (기본 4강좌, 관리자가 추가·삭제 가능 — §admin/curriculum)
+   (스타일별 상세 설명·상대 제안 문구는 `src/content/valuesAssessment.ts` 원문 참고.)
 
-| # | 제목 | 설명 |
-|---|---|---|
-| 1 | 축복결혼이란 무엇인가 | 축복결혼의 정의와 역사, 왜 '축복'이라 부르는지 소개 |
-| 2 | 참사랑과 가정의 가치 | 참사랑의 의미와 가정이 사랑과 평화의 출발점인 이유 |
-| 3 | 참부모님의 삶과 축복의 역사 | 참부모님의 삶의 여정과 축복결혼이 걸어온 역사 |
-| 4 | 축복가정으로 살아가기 | 축복 이후 가정생활에서 실천하는 태도와 준비 |
+4. 하단 버튼: **"이 결과 가지고 축복상담 신청하기"**(`/center/apply`), **"다시 진단하기"**(초기화)
 
-각 카드: `[순번] [제목] [완료 배지(완료 시)] [강사/담당 · 재생 시간] [소개] [영상 준비 중 안내(영상 URL 없을 때)] [다 들었어요 토글]`
-
-- 영상 URL이 비어 있으면 "강의 영상은 준비 중이에요" 안내로 대체 (강좌 소개까지는 항상 노출)
-- 비공개(`is_published=false`) 강좌는 목록에서 제외
-
-**④ 전체 완료 시 CTA**
-```
-title: 4강좌를 모두 들으셨나요?
-body:  이제 지역 담당자와 함께 다음 걸음을 이야기해보세요.
-[버튼] 축복결혼 안내 신청하기 → /onboarding
-```
-
-#### 데이터 원천
-
-- Supabase `courses` 테이블(§7.2)에서 게시된 강좌만 정렬해 가져옵니다.
-- Supabase 미연결 시 `src/content/curriculum.ts`의 `DEFAULT_COURSES` 4개 항목으로 대체됩니다.
+**동작**: 완전히 클라이언트 사이드, 서버 저장·localStorage 저장 모두 없음(응답은 컴포넌트 상태로만 존재, 새로고침하면 사라짐). `ValuesAssessmentSection`은 `embedded` 변형(결과 첨부 체크박스 포함)도 지원하지만 **현재 어느 화면에도 삽입되어 있지 않은 죽은 코드**입니다(§10 I-19).
 
 ---
 
-### P-05. 지역가정교회 `/churches` (실제 구현본 — 원본 가정민원실을 대체)
+### P-08. 마이페이지 `/mypage` (로그인 필요, `RequireAuth`)
 
-> 원본 가정민원실(`/civil-affairs`, `/civil-affairs/blessing-marriage`) 명세는 §13.5에 보존해
-> 두었습니다. **실제 구현에서는 가정민원실 전체(서비스 카드 3장, 축복결혼 행정 안내 탭·준비
-> 현황 위젯, 운영 정보 블록)가 삭제되었고**, 같은 GNB 자리를 지역가정교회 디렉터리가
-> 대신합니다. `/civil-affairs`, `/civil-affairs/blessing-marriage`로 들어오면 `/churches`로
-> 리다이렉트됩니다.
+**목표**: 로그인 사용자가 자신의 강좌 이수 현황을 기기에 상관없이 확인.
 
-**목표**: 방문자가 지역(시·도/시·군·구)으로 가까운 지역가정교회를 찾아 연락할 수 있게 함.
+- 이브로우 **"MY PAGE"**, H1 **"{표시이름}님, 반가워요"**(표시이름 없으면 "회원"), 이메일 표기, **"로그아웃"** 버튼
+- 진행 카드: "내가 수강한 교육", "N / M강 완료" + 진행률 바
+- 강좌별 행: 체크/원 아이콘 + 제목 + "완료" 배지
+- 버튼: 미완료 있으면 **"이어서 듣기 →"**, 전부 완료면 **"사랑의 기술 다시 보기 →"** → `/curriculum`
 
-#### 섹션 구성
-
-**① 히어로**
-```
-eyebrow: 지역가정교회
-title:   가까운 지역가정교회를 찾아보세요
-body:    지역을 선택하면 담당 지역가정교회의 연락처를 안내해드려요.
-         목록에 없는 지역은 대표 연락처로 문의해주세요.
-```
-
-**② 지역 선택 → 결과**
-- 시·도 → 시·군·구 2단 select. 옵션은 `churches` 테이블에 **실제로 등록된 지역만** 동적으로
-  채워집니다(전국 행정구역 마스터 데이터를 따로 두지 않음).
-- 시·도 선택 시 해당 지역의 교회 카드(이름·주소·전화 `tel:` 링크·담당자) 노출
-- 결과 없음: `이 지역에는 아직 등록된 지역가정교회 정보가 없어요. 대표 연락처로 문의해주세요.`
-- 게시(`is_published=true`)된 교회만 노출. 관리는 `/admin/churches`(§8.3)
-
-**③ 대표 연락처 안내** (페이지 하단, 고정 문구)
-```
-목록에 없는 지역이거나 더 궁금한 점이 있으시면
-대표 연락처 02-3271-0480(평일 09:00–18:00)로 문의해주세요.
-```
-- `§footer.ts`의 `CONTACT_PHONE_DISPLAY`/`CONTACT_PHONE_TEL`/`CONTACT_HOURS`를 그대로 재사용
-  (가정민원실 운영 정보 블록이 없어진 뒤에도 대표 연락처 접점을 유지하기 위함)
+**중요**: 이 화면은 **`guidance_requests`(신청서) 상태나 `/roadmap` 진행 단계를 보여주지 않습니다** — 강좌 이수 현황만 다룹니다(§1.3 U-3, §10 I-20). 데이터는 `course_completions`(Supabase, 로그인 전용, localStorage 폴백 없음)에서 가져옵니다.
 
 ---
 
-### P-07. 안내 신청 온보딩 `/onboarding` ⭐ 전환 핵심
+### P-09. 로그인 `/login`, 비밀번호 재설정 `/reset-password`
 
-**목표**: 최소 마찰로 리드(이름·연락처·성별·출생연도·지역)를 확보.
+#### 9a. 로그인 `/login` (`AuthForm` `variant="member"`)
 
-#### 헤더 영역 — 카피 원문
+- 이브로우 **"MEMBER"**, H1 **"로그인"**, 힌트 **"이메일과 비밀번호로 로그인하면, 내가 수강한 교육을 어느 기기에서든 확인할 수 있어요."**
+- 탭: **로그인** / **회원가입**
+- **로그인**: 이메일·비밀번호 → **"로그인"**. 하단 **"비밀번호를 잊으셨나요? 재설정 메일 받기"**(60초 쿨다운) → 성공 시 **"비밀번호 재설정 메일을 보냈어요. 메일함(스팸함 포함)을 확인해주세요."**
+- **회원가입**: 이름(≥2자)·이메일·비밀번호(≥6자) → **"회원가입"**. 이메일 인증이 켜져 있으면 **"가입 확인 메일을 보냈어요. 메일함에서 인증 링크를 눌러주세요."** + 재전송 버튼(60초 쿨다운)
+- 이미 로그인 상태면 즉시 `location.state.from` 또는 `/mypage`로 리다이렉트
+- **신규 계정은 항상 `role='user'`** — staff/admin 승격은 화면에서 불가능(운영자가 DB에서 수동 부여, §7.3)
+- 같은 `AuthForm` 컴포넌트가 `variant="admin"`으로 `/admin/login`도 구동합니다(§8.1)
 
-```
-title:  처음 오셨나요?
-sub:    간단히 알려주시면, 편안하게 안내해 드릴게요
-body:   축복결혼이 처음이신 분을 위한 안내 신청입니다.
-        맞춤 안내를 위해 이름, 연락처, 성별, 출생연도와 생활지역을 확인합니다.
-```
+#### 9b. 비밀번호 재설정 `/reset-password` (`RequireAuth` — 재설정 메일 링크의 임시 세션으로 접근)
 
-#### 스텝 인디케이터 — 실측 5단계
-
-```
-성별  →  출생년도  →  지역  →  연락처  →  완료
- ①        ②         ③        ④        ⑤
-```
-
-- 상단 가로 스텝 바 + 진행률 표시
-- 현재 스텝 `primary` 채움, 완료 스텝 체크 아이콘, 미완료 `muted`
-- 모바일: 축약형 `2 / 5` + 프로그레스 바
-
-#### 스텝별 명세
-
-**Step 1 — 성별** (실측)
-```
-질문: 성별을 선택해주세요
-선택지: [여성] [남성]     ← 큰 카드형 라디오 2개, 좌우 배치
-```
-- 선택 즉시 자동으로 다음 스텝 이동 (auto-advance)
-
-**Step 2 — 출생년도**
-```
-질문: 출생년도를 알려주세요
-입력: Select 또는 4자리 숫자 입력
-검증: 1940 ~ (현재연도 - 18). 만 18세 미만 차단 + 안내 문구 노출
-```
-
-**Step 3 — 지역**
-```
-질문: 어디에 살고 계신가요?
-입력: 시·도 Select → 시·군·구 Select (2단 연동)
-검증: 둘 다 필수. 시·군·구까지만 수집(상세 주소 수집 금지)
-```
-
-**Step 4 — 연락처**
-```
-질문: 연락받으실 정보를 알려주세요
-필드:
-  · 이름          text        필수, 2~20자
-  · 휴대전화 번호  tel         필수, 010-0000-0000 자동 하이픈 포맷
-  · 이메일        email       선택
-동의 (필수 체크박스):
-  · [필수] 개인정보 수집·이용에 동의합니다.  [자세히 보기] → /privacy 모달
-    수집 항목: 이름, 연락처, 성별, 출생연도, 거주 지역
-    이용 목적: 지역 담당자 연결 및 축복결혼 안내·상담
-    보유 기간: 상담 종료 후 1년
-```
-
-**Step 5 — 완료**
-```
-[체크 아이콘 애니메이션]
-신청이 접수되었어요
-
-영업일 기준 1~2일 이내에 가까운 지역 담당자가 연락드릴 예정입니다.
-연락을 원하지 않으시면 언제든 중단을 요청하실 수 있습니다.
-
-[버튼] 축복결혼 더 알아보기  → /guide
-[버튼] 홈으로               → /
-```
-
-#### 공통 동작
-
-| 항목 | 사양 |
-|---|---|
-| 하단 버튼 | `이전` (outline) / `다음` (primary). Step 1은 `이전` 비활성 |
-| 유효성 | zod 스키마. 미충족 시 `다음` 비활성 + 필드 하단 에러 메시지 |
-| 상태 보존 | `sessionStorage`에 진행 상태 저장, 새로고침 시 복원 |
-| 이탈 방지 | Step 2~4에서 페이지 이탈 시 `beforeunload` 확인 |
-| 접근성 | 스텝 전환 시 `aria-live="polite"`로 안내, 첫 필드에 자동 포커스 |
-| 제출 | Supabase `guidance_requests` insert → 성공 시 Step 5, 실패 시 토스트 에러 + 재시도 |
-| 중복 방지 | 동일 전화번호 24시간 내 재신청 시 안내 메시지 |
-| 스팸 방지 | honeypot 필드 + 제출 rate limit (IP당 시간당 3회) |
+- 이브로우 **"RESET PASSWORD"**, H1 **"새 비밀번호 설정"**, 본문 **"사용하실 새 비밀번호를 입력해주세요."**
+- 필드: 새 비밀번호(≥6자) / 새 비밀번호 확인 — 불일치 시 **"두 비밀번호가 서로 달라요."**
+- **"비밀번호 저장"** → 성공 시 `/mypage`로 이동
 
 ---
 
-### P-08. 개인정보처리방침 `/privacy`
-
-카피 원문 (본문 구조 그대로 재현):
+### P-10. 개인정보처리방침 `/privacy` (콘텐츠 `src/content/privacy.ts`, 원문 v1.0과 동일 유지)
 
 ```
 블레싱월드 개인정보처리방침
@@ -896,13 +819,11 @@ body:   축복결혼이 처음이신 분을 위한 안내 신청입니다.
 문의처: 02-3271-0480 | 평일 09:00–18:00
 ```
 
-> 💡 **중요 시사점**: 이 방침은 **회원가입(이메일·표시이름)** 과 **식구 인증(생년월일·소속 교구·교회·교인번호)** 기능의 존재를 전제합니다. 원본 사이트에서 해당 UI는 확인되지 않았으나, **§7 데이터 모델에는 반영**되어야 합니다.
+이 방침이 전제하는 "회원가입"·"식구 인증" 기능은 실제로 구현되어 있습니다(§7.2 `profiles`, `member_verifications`) — `member_verifications`는 데이터 모델만 있고 전용 UI(신청/심사 화면)는 아직 없습니다(§8.4).
 
 ---
 
-### P-09. 이용약관 `/terms`
-
-카피 원문 (조문 구조 그대로 재현):
+### P-11. 이용약관 `/terms` (콘텐츠 `src/content/terms.ts`, 원문 v1.0과 동일 유지)
 
 ```
 이용약관
@@ -933,12 +854,13 @@ body:   축복결혼이 처음이신 분을 위한 안내 신청입니다.
 약관 및 서비스 관련 문의는 02-3271-0480(평일 09:00–18:00)으로 연락해 주세요.
 ```
 
-- 조문 스타일: 조 제목 `H3`, 본문 들여쓰기, 조 사이 `py-6` 간격
-- 상단에 목차(anchor 링크) 제공 권장
+상단에 조 제목 앵커 링크(목차) 제공.
+
+> ⚠️ 제1조는 여전히 "가정행복국"으로만 표기하나, 푸터(§5.2)는 "가정행복국 축복가정부"까지 표기합니다 — 완전히 통일되지는 않았습니다(v1.0 I-02의 잔여분, §10에서 갱신).
 
 ---
 
-### P-10. 404 `*`
+### P-12. 404 `*`
 
 ```
 페이지를 찾을 수 없어요
@@ -946,306 +868,276 @@ body:   축복결혼이 처음이신 분을 위한 안내 신청입니다.
 [버튼] 홈으로 돌아가기
 ```
 
+Compass 아이콘. SEO는 전용 항목 없이 기본값(`SEO_DEFAULTS`)으로 폴백됩니다.
+
 ---
 
 ## 7. 데이터 모델 (Supabase)
 
-### 7.1 ERD 요약
+기준: `supabase/migrations/0001_init.sql` ~ `0017_values_assessment.sql` (17개, 순서대로 적용됨) + Edge Function `purge-guidance-requests`.
 
-```
-profiles ──< guidance_requests
-   │
-   ├──< member_verifications
-   └──< blessing_progress
+### 7.1 마이그레이션 이력 요약
 
-stories (관리자 작성)
-regions (마스터)
-faqs (관리자 관리)
-courses (관리자 관리)   — §P-04 축복가치교육
-churches (관리자 관리)  — §P-05 지역가정교회 연결
+| # | 파일 | 내용 |
+|---|---|---|
+| 0001 | `init` | `profiles` `guidance_requests` `stories` `community_posts/requests/comments` `member_verifications` `blessing_progress` `faqs` `regions` 생성 + RLS |
+| 0002 | `courses` | `courses` 테이블 + RLS + 기본 4강좌 시드 |
+| 0003 | `auth` | `handle_new_user()`, `prevent_role_self_escalation()` |
+| 0004 | `fix_profiles_rls_recursion` | `is_staff_or_admin()` SECURITY DEFINER 헬퍼로 RLS 무한재귀 버그 수정 |
+| 0005 | `churches` | `churches` 테이블 + RLS + 예시 3건 시드 |
+| 0006 | `guidance_completed_courses` | `guidance_requests.completed_courses text[]` 추가 |
+| 0007 | `course_completions` | 로그인 사용자용 이수 기록 테이블 + RLS |
+| 0008 | `guidance_dedupe` | 동일 전화번호 24시간 내 중복 신청 차단 트리거 |
+| 0009 | `stories_admin` | `stories` 관리자 쓰기 정책 추가(0001 누락분) |
+| 0010 | `faqs_admin` | `faqs` 관리자 쓰기 정책 추가(0001 누락분) |
+| 0011 | `guidance_admin` | `closed_at` 추가, 상태 전이 자동 타임스탬프 트리거, `audit_log` 테이블 |
+| 0012 | `six_pillars` | **6축 개편 스키마 확장**(아래 참고) |
+| 0013 | `seed_stories` | 스토리 6건 시드(에디토리얼, `family_name`/`region` 의도적 공백) |
+| 0014 | `seed_faqs` | FAQ 11건 시드 |
+| 0015 | `seed_churches` | 예시 3건 삭제 → 실제 지역교회 약 228건 시드 |
+| 0016 | `fix_church_names` | 교회명 3건 "개척" 접미사 정리 |
+| 0017 | `values_assessment` | `guidance_requests.values_assessment jsonb` 추가 |
 
-[미사용] community_posts ──< community_comments
-                  └──< community_requests
-```
+**0012(six_pillars)이 추가한 것**: `roadmap_steps`(신규), `site_stats`(신규), `stories.quote`/`stories.blessing_type`, `courses.quiz`/`courses.pass_score`, `course_completions.quiz_score`, `guidance_requests.consult_method`, `blessing_progress.step_key` 체크를 6단계→8단계로 확장.
 
-> `community_posts`/`community_requests`/`community_comments`는 나눔의 열매 폐기(§13.1) 이후
-> **참조하는 프론트엔드 코드가 없습니다.** 데이터 손실 방지를 위해 테이블은 삭제하지 않고
-> 그대로 두었을 뿐, 신규 구현에서는 사용하지 마세요.
+### 7.2 테이블 정의 (0017 적용 후 최종 상태)
 
-### 7.2 테이블 정의
+#### `profiles`
+| 컬럼 | 타입 | 제약 |
+|---|---|---|
+| id | uuid | PK, FK→auth.users, `on delete cascade` |
+| display_name | text | not null |
+| email / phone | text | |
+| gender | text | check in ('female','male') |
+| birth_year | int | |
+| region_sido / region_sigungu | text | |
+| is_verified_member | boolean | default false |
+| role | text | default 'user', check in ('user','staff','admin') |
+| created_at | timestamptz | default now() |
 
-#### `profiles` — 사용자 프로필
-| 컬럼 | 타입 | 제약 | 설명 |
-|---|---|---|---|
-| id | uuid | PK, FK→auth.users | |
-| display_name | text | not null | 표시 이름 |
-| email | text | | |
-| phone | text | | 암호화 저장 권장 |
-| gender | text | check in ('female','male') | |
-| birth_year | int | | |
-| region_sido | text | | 시·도 |
-| region_sigungu | text | | 시·군·구 |
-| is_verified_member | boolean | default false | 식구 인증 여부 |
-| role | text | default 'user' | user / staff / admin |
-| created_at | timestamptz | default now() | |
+가입 시 `handle_new_user()` 트리거가 자동 생성, `role`은 항상 `'user'`로 시작.
 
-#### `guidance_requests` — 안내 신청 (온보딩 폼) ⭐
-| 컬럼 | 타입 | 제약 | 설명 |
-|---|---|---|---|
-| id | uuid | PK default gen_random_uuid() | |
-| user_id | uuid | FK→profiles, nullable | 비회원 신청 허용 |
-| name | text | not null | |
-| phone | text | not null | |
-| email | text | | |
-| gender | text | not null, check in ('female','male') | |
-| birth_year | int | not null | |
-| region_sido | text | not null | |
-| region_sigungu | text | not null | |
-| status | text | default 'received' | received / assigned / contacted / in_progress / closed / opted_out |
-| assigned_staff_id | uuid | FK→profiles | 지역 담당자 |
-| assigned_at | timestamptz | | |
-| contacted_at | timestamptz | | |
-| memo | text | | 담당자 메모 |
-| privacy_agreed_at | timestamptz | not null | 동의 시각 (법적 근거) |
-| source | text | default 'web' | 유입 경로 |
-| purge_after | date | | 상담 종료 + 1년 |
-| created_at | timestamptz | default now() | |
-
-#### `stories` — 행복의 꽃
-| 컬럼 | 타입 | 설명 |
+#### `guidance_requests` ⭐ (축복상담 신청)
+| 컬럼 | 타입 | 비고 |
 |---|---|---|
 | id | uuid PK | |
-| slug | text unique | URL |
-| title | text not null | |
-| excerpt | text | 카드 요약 |
-| body | text | 마크다운/리치텍스트 |
+| user_id | uuid FK→profiles, on delete set null | 비회원 신청 허용 |
+| name / phone | text not null | |
+| email | text | |
+| gender | text not null | check in ('female','male') |
+| birth_year | int not null | |
+| region_sido / region_sigungu | text not null | |
+| status | text default 'received' | check in (received, assigned, contacted, in_progress, closed, opted_out) |
+| assigned_staff_id | uuid FK→profiles | |
+| assigned_at / contacted_at / closed_at | timestamptz | **트리거가 자동 기록**(0011) |
+| memo | text | |
+| privacy_agreed_at | timestamptz not null | |
+| source | text default 'web' | `curriculum` | `web` |
+| purge_after | date | closed 전환 시 `now()+1년` 자동 계산 |
+| completed_courses | text[] | 0006, FK 없음(비회원 흐름) |
+| consult_method | text | 0012, check in (visit, phone, video) |
+| values_assessment | jsonb | 0017, 아래 참고 |
+| created_at | timestamptz | |
+
+인덱스 `(phone, created_at desc)`. 트리거: 24시간 내 동일 전화번호 중복 INSERT 차단(`duplicate_phone_24h`, errcode `BW001`), 상태 전이 시 타임스탬프 자동 기록.
+
+**`values_assessment` jsonb 형태** (DB 제약 없음, 앱 코드가 정의):
+```ts
+{
+  answers: number[];               // 12개, 1~5
+  scores: Record<Category, number>; // 영역별 평균(소수 1자리)
+  styles: Record<Category, "A"|"B">;
+}
+// Category = "conversation" | "family" | "faith" | "life"
+```
+`/center/apply`가 이 컬럼을 실제로 채우지 않으므로(§6 P-05a, §10 I-19) **현재는 항상 null**입니다.
+
+#### `stories`
+| 컬럼 | 타입 | 비고 |
+|---|---|---|
+| id uuid PK / slug text unique / title text not null | | |
+| excerpt / body | text | |
 | cover_image_url | text | |
-| category | text | interview / case / video |
-| family_name | text | 가정 표기(익명 가능) |
-| region | text | |
+| category | text not null | check in (interview, case, video) — 콘텐츠 *형식* |
+| quote | text | 0012, 카드용 인용구 |
+| blessing_type | text | 0012, 콘텐츠 *주제*(대화와 관계/일상/기도와 묵상/나눔 등) — `category`와 별개 축 |
+| family_name / region | text | |
 | view_count | int default 0 | |
 | is_published | boolean default false | |
-| published_at | timestamptz | |
-| created_at | timestamptz default now() | |
+| published_at / created_at | timestamptz | |
 
-#### `courses` — 축복가치교육 (§P-04, 실제 구현 추가)
-| 컬럼 | 타입 | 설명 |
+#### `courses`
+| 컬럼 | 타입 | 비고 |
 |---|---|---|
-| id | text PK | 사람이 읽을 수 있는 고정 슬러그(예: `step-01`) |
-| order_no | int | 노출 순서 |
-| title | text not null | |
-| instructor | text | 강사/담당 |
-| duration_minutes | int | |
-| description | text | |
-| video_url | text | 비어 있으면 "영상 준비 중"으로 표시 |
-| is_published | boolean default true | |
-| created_at | timestamptz default now() | |
+| id text PK | | 사람이 읽을 수 있는 슬러그(`step-01` 등) |
+| order_no int / title text not null / instructor text / duration_minutes int / description text / video_url text | | |
+| is_published boolean default true | | |
+| quiz | jsonb | 0012, `[{q, choices[], answer}]` |
+| pass_score | int default 60 | 0012 |
+| created_at | timestamptz | |
 
-- RLS: 게시된(`is_published=true`) 강좌는 누구나 조회, 쓰기는 `is_staff_or_admin()`(§8)인 로그인 사용자만.
-- 진행률(완료 여부)은 별도 테이블 없이 방문자의 `localStorage`에만 저장합니다(로그인 불필요, §P-04②).
-
-#### `churches` — 지역가정교회 (§P-05, 실제 구현 추가)
-| 컬럼 | 타입 | 설명 |
-|---|---|---|
-| id | text PK | |
-| region_sido | text not null | 시·도 |
-| region_sigungu | text not null | 시·군·구 |
-| name | text not null | 교회명 |
-| address | text | |
-| phone | text | |
-| contact_name | text | 담당자 |
-| is_published | boolean default true | |
-| created_at | timestamptz default now() | |
-
-- RLS: `courses`와 동일한 패턴(게시된 것만 공개 조회, 쓰기는 `is_staff_or_admin()`).
-- 전국 행정구역 마스터를 따로 두지 않고, `region_sido`/`region_sigungu`에 **실제 등록된 값만** 셀렉트 옵션으로 씁니다.
-
-#### [미사용] `community_posts` — 나눔의 열매 폐기(§13.1)로 프론트엔드에서 더 이상 참조하지 않음
-| 컬럼 | 타입 | 설명 |
-|---|---|---|
-| id | uuid PK | |
-| author_id | uuid FK→profiles not null | |
-| category | text not null | goods / talent / together / chat |
-| title | text not null | 2~60자 |
-| body | text not null | 10~2000자 |
-| image_urls | text[] | 최대 5 |
-| region_sido | text not null | |
-| region_sigungu | text not null | |
-| method | text | direct / delivery / online |
-| status | text default 'open' | open / reserved / completed |
-| view_count | int default 0 | |
-| like_count | int default 0 | |
-| report_count | int default 0 | |
-| recommend_score | numeric | §P-04 산식으로 계산·갱신 |
-| completed_at | timestamptz | |
-| created_at | timestamptz default now() | |
-
-#### [미사용] `community_requests` — 나눔 신청
-| 컬럼 | 타입 | 설명 |
-|---|---|---|
-| id | uuid PK | |
-| post_id | uuid FK→community_posts | |
-| requester_id | uuid FK→profiles | |
-| message | text | |
-| status | text default 'pending' | pending / accepted / rejected / cancelled |
-| accepted_at | timestamptz | 수락 시점에만 상세 위치·연락처 공개 |
-
-#### [미사용] `community_comments`
+#### `course_completions`
 | 컬럼 | 타입 |
 |---|---|
-| id uuid PK / post_id uuid FK / author_id uuid FK / body text / parent_id uuid (대댓글) / created_at timestamptz |
+| user_id uuid FK→profiles / course_id text FK→courses | PK 복합 |
+| completed_at timestamptz | |
+| quiz_score int | 0012 |
 
-#### `member_verifications` — 식구 인증
-| 컬럼 | 타입 | 설명 |
-|---|---|---|
-| id uuid PK | | |
-| user_id | uuid FK→profiles | |
-| birth_date | date | 개인정보처리방침 명시 항목 |
-| district | text | 소속 교구 |
-| church | text | 소속 교회 |
-| member_no | text | 교인 번호 |
-| status | text default 'pending' | pending / approved / rejected |
-| reviewed_by uuid / reviewed_at timestamptz | | |
+#### `churches`
+| 컬럼 | 타입 |
+|---|---|
+| id text PK / region_sido text not null / region_sigungu text not null / name text not null | |
+| address / phone / contact_name text | |
+| is_published boolean default true / created_at | |
 
-#### `blessing_progress` — 축복 준비 현황 (원본 P-06 위젯 설계, §13.5 — 아직 미구현)
-| 컬럼 | 타입 | 설명 |
+인덱스 `(region_sido, region_sigungu)`. 시드 이력: 예시 3건(0005) → 삭제 후 실제 약 228건(0015, "2026 신한국 전국 교회 주소록" 기준 2026-03-01) → 명칭 정리(0016). 기숙사/분원/본부 사무실 행은 의도적으로 제외했고, 개인 휴대전화는 공개하지 않음(사무실 전화 또는 대표자 휴대전화만), `contact_name`은 전 행에서 의도적으로 공란입니다.
+
+#### `roadmap_steps` (신규, 0012)
+| 컬럼 | 타입 | 비고 |
 |---|---|---|
-| id uuid PK | | |
-| user_id uuid FK→profiles | | |
-| step_key | text | step_01 ~ step_06 |
-| status | text | not_started / in_progress / completed |
-| completed_at | timestamptz | |
-| updated_by | uuid | 담당자 |
+| key text PK | check `^step_0[1-8]$` |
+| order_no int not null | |
+| title text not null | |
+| description text not null default '' | |
+| duration_label text | **의도적으로 nullable** — 확정 전에는 기간 배지 자체를 숨기기 위함 |
+| link_to / link_label text | |
+| is_published boolean default true | |
+
+시드 없음(관리자가 직접 입력).
+
+#### `site_stats` (신규, 0012)
+| 컬럼 | 타입 |
+|---|---|
+| key text PK / label text not null | |
+| value bigint / basis_date date | 둘 다 있어야 프론트에서 렌더 |
+| unit text default '가정' | |
+| display_order int default 0 | |
+
+시드 3건(값 없음): `blessed_families`(누적 축복가정), `yearly_ceremony_families`(올해 축복식 참여 가정), `course_completions`(사랑의 기술 이수자, 단위 "명"). 코멘트: "임의의 숫자를 넣지 말 것 — 협회 확정치와 기준일만."
+
+#### `blessing_progress`
+| 컬럼 | 타입 |
+|---|---|
+| id uuid PK / user_id uuid FK→profiles | |
+| step_key text | check in (`step_01`..`step_08`, 0012에서 6→8 확장) |
+| status text default 'not_started' | check in (not_started, in_progress, completed) |
+| completed_at timestamptz / updated_by uuid FK→profiles | |
+| UNIQUE(user_id, step_key) | |
+
+쓰기는 staff/admin만 가능(사용자 셀프 기록 불가) — `/admin/guidance`에서 신청 건에 로그인 사용자가 연결돼 있을 때만 담당자가 단계를 기록합니다.
 
 #### `faqs`
 | 컬럼 | 타입 |
 |---|---|
-| id uuid PK / question text / answer text / sort_order int / is_default_visible boolean / is_published boolean |
+| id uuid PK / question text not null / answer text not null | |
+| sort_order int default 0 / is_default_visible boolean default false / is_published boolean default true | |
 
-- `is_default_visible = true` 인 5개가 기본 노출, 나머지는 `질문 더 보기 (n)` 로 확장
+11건 시드(§6 P-02).
 
-#### `regions` — 지역 마스터
+#### `member_verifications` (식구 인증 — 데이터 모델만 존재, 전용 UI 없음)
 | 컬럼 | 타입 |
 |---|---|
-| code text PK / sido text / sigungu text / staff_id uuid (지역 담당자) |
+| id uuid PK / user_id uuid FK→profiles | |
+| birth_date date / district text / church text / member_no text | |
+| status text default 'pending' | check in (pending, approved, rejected) |
+| reviewed_by uuid / reviewed_at timestamptz | |
 
-### 7.3 RLS 정책 (필수)
+#### `regions` — 사실상 미사용
+`code text PK / sido text / sigungu text / staff_id uuid`. 어떤 마이그레이션도 시드하지 않았고, 실제로는 `profiles`/`guidance_requests`/`churches`의 `region_sido`/`region_sigungu` 자유 텍스트 필드가 이 역할을 대신합니다.
 
-```sql
--- guidance_requests: 익명 INSERT 허용, SELECT는 본인 또는 staff/admin만
-alter table guidance_requests enable row level security;
+#### `audit_log` (신규, 0011 — PII 없는 삭제 이력)
+`id uuid PK / action text not null / count int default 0 / created_at`. 개인정보는 전혀 담지 않고 건수만 기록(§7.4).
 
-create policy "anyone can submit" on guidance_requests
-  for insert to anon, authenticated with check (true);
+#### [미사용] `community_posts` / `community_requests` / `community_comments`
+0001에서 전체 RLS와 함께 생성됐으나 0002~0017 어느 마이그레이션도 손대지 않았습니다 — 나눔의 열매(§13.1) 기능이 스캐폴딩 이후 실제로 만들어지지 않은 것으로 보입니다. 데이터 손실 방지를 위해 삭제하지 않았을 뿐 프론트엔드 코드는 참조하지 않습니다.
 
-create policy "owner or staff can read" on guidance_requests
-  for select to authenticated
-  using (
-    user_id = auth.uid()
-    or exists (select 1 from profiles p
-               where p.id = auth.uid() and p.role in ('staff','admin'))
-  );
+### 7.3 RLS 정책 (표준 패턴)
 
--- community_posts: 게시된 글은 누구나 읽기, 작성/수정/삭제는 본인만
-alter table community_posts enable row level security;
+| 테이블 | SELECT | INSERT/UPDATE/DELETE |
+|---|---|---|
+| `profiles` | 본인 또는 staff/admin | UPDATE는 본인만(role 변경은 트리거로 별도 차단) |
+| `guidance_requests` | 본인(`user_id=auth.uid()`) 또는 staff/admin. **익명 SELECT 절대 금지** | INSERT는 `anon`+`authenticated` 누구나(`true`). UPDATE는 staff/admin만. DELETE 정책 없음(Edge Function이 service-role로 처리) |
+| `stories` `faqs` `courses` `churches` `roadmap_steps` | `is_published=true`만 공개 | ALL: staff/admin만 |
+| `site_stats` | 무조건 공개 | ALL: staff/admin만 |
+| `course_completions` | 본인 전체 CRUD + staff/admin 읽기 전용 | — |
+| `member_verifications` | 본인 또는 staff/admin. 익명 SELECT 금지 | INSERT는 본인만 |
+| `blessing_progress` | 본인 또는 staff/admin | ALL: staff/admin만(본인 쓰기 불가) |
+| `audit_log` | staff/admin만 | INSERT 정책 없음(service-role만 기록) |
+| `community_*` | 게시된 글 공개(`report_count<5`) 등 v1.0 그대로 | 작성자만 |
 
-create policy "public read" on community_posts
-  for select using (report_count < 5);
+> ⛔ **절대 금지**: `guidance_requests`, `member_verifications`에 익명 SELECT 정책 추가.
 
-create policy "author write" on community_posts
-  for insert to authenticated with check (author_id = auth.uid());
+### 7.4 함수·트리거
 
-create policy "author update" on community_posts
-  for update to authenticated using (author_id = auth.uid());
+| 함수 | 종류 | 역할 |
+|---|---|---|
+| `is_staff_or_admin(uuid)` | SECURITY DEFINER, STABLE | RLS 무한재귀 버그(0004) 해결용 헬퍼. 이후 모든 정책이 인라인 `exists(...)` 대신 이 함수를 씀(`roadmap_steps`/`site_stats`는 예외적으로 여전히 인라인 체크 — 사소한 불일치로 §10 I-22에 기록) |
+| `handle_new_user()` | SECURITY DEFINER | 회원가입 시 `profiles` 자동 생성, `role`은 항상 `'user'` |
+| `prevent_role_self_escalation()` | SECURITY DEFINER | 로그인 사용자의 `profiles.role` 셀프 변경을 조용히 원복(`auth.uid()`가 없는 DB 직접 접속은 예외 — 최초 admin 수동 부여 경로) |
+| `guidance_requests_check_duplicate_phone()` | SECURITY DEFINER | 동일 전화번호 24시간 내 재제출 차단(`duplicate_phone_24h`, `BW001`) |
+| `guidance_requests_stamp_status_transition()` | SECURITY DEFINER | `status` 변경 시 `assigned_at`/`contacted_at`/`closed_at` 자동 기록, `closed` 전환 시 `purge_after=+1년` 계산 |
 
-create policy "author delete" on community_posts
-  for delete to authenticated using (author_id = auth.uid());
+### 7.5 개인정보 보존 자동화 (Edge Function `purge-guidance-requests`)
 
--- stories: 게시된 것만 공개 읽기, 쓰기는 admin
-create policy "published read" on stories
-  for select using (is_published = true);
-```
-
-> ⛔ **절대 금지**: `guidance_requests`, `member_verifications`에 대한 익명 SELECT 정책. 개인정보 유출 사고로 직결됩니다.
-
-> 🐛 **실제 구현에서 발견·수정한 버그**: 위 `exists (select 1 from profiles p where p.id = auth.uid() and p.role in (...))`
-> 패턴을 `profiles` 자신의 SELECT 정책에 그대로 쓰면 **`infinite recursion detected in policy for
-> relation "profiles"`** 오류가 납니다(정책 평가 중 같은 정책을 다시 평가하게 됨). 로그인한
-> staff가 `courses`/`churches`에 쓰기를 시도할 때도 같은 오류가 발생합니다.
-> **해결**: role 조회를 RLS를 우회하는 `SECURITY DEFINER` 헬퍼 함수로 분리하십시오.
-> ```sql
-> create or replace function public.is_staff_or_admin(check_uid uuid)
-> returns boolean language sql security definer set search_path = public stable as $$
->   select exists (select 1 from public.profiles p where p.id = check_uid and p.role in ('staff','admin'));
-> $$;
-> ```
-> 이 함수를 만든 역할(마이그레이션을 실행하는 `postgres`)이 `BYPASSRLS` 속성을 가지고 있어
-> 내부 조회가 RLS를 타지 않으므로 재귀가 끊깁니다. `profiles`를 포함한 모든 정책에서
-> 인라인 `exists(...)` 대신 `public.is_staff_or_admin(auth.uid())`를 쓰십시오.
-
-> 🔒 **회원가입 시 profiles 자동 생성 + role 셀프 승격 방지** (실제 구현 추가)
-> `auth.users`에 새 계정이 생기면 트리거로 `profiles` 행을 자동 생성하고(`role`은 항상 `'user'`로
-> 시작), `profiles.role`을 사용자 스스로 `staff`/`admin`으로 바꾸는 것은 `BEFORE UPDATE` 트리거로
-> 차단합니다(단, `auth.uid()`가 없는 DB 직접 접속 — 운영자의 `psql`/대시보드 SQL 편집기 — 은
-> 예외로 허용해 최초 관리자 부여가 가능하게 함). 최초 admin은 항상 운영자가
-> `update profiles set role='admin' where email='...';` 로 수동 부여합니다.
-
-### 7.4 개인정보 보존 자동화 (Edge Function, 일 1회 cron)
-
-```
-1. status = 'closed' 이고 closed_at + 1년 경과한 guidance_requests → 삭제
-2. status = 'opted_out' → 즉시 삭제 (요청 접수 시 실행)
-3. 삭제 이력은 개인식별정보 없이 audit_log 테이블에 건수만 기록
-```
+- 배포: `supabase functions deploy purge-guidance-requests --schedule "0 18 * * *"`(매일 03:00 KST), `SUPABASE_SERVICE_ROLE_KEY`로 RLS 우회
+- 로직: ① `status='closed' AND purge_after<=오늘` → 삭제 ② `status='opted_out'` → 즉시 삭제 ③ 삭제 건수만 `audit_log`에 기록(개인식별정보 없음)
+- 0011 이전에는 `purge_after`를 채우는 트리거가 없어 이 함수가 사실상 아무것도 지우지 못하는 죽은 코드였습니다 — 0011 이후 정상 동작.
 
 ---
 
-## 8. 관리자 요구사항 (별도 화면, `/admin/*`)
+## 8. 관리자(축복관리자) 요구사항 — `/admin/*`
 
-> 원본 사이트에는 공개 관리자 화면이 없으나, 서비스 운영에 필수적이므로 포함합니다.
-> 아래 ✅ 표시 항목은 **실제로 구현·배포되어 동작 확인까지 마친** 화면이고, 나머지는 아직
-> 설계 단계입니다.
+> v1.0에서 "설계 단계"였던 화면들이 **전부 구현·배포되었습니다.** 8개 화면 모두 `RequireAdmin`(staff 또는 admin 역할, 두 역할 간 화면별 차등 없음)으로 보호되고, `AdminHeader`가 로그인 정보·역할 배지·로그아웃·8개 화면 간 이동 탭을 공통 제공합니다.
 
-### 8.1 로그인 (`/admin/login`) ✅ 구현됨
+### 8.1 로그인 `/admin/login` ✅
 
-- Supabase Auth 이메일/비밀번호. 같은 화면에서 로그인·회원가입 탭 전환.
-- 회원가입은 누구나 가능하지만 **기본 role은 항상 `'user'`** — staff/admin 권한은 화면에서
-  자동 부여되지 않고, 운영자가 DB에서 수동으로 승격합니다(§7.3).
-- 이메일 인증(confirm email)이 켜져 있으면 가입 직후 로그인 불가 — 메일 인증 후 로그인.
-- `RequireAdmin`(`src/components/admin/RequireAdmin.tsx`)이 `/admin/*` 하위 라우트를 감싸
-  ① 비로그인 → `/admin/login`으로 리다이렉트, ② 로그인했지만 `staff`/`admin`이 아니면
-  "권한 없음" 화면을 보여줍니다.
-- `AdminHeader`(`src/components/admin/AdminHeader.tsx`)가 로그인 정보·로그아웃·관리 화면 간
-  이동 탭을 모든 `/admin/*` 화면에 공통 노출합니다.
+- `AuthForm` `variant="admin"`. 로그인/회원가입 탭. 신규 가입은 항상 `role='user'`이며, staff/admin 승격은 운영자가 DB에서 수동으로만 가능(§7.4).
+- `RequireAdmin`: 비로그인 → `/admin/login` 리다이렉트, 로그인했지만 권한 없음 → **"관리자 권한이 없어요"** 화면(**"다시 확인하기"**로 `refreshProfile()` 재조회, **"로그아웃"** 버튼).
+- 창 포커스 시 프로필을 재조회 — 대시보드에서 role을 방금 올려준 경우 로그아웃 없이 반영되도록.
 
-### 8.2 축복가치교육 관리 (`/admin/curriculum`) ✅ 구현됨
+### 8.2 사랑의 기술 관리 `/admin/curriculum` ✅
 
-- `courses` 목록 CRUD: 제목·강사·재생 시간·소개·영상 URL·공개 여부, 순서 변경(위/아래), 추가/삭제.
-- Supabase 연결 시 저장하면 **모든 방문자에게 즉시 반영**. 미연결 시 이 브라우저의
-  `localStorage`에만 저장되고 화면에 그 사실을 안내합니다(§src/lib/courses.ts).
+`courses` CRUD(추가/삭제/순서 위아래/저장). 필드: 제목·강사·시간·설명·영상URL·공개여부 + `QuizEditor`(문항/보기/정답 배열, 통과점수). 제목 빈 값이면 저장 차단. Supabase 저장 성공/localStorage 폴백 여부를 토스트로 구분 안내.
 
-### 8.3 지역가정교회 관리 (`/admin/churches`) ✅ 구현됨
+### 8.3 지역가정교회 관리 `/admin/churches` ✅
 
-- `churches` 목록 CRUD: 시·도·시·군·구·교회명·주소·전화·담당자·공개 여부.
-- 저장 동작은 8.2 축복가치교육 관리와 동일한 패턴(`src/lib/churches.ts`).
+`churches` CRUD(추가/삭제, 순서 변경 없음). 필드: 시·도·시·군·구·교회명·주소·전화·담당자·공개여부. 이름/시·도/시·군·구 빈 값이면 저장 차단.
 
-### 8.4 나머지 관리 화면 (설계 단계, 미구현)
+### 8.4 스토리 관리 `/admin/stories` ✅
 
-| 화면 | 기능 |
+`stories` CRUD(추가는 맨 위에 삽입/삭제). 필드: 제목·슬러그(제목에서 자동 생성 가능)·카테고리·`quote`·`blessingType`·가정명·지역·커버이미지·요약·본문·공개여부(조회수는 읽기전용). 제목 공백, 슬러그 생성 불가/중복 시 저장 차단. 공개로 새로 체크하면 `publishedAt`을 현재 시각으로 자동 기록.
+
+### 8.5 신청 관리 `/admin/guidance` ✅ (개인정보 화면 — Supabase 없으면 완전히 비활성)
+
+- `guidance_requests` 필터(지역/상태/신청일), CSV 내보내기(UTF-8 BOM), 상태 변경(드롭다운), 담당자 배정(staff/admin 목록), 메모(포커스아웃 저장 시)
+- 로그인 신청 건은 추가로 **"로드맵 단계"** 드롭다운 — N단계 선택 시 이전 단계는 `completed`, N단계는 `in_progress`로 `blessing_progress`에 반영. 비로그인 신청은 **"비로그인 신청(단계 기록 불가)"** 표시.
+- 상태값(`GuidanceStatus`): `received`(접수됨) `assigned`(담당자 배정) `contacted`(연락함) `in_progress`(진행 중) `closed`(종료 — 토스트 "1년 뒤 자동으로 파기됩니다") `opted_out`(수신 거부)
+- `completedCourses` 개수, `valuesAssessment`(있으면 A/B 스타일) 배지도 함께 표시.
+- **localStorage 폴백 없음** — PII 데이터라 의미가 없다는 판단.
+
+### 8.6 FAQ 관리 `/admin/faq` ✅
+
+`faqs` CRUD(추가/삭제/순서 변경). 필드: 질문·답변·기본노출여부·공개여부. 질문/답변 공백이면 저장 차단.
+
+### 8.7 회원 관리 `/admin/members` ✅ (읽기 전용)
+
+`profiles` × `course_completions` 조인 목록. 이름·이메일·역할 배지(user→회원/staff→운영자/admin→관리자)·가입일·강좌별 이수 칩. **쓰기 기능 없음.** localStorage 폴백 없음.
+
+### 8.8 로드맵 관리 `/admin/roadmap` ✅
+
+`roadmap_steps` **편집 전용**(추가/삭제 불가 — 고정 8단계). 필드: 제목·소요기간(공란 허용, 공란이면 배지 미표시)·설명·연결 링크(href/label). 제목 공백이면 저장 차단.
+
+### 8.9 홈 수치 관리 `/admin/stats` ✅
+
+`site_stats` **편집 전용**(고정 3개 키). 필드: 값·기준일·단위. **값과 기준일 중 하나만 채우면 저장 자체를 거부**(반쪽 데이터로 인한 오해 방지 — UI 레벨 비즈니스 규칙).
+
+### 8.10 남은 미구현 화면
+
+| 화면 | 상태 |
 |---|---|
-| 신청 관리 | `guidance_requests` 목록(지역·상태·기간 필터), 지역 담당자 배정, 상태 변경, 메모, CSV 내보내기(권한 제한) |
-| 스토리 관리 | 작성/수정/게시·비게시, 커버 이미지 업로드 |
-| FAQ 관리 | 문항 CRUD, 노출 순서, 기본 노출 여부 |
-| 식구 인증 심사 | 대기 목록, 승인/반려 |
-| 준비 현황 관리 | 사용자별 `blessing_progress` 단계 상태 갱신 |
-| 통계 | 신청 건수 추이, 지역별 분포, 온보딩 스텝별 이탈률 |
-
-> 원안에 있던 "커뮤니티 관리"(나눔의 열매 신고 게시물 큐)는 §13.1에 따라 대상 기능 자체가
-> 폐기되어 제외했습니다.
-
-- 접근 제어: `profiles.role in ('staff','admin')` — 실제로는 `public.is_staff_or_admin(auth.uid())`
-  헬퍼로 판정합니다(§7.3). `staff`는 담당 지역 데이터만 조회 가능하도록 하는 세부 정책은 아직 미구현.
-- 모든 개인정보 조회를 `access_log`에 기록하는 것도 아직 미구현입니다.
+| 식구 인증 심사(`member_verifications` 승인/반려) | 데이터 모델만 있고 UI 없음 |
+| staff별 담당 지역 제한 RLS | 미구현(현재 모든 staff가 전 지역 신청을 봄) |
+| 개인정보 조회 자체에 대한 `access_log` 기록 | 미구현 |
 
 ---
 
@@ -1253,243 +1145,200 @@ create policy "published read" on stories
 
 ### 9.1 접근성 (WCAG 2.1 AA)
 
-- [ ] 모든 이미지에 의미 있는 `alt` (§4.6 표의 문구 사용)
-- [ ] 본문 텍스트 명도 대비 4.5:1 이상, 큰 텍스트 3:1 이상
-- [ ] 키보드만으로 전체 내비게이션·폼·아코디언·캐러셀 조작 가능
-- [ ] 포커스 링 항상 시각적으로 표시 (`ring-2 ring-ring ring-offset-2`)
-- [ ] `Skip to content` 링크 제공
-- [ ] 아코디언/탭에 올바른 `aria-expanded`, `aria-controls`
-- [ ] 캐러셀 자동재생은 `prefers-reduced-motion: reduce` 시 정지
-- [ ] 폼 에러는 `role="alert"` 로 스크린리더 전달
+v1.0 체크리스트가 여전히 유효하며 실측 개선 이력이 있습니다: `docs/2026-08-26_6축개편_설계.md`가 명시하듯 리스킨(딥 퍼플+골드 팔레트) 적용 시 **Lighthouse 접근성 100점 실측**을 근거로 팔레트를 확정했고, `git log`의 `a91ec09 Fix accessibility issues: heading hierarchy and loading states (#7)` 커밋이 후속 접근성 수정을 반영했습니다.
+
+- [x] 캐러셀 자동재생은 `prefers-reduced-motion: reduce` 시 정지
+- [x] 아코디언에 Radix 기본 `aria-expanded`/`aria-controls`
+- [ ] 전 폼 필드의 `role="alert"` 에러 전달 — 미검증
+- [ ] 캐러셀 좌우 화살표·dot의 키보드 접근성 — 미검증
 
 ### 9.2 성능
 
 | 지표 | 목표 |
 |---|---|
-| LCP | < 2.5s (4G) |
-| CLS | < 0.1 |
-| INP | < 200ms |
-| 초기 JS 번들 | < 200KB (gzip) |
+| 초기 JS 번들 | < 200KB (gzip) — 코드 스플리팅 없으면 216KB라는 실측 코멘트가 `App.tsx`에 있음 |
 
-- 라우트별 `React.lazy` 코드 스플리팅
-- 이미지 WebP + 반응형 `srcset` + `width`/`height` 명시(CLS 방지)
-- 폰트 `font-display: swap` + 한글 서브셋
+라우트별 `React.lazy` 전면 적용으로 대응 중.
 
 ### 9.3 SEO
 
-- [ ] 라우트별 고유 `title`/`description` (§5.3)
-- [ ] `sitemap.xml`, `robots.txt`
-- [ ] `Organization` + `FAQPage` JSON-LD 구조화 데이터
-- [ ] canonical URL
-- [ ] SPA인 경우 prerender(vite-plugin-ssg 등)로 크롤러 대응
+- [x] 라우트별 고유 title/description(§5.4)
+- [x] Organization(`/`), FAQPage(`/guide`), HowTo(`/roadmap`) JSON-LD
+- [ ] `sitemap.xml`이 신규 라우트(`/roadmap` `/values` `/center/*` 등)를 모두 포함하는지 재확인 필요
 
 ### 9.4 브라우저 지원
 
-Chrome / Edge / Safari / Firefox 최신 2개 버전, iOS Safari 15+, Android Chrome 최신
+Chrome / Edge / Safari / Firefox 최신 2개, iOS Safari 15+, Android Chrome 최신 (변경 없음)
 
-### 9.5 화면별 수용 기준 (Acceptance Criteria)
+### 9.5 화면별 수용 기준 (갱신)
 
-| ID | 기준 |
-|---|---|
-| AC-01 | GNB 5개 항목이 순서대로 표시되고, 현재 라우트가 시각적으로 강조된다 |
-| AC-02 | 푸터가 모든 페이지에 동일하게 표시되고 §5.2 카피와 문자열이 정확히 일치한다 |
-| AC-03 | 홈 히어로 캐러셀이 3장을 5초 간격으로 순환하고, 화살표·dot으로 수동 제어된다 |
-| AC-04 | 홈 CTA `축복결혼 알아보기` → `/guide`, `축복결혼 안내 신청` → `/onboarding` 로 이동한다 |
-| AC-05 | `/guide` 의 6단계 스텝이 3개 그룹으로 묶여 01~06 순서로 표시된다 |
-| AC-06 | `/guide` FAQ가 기본 5개 노출되고 `질문 더 보기 (4)` 클릭 시 9개 전체가 노출된다 |
-| AC-07 ✅ | `/curriculum` 강좌가 `order_no` 순으로 표시되고, `is_published=false` 강좌는 숨겨진다 |
-| AC-08 ✅ | `/curriculum`에서 "다 들었어요" 토글이 진행률 바에 즉시 반영되고, 새로고침 후에도 유지된다(`localStorage`) |
-| AC-09 ✅ | `/churches` 대표 연락처가 `tel:` 링크로 동작한다 |
-| AC-09b ✅ | `/churches`에서 시·도 선택 시 시·군·구 옵션이 해당 지역 데이터로만 채워진다 |
-| AC-10 | `/onboarding` 5스텝(성별→출생년도→지역→연락처→완료)이 순서대로 진행되고, 필수값 미입력 시 `다음`이 비활성화된다 |
-| AC-11 | 온보딩 제출 시 `guidance_requests`에 레코드가 생성되고 `privacy_agreed_at`이 기록된다 |
-| AC-12 | 개인정보 동의 체크 없이는 제출이 불가하다 |
-| AC-13 | `/stories`에 데이터가 없을 때 빈 상태 UI가 표시되고 화면이 깨지지 않는다 |
-| AC-14 | 모바일 375px 폭에서 가로 스크롤이 발생하지 않는다 |
-| AC-15 ✅ | 익명 사용자가 `guidance_requests`를 SELECT 할 수 없다 (RLS 검증) — `courses`/`churches`도 동일 원칙으로 익명 쓰기가 REST API 레벨에서 401로 거부됨을 확인함 |
-| AC-16 | 외부 링크(HJ Baby Blessing, 성화감사장)가 새 탭 + `rel="noopener noreferrer"` 로 열린다 |
-| AC-17 | Lighthouse 접근성 점수 90 이상, SEO 점수 90 이상 |
-| AC-18 ✅ | `/admin/curriculum`·`/admin/churches`는 비로그인 시 `/admin/login`으로 리다이렉트되고, `user` role 계정으로는 "권한 없음" 화면이 뜬다 |
-| AC-19 ✅ | `user` role 계정이 REST API로 자신의 `profiles.role`을 `admin`으로 직접 바꿔도 실제 값은 바뀌지 않는다 (셀프 승격 방지 트리거 검증) |
-
-> ✅ 표시는 실제 구현 후 수동으로 동작 확인까지 마친 항목입니다(§13). 나머지는 아직 자동화된
-> 테스트나 수동 점검을 거치지 않았습니다.
+| ID | 기준 | 상태 |
+|---|---|---|
+| AC-01 | GNB 6개 항목이 순서대로 표시되고 현재 라우트가 강조된다 | ✅ |
+| AC-02 | 푸터가 모든 페이지에 동일하게 표시된다(단 브랜드 설명 문장에 오탈자 있음, §10 I-21) | ✅(오탈자 별개 이슈) |
+| AC-03 | 홈 히어로 캐러셀이 3장을 5초 간격으로 순환한다 | ✅ |
+| AC-04 | 홈 CTA `축복상담 신청` → `/center/apply`, `축복결혼 알아보기` → `/guide` | ✅ |
+| AC-05 | `/curriculum` 강좌가 `order_no` 순으로 표시되고 `is_published=false`는 숨겨진다 | ✅ |
+| AC-06 | `/curriculum`의 "다 들었어요"/퀴즈 통과가 진행률에 즉시 반영되고 새로고침 후 유지된다 | ✅ |
+| AC-07 | `/curriculum/:courseId` 퀴즈 통과 시 `course_completions.quiz_score`가 기록된다(로그인 시) | ✅ |
+| AC-08 | `/roadmap`이 8단계를 표시하고, 로그인 사용자의 `blessing_progress`가 있으면 그 단계를 강조한다 | ✅ |
+| AC-09 | `/roadmap` 준비도 진단 체크 상태가 새로고침 시 초기화된다(서버·로컬 저장 없음, 설계대로) | ✅ |
+| AC-10 | `/center/churches` 대표 연락처가 `tel:` 링크로 동작하고, 시·도 선택 시 시·군·구가 해당 지역 데이터로만 채워진다 | ✅ |
+| AC-11 | `/center/apply` 단일화면 폼이 7필드 전부 검증 통과 전에는 제출되지 않는다 | ✅ |
+| AC-12 | 제출 시 `guidance_requests`에 레코드가 생성되고 `privacy_agreed_at`이 기록된다 | ✅ |
+| AC-13 | 동일 전화번호로 24시간 내 재제출 시 서버가 거부한다(DB 트리거) | ✅ |
+| AC-14 | `/values` 12문항을 모두 답하면 4개 영역 결과가 계산되어 표시된다 | ✅ |
+| AC-15 | `/values` 결과가 `/center/apply` 제출 데이터에 포함된다 | ❌ **미구현**(§10 I-19) |
+| AC-16 | 익명 사용자가 `guidance_requests`/`member_verifications`를 SELECT 할 수 없다(RLS) | ✅ |
+| AC-17 | `user` 역할 계정이 REST API로 자신의 `role`을 `admin`으로 바꿔도 실제로는 바뀌지 않는다 | ✅ |
+| AC-18 | `/admin/*` 8개 화면 모두 비로그인 시 `/admin/login`으로, 권한 없으면 "권한 없음" 화면으로 이동한다 | ✅ |
+| AC-19 | `/admin/stats`는 값과 기준일 중 하나만 채워진 상태로 저장할 수 없다 | ✅ |
+| AC-20 | 모바일 375px 폭에서 가로 스크롤이 발생하지 않는다 | 미검증 |
+| AC-21 | Lighthouse 접근성 점수 90 이상 | ✅(딥퍼플+골드 팔레트 적용 시 100점 실측, 근거: 6축 개편 설계 §5.2) |
 
 ---
 
-## 10. 개선 제안 (원본 대비)
+## 10. 개선 제안 (갱신)
 
-> 동일 재현을 기본으로 하되, 아래 항목은 **원본의 결함 또는 개선 여지**입니다. 우선순위 순.
+> v1.0의 I-01~I-18 중 해결/해당없음이 된 항목은 상태만 표기하고 본문은 남겨 이력을 보존합니다. 신규 항목은 I-19부터.
 
-### 🔴 필수 수정 (버그)
+### 이미 해결됨 / 해당 없음
+
+| ID | 항목 | 현재 상태 |
+|---|---|---|
+| ~~I-01~~ | 성화감사장 Google Forms 편집 URL 노출 | **해당 없음** — 기능 자체가 홈에서 삭제됨(§2.3) |
+| I-02 | 부서명 표기 불일치 | **해결** — "가정행복국"→"가정행복국 축복가정부"로 2026-08-27 이후 대부분 통일. 단 `/terms` 제1조만 "가정행복국"으로 남아 있음(§6 P-11) |
+| I-05 | `/stories` 콘텐츠 0건 | **해결(부분)** — 6건 시드됐으나 실제 인터뷰 아닌 에디토리얼(§6 P-06 경고 참고) |
+| I-06 | FAQ 답변 미확보 | **해결** — 11개 전부 답변 보유 |
+| ~~I-11~~ | 커뮤니티 지역 자동 필터 | **해당 없음** — 나눔의 열매 폐기(§13.1) |
+
+### 🔴 신규 — 데이터/기능 공백
 
 | ID | 항목 | 문제 | 조치 |
 |---|---|---|---|
-| **I-01** | 성화감사장 링크 | Google Forms **편집 URL**(`/edit?usp=drive_web&ouid=...`)로 연결됨. 권한에 따라 **폼 편집 화면이 노출되거나 접근 거부**됨. `ouid` 파라미터로 운영자 Google 계정 식별자가 노출됨 | 응답용 URL(`/viewform` 또는 단축 URL)로 즉시 교체 |
-| **I-02** ✅ | 부서명 표기 불일치 | 푸터=`가정행복국`, 민원실=`한국협회 / 가정행복지원국 축복가정부` | 공식 명칭 하나로 통일 후 전 페이지 일괄 적용 — 2026-08-27 `가정행복국`으로 통일 완료 |
-| **I-03** | 답변 소요시간 불일치 | 푸터=`1~2일`, 민원실=`2일 이내` | 하나로 통일 |
-| ~~I-04~~ | ~~`/civil-affairs/blessing-marriage` 미구현~~ | 메타 태그는 있으나 실제 콘텐츠는 `/civil-affairs`와 동일 | **해당 없음** — 가정민원실 자체가 폐기됨(§13.5) |
-| **I-05** | `/stories` 콘텐츠 0건 | 홈에서 링크로 유도하나 도착하면 빈 화면 | 최소 3~5건 확보 전까지 빈 상태 UI 필수, 또는 홈 카드에 `준비 중` 배지 |
-| **I-06** | FAQ 답변 미확보 | 2~9번 답변 원문 확인 불가 | 운영 담당자로부터 확보 |
+| **I-19** | 가치관 진단 결과가 신청서에 미연동 | `/values`에서 계산한 결과가 `/center/apply` 제출 시 전송되지 않음. `ValuesAssessmentSection`의 `embedded` 변형과 `submitGuidanceRequest()`의 `valuesAssessment` 필드가 이미 준비돼 있지만 실제로 연결되지 않은 죽은 코드 | `Onboarding.tsx`에 `ValuesAssessmentSection variant="embedded"`를 삽입해 실제로 연동하거나, 연동할 계획이 없다면 죽은 코드를 정리 |
+| **I-20** | 신청자 본인에게 신청 상태가 보이지 않음 | `guidance_requests.status`(접수됨/배정/연락함 등)를 담당자만 보고, 신청자는 `/mypage`에서도 확인 불가 | `/mypage`에 본인 신청 상태 조회 섹션 추가 검토 |
+| **I-21** | 푸터 브랜드 설명 조사 오류 | "…가정행복국 축복가정부**이** 운영하는…" (§5.2) | `footer.ts` 문자열 수정 |
+| **I-22** | RLS 헬퍼 사용 불일치 | `roadmap_steps`/`site_stats`는 `is_staff_or_admin()` 대신 인라인 `profiles.role` 체크를 씀(다른 테이블과 패턴 다름) | 일관성을 위해 헬퍼로 통일 검토(기능 문제는 아님) |
+| **I-23** | 홈 수치 섹션이 계속 비어 있음 | `site_stats` 3종 모두 값 미입력 → 홈 "OUR FAMILIES" 섹션이 아예 렌더되지 않음 | 협회 확정치 확보 후 `/admin/stats`에서 입력 |
+| **I-24** | `/center/documents` 준비도 진단(§6 P-04③) 상태가 페이지 이동 시 유실 | `ReadinessChecker`가 컴포넌트 상태만 사용(§설계 의도) — `/roadmap`에서 체크한 뒤 `/center/documents`로 이동하면 초기화됨 | 의도된 개인정보 보호 설계이므로 "문제"라기보다 사용자에게 사전 안내 문구 보강 검토 |
 
-### 🟡 사용성 개선
-
-| ID | 제안 | 근거 |
-|---|---|---|
-| **I-07** ✅ | 대표 연락처(02-3271-0480)를 **푸터 외의 페이지에도** 노출 | 가정민원실 폐기 이후 `/civil-affairs`가 없어짐 → `/churches`(§6 P-05③)에 대표 연락처를 노출해 해결. 아직 푸터 자체에는 없음 |
-| **I-08** | 온보딩 스텝 순서를 **지역 → 성별 → 출생년도 → 연락처** 로 조정 검토 | 첫 질문이 '성별'이면 일부 사용자에게 민감하게 느껴질 수 있음. 지역이 심리적 문턱이 낮음 |
-| **I-09** | 온보딩 진입 전 **예상 소요시간 안내** ("30초면 끝나요") | 폼 이탈률 감소 |
-| **I-10** | 홈에 **"내 준비 현황 보기"** 로그인 진입점 추가 | 기존 준비자(U-2)의 재방문 동선이 현재 없음 |
-| ~~I-11~~ | ~~커뮤니티 지역 자동 필터~~ | **해당 없음** — 나눔의 열매 자체가 폐기됨(§13.1) |
-| **I-12** | 스토리 상세에 **관련 CTA**(`/onboarding`) 배치 | 감정적 몰입 직후가 전환 최적 지점 |
-| **I-13** | 카카오톡 채널 / 문의 폼 등 **비전화 문의 채널** 추가 | 20~30대 타깃에게 전화는 높은 문턱 |
-
-### 🟢 확장 제안
+### 🟡 사용성 개선 (v1.0 잔여 + 신규)
 
 | ID | 제안 |
 |---|---|
-| **I-14** | 다국어(영/일) 지원 — 히어로에 "다양한 국적의 부부" 이미지를 쓰는 만큼 국제 축복 수요 대응 |
-| **I-15** | 온보딩 이탈 지점 분석용 이벤트 트래킹 (스텝별 `step_view` / `step_complete`) |
-| **I-16** | 신청 접수 시 신청자에게 **알림톡 자동 발송** (접수 확인 + 담당자 연락 예정 안내) |
-| **I-17** | `/guide` FAQ에 `FAQPage` JSON-LD 적용 → 구글 검색 리치 결과 노출 |
-| **I-18** | 커뮤니티 게시물 신고 누적 시 자동 숨김 + 운영자 알림 (현재 `report_count < 5` 정책의 운영 자동화) |
+| I-08 | 온보딩 필드 순서를 성별보다 덜 민감한 항목(지역 등) 먼저로 조정 검토 — 현재도 성별이 3번째 필드 |
+| I-13 | 카카오톡 채널 등 비전화 문의 채널 추가 (아직 미도입) |
 
 ---
 
-## 11. 구현 마일스톤
+## 11. 구현 마일스톤 (갱신)
 
-| 단계 | 범위 | 산출물 |
+| 단계 | 범위 | 상태 |
 |---|---|---|
-| **M1 — 기반** | 프로젝트 스캐폴딩, 디자인 토큰(§4), Header/Footer/SEO(§5), 라우팅(§2) | 빈 화면이지만 전 라우트 이동 가능 |
-| **M2 — 정적 페이지** | P-01 홈, P-02 가이드, P-08 개인정보, P-09 약관, P-10 404 — 원안의 "P-05 민원실"은 가정민원실 폐기로 대상이 없어짐(§13.5) | 콘텐츠 완성된 정보 사이트 |
-| **M3 — 전환 퍼널** | Supabase 스키마 + RLS(§7), P-07 온보딩 폼 | 실제 리드 수집 가능 |
-| **M4 — 콘텐츠** | P-03 스토리(목록·상세·관리) — 원안의 "P-06 축복결혼 행정 안내"는 가정민원실 폐기로 대상이 없어짐(§13.5) | 콘텐츠 운영 가능 |
-| **M5 — 축복가치교육·지역가정교회 ✅** | P-04 축복가치교육(강좌 목록·진행 표시), P-05 지역가정교회 디렉터리 — 원안의 나눔의 열매(§13.1)·가정민원실(§13.5)은 폐기 | 축복가치교육·지역가정교회 오픈 |
-| **M6 — 운영 (부분 완료 ✅)** | 관리자 로그인(§8.1), 축복가치교육 관리(§8.2), 지역가정교회 관리(§8.3) 완료. 신청/스토리/FAQ/식구인증/통계 관리, 개인정보 자동 파기(§7.4)는 미착수 | 축복가치교육·지역가정교회 운영 이관 가능 |
-| **M7 — 품질** | 접근성·성능·SEO 점검(§9), 개선 항목(§10) 반영 | 정식 오픈 |
-
-> 실제 구현은 위 순서를 그대로 따르지 않고 M5/M6 중 축복가치교육·지역가정교회·로그인 부분을
-> 먼저 완료했습니다. M3(온보딩 제출 연동)·M4(스토리 관리)는 아직 착수 전입니다(§13).
+| M1 — 기반 | 프로젝트 스캐폴딩, 디자인 토큰, Header/Footer/SEO, 라우팅 | ✅ 완료 |
+| M2 — 정적 페이지 | 홈, 가이드, 개인정보, 약관, 404 | ✅ 완료 |
+| M3 — 전환 퍼널 | Supabase 스키마 + RLS, 축복상담 신청 폼(현재는 단일화면 7필드) | ✅ 완료 |
+| M4 — 콘텐츠 | 스토리 목록·상세·관리(6건 에디토리얼 시드) | ✅ 완료(콘텐츠 성격은 §6 P-06 참고) |
+| M5 — 사랑의 기술·지역가정교회 | 강좌 목록·상세·퀴즈, 지역가정교회 디렉터리(228건 시드) | ✅ 완료 |
+| M6 — 운영 | 관리자 로그인 + 8개 관리 화면 전부 | ✅ 완료(§8.10 제외) |
+| **M7 — 6축 개편** | GNB 재편, `/roadmap`·`/center` 신규, 강좌 상세+퀴즈, 홈 4블록 재배치, 모바일 CTA 바 | ✅ 완료(2026-08-27) |
+| **M8 — 가치관 진단** | `/values` 12문항 신규 | ✅ 완료(2026-08-28) — 단 신청서 연동은 미완(I-19) |
+| **M9 — 로드맵 시각 재설계** | 굽이진 경로형 타임라인 UI | ✅ 완료(2026-09-05, 커밋 `333068f`) |
+| M10 — 품질 마감 | 접근성/성능/SEO 전체 재점검, I-19~I-24 해소, `sitemap.xml` 갱신 | 진행 필요 |
 
 ---
 
-## 12. 부록 — AI 코딩 도구용 시작 프롬프트
+## 12. 부록 — 기능 추가 시 AI 코딩 도구용 프롬프트 템플릿
 
-Lovable / Claude Code 등에 아래를 첫 프롬프트로 사용하십시오.
+이제 이 저장소는 신규 스캐폴딩이 아니라 **기존 서비스에 기능을 얹는** 상태이므로, 프롬프트도 그에 맞춥니다.
 
 ```
-첨부한 PRD(BlessingWorld_PRD.md)를 따라 웹사이트를 구축해줘.
-
-이번 작업 범위는 M1 + M2 (§11 마일스톤)이야:
-1. §3.1 기술 스택으로 프로젝트를 세팅해줘.
-2. §4 디자인 시스템의 CSS 변수와 타이포그래피를 index.css와
-   tailwind.config.ts에 정확히 반영해줘. 색상은 하드코딩하지 말고
-   반드시 시맨틱 토큰(bg-background, text-primary 등)만 사용해.
-3. §5의 Header, Footer, SEO, SectionHeading 공통 컴포넌트를 만들어줘.
-   Footer 문구는 §5.2 원문을 한 글자도 바꾸지 마.
-4. §2.1 사이트맵대로 라우팅을 구성해줘.
-5. §6의 P-01(홈), P-02(축복의 씨앗), P-05(지역가정교회),
-   P-08(개인정보처리방침), P-09(이용약관), P-10(404)을 구현해줘.
+이 저장소(BlessingWorld)에 기능을 추가/수정해줘: {요구사항}
 
 지켜야 할 규칙:
-- 모든 한국어 카피는 PRD에 적힌 원문 그대로 쓸 것. 임의로 바꾸지 말 것.
-- 카피는 JSX에 하드코딩하지 말고 src/content/*.ts 상수로 분리할 것.
-- 모든 문단에 word-break: keep-all 적용, 본문 행간 1.75.
-- §9.1 접근성 체크리스트를 만족할 것 (alt 텍스트는 §4.6 표의 문구 사용).
-- 모바일 375px에서 가로 스크롤이 생기지 않을 것.
-- 이미지는 아직 없으니 §4.6의 키와 비율에 맞는 플레이스홀더로 두고,
-  alt 텍스트는 표에 적힌 문구를 그대로 넣어줘.
-- 성화감사장 링크는 §10 I-01에 따라 Google Forms 응답용 URL 자리표시자로 둘 것.
+- CLAUDE.md의 3계층 원칙(content/lib/pages) 그대로 따를 것. 카피는 src/content/*.ts에,
+  데이터 접근은 src/lib/*.ts에 Supabase-우선/localStorage-대체/content 기본값 폴백
+  패턴(예: src/lib/courses.ts)으로 작성할 것.
+- 색상은 반드시 시맨틱 토큰(bg-primary, text-accent-deep 등)만 사용. §4의 실제 CSS 변수를
+  참고하고, DESIGN.md 산문과 실제 코드가 다르면 코드(§4.2 코드 블록)를 따를 것.
+- 새 Supabase 테이블/정책은 §7.4의 is_staff_or_admin() 헬퍼 패턴을 재사용하고,
+  절대 profiles를 인라인 exists(...)로 재귀 조회하지 말 것(§7.4 무한재귀 버그 참고).
+- 새 라우트는 App.tsx에 React.lazy로 추가하고, GNB에 넣을지 여부는 §2.4의
+  6개 고정 항목 순서를 먼저 훼손하지 않는지 확인할 것.
+- 기존 화면의 카피(§6)는 임의로 바꾸지 말 것. 바꿔야 한다면 content 파일부터 수정.
 
-완료 후 §9.5의 AC-01 ~ AC-06, AC-14, AC-16을 스스로 점검해서
-결과를 표로 보고해줘.
+작업 완료 후 관련된 §9.5 AC 항목이 있으면 스스로 점검해서 결과를 보고해줘.
 ```
 
 ---
 
-## 13. 구현 반영 변경 이력 (원본 대비)
+## 13. 변경 이력 (원본 대비 · 누적)
 
-이 절은 §1~§9 본문에 이미 반영된(현재 시점의) 변경 사항을 한곳에 모아 정리한 변경 이력입니다.
-"왜 §6 P-04가 원본 실측 내용과 다른가?" 같은 질문에 답하기 위한 용도입니다.
+### 13.1 나눔의 열매(`/community`) 폐기 → 사랑의 기술(`/curriculum`)
 
-### 13.1 나눔의 열매(`/community`) 폐기 → 축복가치교육(`/curriculum`)
+(v1.0 원문 유지) 원본의 나눔의 열매(지역 기반 재능·물품 나눔장터) 명세를 참고용으로 남겨둡니다. 실제 구현에서는 이 화면 전체와 관련 라우트·컴포넌트가 삭제되었습니다. 폐기 라우트: `/community`, `/community/new`, `/community/:id`. DB 테이블(`community_posts`/`_requests`/`_comments`)은 삭제하지 않았으나 프론트엔드가 참조하지 않습니다(§7.2).
 
-원본 사이트를 분석해 작성했던 나눔의 열매(지역 기반 재능·물품 나눔장터) 명세를 참고용으로
-남겨둡니다. **실제 구현에서는 이 화면 전체와 관련 라우트·컴포넌트가 삭제되었고**, 같은 GNB
-자리를 축복가치교육(§6 P-04, 현재 버전)이 대신합니다.
+### 13.2 지역가정교회 디렉터리 도입 (초기 버전)
 
-- 폐기된 라우트: `/community`, `/community/new`, `/community/:id`
-- 폐기된 파일: `src/pages/Community.tsx`, `CommunityNew.tsx`, `CommunityDetail.tsx`, `src/content/community.ts`, `src/components/community/*`
-- **DB 테이블은 삭제하지 않음**: `community_posts`/`community_requests`/`community_comments`는
-  데이터 손실 방지를 위해 그대로 남아 있으나(§7.1) 어떤 프론트엔드 코드도 더 이상 참조하지 않습니다.
-- 원본 명세(카테고리 탭, 추천순 정렬 산식, 나눔 카드 그리드, 신청/수락 플로우 등)는 이 변경
-  이전 시점의 §6 P-04에 있었던 내용이며, 향후 유사 기능을 다시 만들 때 참고할 수 있도록 이
-  변경 이력에 그 존재만 기록해 둡니다(전문은 git 이력 참고).
-
-### 13.2 지역가정교회 디렉터리 도입 (초기 버전 — 이후 13.5로 대체)
-
-처음에는 원본에 없던 기능으로 `/civil-affairs`(가정민원실) 안에 지역(시·도/시·군·구) 기반
-교회 디렉터리 섹션만 추가했습니다(`churches` 테이블, `/admin/churches` 관리 화면). 이후
-§13.5에서 가정민원실 자체가 폐기되면서 이 디렉터리가 `/churches`라는 독립 페이지로
-승격되었습니다 — 현재 §6 P-05가 최신 상태입니다.
+(v1.0 원문 유지) 처음에는 `/civil-affairs`(가정민원실) 안의 하위 섹션으로 도입되었다가, 이후 §13.5에서 가정민원실 자체가 폐기되며 독립 페이지로 승격되었고, 6축 개편(§13.6)에서 다시 `/center/churches`로 이동했습니다.
 
 ### 13.3 관리자 로그인 · 인증 실제 구현
 
-§8(관리자 요구사항)은 원래 "접근 제어: profiles.role" 정도만 언급하고 실제 로그인 화면은
-설계하지 않았습니다. 실제 구현에서 Supabase Auth 기반 로그인(§8.1)과 그에 딸린 RLS 재귀 버그
-수정(§7.3)까지 완료했습니다.
+(v1.0 원문 유지, §8로 완전히 흡수됨) Supabase Auth 로그인과 RLS 재귀 버그 수정을 실제 구현 완료.
 
 ### 13.4 실제 Supabase 프로젝트 연결
 
-§7의 스키마는 실제 Supabase 프로젝트에 마이그레이션까지 적용되어 있습니다
-(`supabase/migrations/0001_init.sql` ~ `0005_churches.sql`). `.env`의
-`VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`가 채워져 있으면 앱이 실제 DB를 사용하고,
-비어 있으면 각 기능이 `src/content/*.ts` 기본값 또는 `localStorage`로 조용히 대체됩니다
-(§src/integrations/supabase/client.ts의 `isSupabaseConfigured`).
+(v1.0 원문 유지) §7의 스키마가 실제 프로젝트에 마이그레이션 적용되어 있으며, `.env` 미설정 시 콘텐츠 기본값/localStorage로 대체되는 원칙은 지금도 동일합니다(`CLAUDE.md` "Optional Supabase backend" 참고).
 
-### 13.5 가정민원실(`/civil-affairs`) 폐기 → 지역가정교회(`/churches`)로 대체
+### 13.5 가정민원실(`/civil-affairs`) 폐기 → 지역가정교회로 대체
 
-원본 사이트를 분석해 작성했던 가정민원실(서비스 허브: 축복결혼 행정 안내·HJ Baby
-Blessing·성화감사장 + 운영 정보 블록) 명세를 참고용으로 남겨둡니다. **실제 구현에서는 이
-화면 전체와 관련 라우트·컴포넌트·페이지가 삭제되었고**, 같은 GNB 자리를 지역가정교회
-디렉터리(§13.2에서 먼저 도입된 기능)가 대신합니다.
+(v1.0 원문 유지) 서비스 카드 3장, 축복결혼 행정 안내, 운영 정보 블록 삭제. `/civil-affairs`, `/civil-affairs/blessing-marriage`는 지금도 `/center/churches`로 리다이렉트됩니다(§2.2).
 
-- 폐기된 라우트: `/civil-affairs`, `/civil-affairs/blessing-marriage` — 둘 다 `/churches`로
-  리다이렉트됩니다(북마크 호환).
-- 폐기된 파일: `src/pages/CivilAffairs.tsx`, `BlessingMarriage.tsx`, `src/content/civilAffairs.ts`,
-  `src/components/civil-affairs/*`
-- **함께 삭제된 내용**: 서비스 카드 3장(축복결혼/HJ Baby Blessing/성화감사장 안내 카드 자체는
-  아니고, 이 카드들이 있던 허브 페이지), "2027 축복결혼" 행정 안내(신청 자격·절차·구비서류
-  탭, 내 준비 현황 위젯 — 원래도 원본에 미구현 상태였던 §P-06 설계 제안), 운영 정보 블록
-  (운영기관·담당부서·상담시간 등)
-- **살아남은 것**: HJ Baby Blessing·성화감사장은 원래도 외부 링크 카드였으므로 홈 카드 그리드
-  (§6 P-01④)에서 그대로 동작합니다. 대표 연락처(`tel:` 링크)는 `/churches` 페이지 하단으로
-  옮겨 계속 노출됩니다(§6 P-05③).
-- `blessing_progress` 테이블(§7.2)은 삭제하지 않았지만, 이를 쓰는 화면 자체가 없어져 당분간
-  미사용 상태입니다.
+### 13.6 6축 개편 (2026-08-26 설계 → 2026-08-27 구현 완료)
+
+설계서: `docs/2026-08-26_6축개편_설계.md`. 승인된 6개 결정사항: ① 홈 수치는 3종 병치(기준일 필수) ② 로드맵 8단계(심사/매칭·약혼 분리) ③ 상담 예약 없이 방식만 선택 ④ 교육 명칭 "사랑의 기술"로 통일 ⑤ 강좌 상세+확인 퀴즈 신설 ⑥ 디자인 토큰은 현행(퍼플+골드) 유지.
+
+**신규 파일**: `pages/Roadmap.tsx` `pages/Center.tsx` `pages/CourseDetail.tsx` `pages/admin/RoadmapAdmin.tsx` `pages/admin/StatsAdmin.tsx` `content/roadmap.ts` `content/center.ts` `lib/roadmap.ts` `lib/blessingProgress.ts` `lib/siteStats.ts` `components/roadmap/*` `components/curriculum/CourseQuiz.tsx` `components/admin/QuizEditor.tsx` `components/home/StatBand.tsx` `components/home/RoadmapPreview.tsx` `components/layout/MobileCtaBar.tsx` `components/guide/RoadmapBanner.tsx` `supabase/migrations/0012_six_pillars.sql`
+
+**삭제 파일**: `components/guide/StepJourney.tsx`(절차 설명이 `/roadmap`으로 이동), `components/onboarding/StepIndicator.tsx`(신청서가 한 화면이 되어 불필요), `content/guide.ts`의 `STEP_JOURNEY` 데이터.
+
+**설계와 실제 구현이 달라진 점** (설계서 §8 "구현 결과" 원문 유지):
+1. 신청서 5단계 위저드 → **한 화면 7필드**로 교체(스텝 인디케이터·이탈방지·자동포커스 제거, 대신 오류 필드로 스크롤).
+2. 홈 "행복의 꽃 미리보기" 섹션은 넣지 않음(당시 스토리 콘텐츠 0건).
+3. 로드맵 단계 지정은 **로그인 신청 건에만 가능**(`blessing_progress`가 `user_id` 필요).
+4. `site_stats.value`는 비운 채 배포(§10 I-23으로 지금도 이어지는 이슈).
+
+**--pillar-\* 축별 식별색 / `.stat-figure`·`.stat-basis` 유틸리티는 설계서의 제안이었을 뿐 실제로 채택되지 않았습니다**(§4.2 참고) — 이 문서 v1.0 초안 작성 시 설계서만 보고 이미 구현된 것으로 오인했던 부분이라 v2.0에서 명확히 정정합니다.
+
+### 13.7 6축 개편 이후 추가 변경 (2026-08-28 ~ 2026-09-05)
+
+- **2026-08-28**: `/values`(가치관 진단 12문항) 신규 추가, GNB 6번째 항목으로 노출(`0017_values_assessment.sql`). `guidance_requests`와의 연동은 미완성 상태로 남음(§10 I-19).
+- **2026-08-27**: `MyPage`/`Login`/`ResetPassword`(§6 P-08, P-09) 및 `RequireAuth` 가드 추가 — v1.0/6축 설계서 어디에도 없던 일반 사용자 계정 기능.
+- **접근성 수정**: 헤딩 위계·로딩 상태 수정(PR #7, 커밋 `a91ec09`).
+- **2026-09-05**: `/roadmap` 타임라인을 좌/중/우/중 굽이진 경로형 UI로 재설계(커밋 `333068f`).
+- 홈 카드 그리드에서 v1.0의 외부 링크 카드(HJ Baby Blessing·성화감사장)가 완전히 제거됨(§2.3) — 정확히 언제 제거됐는지는 이 갱신 시점에 특정하지 못했으며, git blame으로 추가 확인이 필요하면 `src/content/home.ts`의 `HOME_CARDS` 히스토리를 보십시오.
 
 ---
 
-## 부록 B — 원본 사이트 실측 요약표
+## 부록 A — 원본 사이트(`blessinghome.lovable.app`) 실측 요약표 (2026-08 시점, 역사적 참고용)
+
+> 이 표는 **원본 스크래핑 시점의 원본 사이트** 구조를 기록한 것으로, 현재 블레싱월드 구현과는 다릅니다. 현재 구현 요약은 §2.1을 보십시오.
 
 | 항목 | 값 |
 |---|---|
 | 도메인 | blessinghome.lovable.app |
 | 플랫폼 | Lovable (Vite + React SPA) |
 | 라우트 수 | 9 (+404) |
-| GNB 항목 | 5 (원본 재구현 4개 + `/documents` 1개 추가, §2.3) |
+| GNB 항목 | 4 (재구현 시 `/documents` 1개를 얹어 5개로, 이후 6축 개편으로 6개까지 증가) |
 | 홈 히어로 슬라이드 | 3 |
-| 홈 콘텐츠 카드 | 5 |
-| 가이드 가치 기둥 | 4 |
-| 가이드 여정 스텝 | 6 (3그룹) |
-| 가이드 FAQ | 9 (기본 5 + 더보기 4) |
-| 커뮤니티 카테고리 | 5 (전체 포함) |
-| 커뮤니티 정렬 | 4 |
-| 온보딩 스텝 | 5 |
-| 민원실 서비스 | 3 (내부 1 + 외부 2) |
+| 홈 콘텐츠 카드 | 5 (그중 2개는 외부 링크 — 현재 구현에는 없음, §2.3) |
+| 가이드 여정 스텝 | 6 (현재는 `/roadmap`에서 8단계로 확장) |
+| 가이드 FAQ | 9 (현재는 11개) |
+| 커뮤니티 카테고리 | 5 — 현재 미구현 기능(§13.1) |
+| 온보딩 스텝 | 5 (현재는 한 화면 7필드, §6 P-05a) |
 | 약관 조문 | 6 |
-| 저작권 표기 | © 2026 블레싱월드. All rights reserved. |
 
 ---
 
-*본 PRD는 공개된 웹사이트의 구조·문구를 분석하여 재구현 목적으로 작성되었습니다. 실제 서비스 구축 시 운영기관(세계평화통일가정연합 가정행복국)의 확인을 거쳐 문구·연락처·법적 고지 내용을 최종 확정하십시오.*
+*이 문서는 원본 공개 웹사이트 분석(v1.0)에서 출발해, 이후 실제 코드베이스(`src/`, `supabase/migrations/`, `DESIGN.md`)를 그대로 반영하는 as-built 명세(v2.0)로 전환되었습니다. 기능 추가·수정 시 이 문서를 갱신하고, 상충하는 부분은 실제 코드가 항상 우선합니다.*

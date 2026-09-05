@@ -89,6 +89,20 @@ export const DEFAULT_ROADMAP_STEPS: RoadmapStep[] = [
   },
 ];
 
+// 각 단계에 붙는 상징적 이름 — "축복"이라는 나무가 씨앗에서 꽃까지 자라나는 과정에
+// 8단계를 빗댄 고정 브랜드 카피입니다. 문구·기간과 달리 관리자 화면(RoadmapAdmin)에서
+// 고치는 대상이 아니라서 DEFAULT_ROADMAP_STEPS/Supabase가 아닌 이 맵으로 따로 둡니다.
+export const ROADMAP_SERIES_NAMES: Record<string, string> = {
+  step_01: "축복의 씨앗",
+  step_02: "축복의 성장",
+  step_03: "축복의 문으로",
+  step_04: "축복의 만남",
+  step_05: "축복의 준비",
+  step_06: "축복의 심사",
+  step_07: "축복의 설렘",
+  step_08: "축복의 꽃",
+};
+
 /** 7단계처럼 본인이 진행할 수 없는 단계에 붙는 안내 — 이탈이 아니라 대기임을 알립니다. */
 export const WAITING_NOTE =
   "이 단계는 기다리는 시간입니다. 진행이 멈춘 것이 아니니, 연락이 올 때까지 편히 기다려 주세요.";

@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { SectionHeading } from "@/components/common/SectionHeading";
 import { Button } from "@/components/ui/button";
 import { HOME_ROADMAP_PREVIEW } from "@/content/home";
-import { DEFAULT_ROADMAP_STEPS } from "@/content/roadmap";
+import { DEFAULT_ROADMAP_STEPS, ROADMAP_SERIES_NAMES } from "@/content/roadmap";
 
 // 홈 로드맵 미리보기(6축 개편 §4.1-4) — 앞 3단계만 보여주고 나머지는 /roadmap으로 넘깁니다.
 // 홈에서 8단계를 모두 나열하면 로드맵 페이지가 존재할 이유가 없어지고, 첫 화면이 무거워집니다.
@@ -32,7 +32,12 @@ export function RoadmapPreview() {
             >
               {step.no}
             </span>
-            <h3 className="mt-4 text-lg font-semibold text-foreground">{step.title}</h3>
+            {ROADMAP_SERIES_NAMES[step.key] ? (
+              <p className="mt-4 text-xs font-semibold tracking-wide text-accent-deep">
+                {ROADMAP_SERIES_NAMES[step.key]}
+              </p>
+            ) : null}
+            <h3 className="mt-1 text-lg font-semibold text-foreground">{step.title}</h3>
             <p className="mt-2 text-sm leading-[1.75] text-muted-foreground">{step.description}</p>
           </li>
         ))}
