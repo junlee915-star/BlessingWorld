@@ -74,18 +74,31 @@ export const VIDEO_RAILS: VideoRail[] = [
     id: "family-worship",
     eyebrow: "FAMILY WORSHIP",
     title: "우리 가족 행복한 날 가정예배",
-    playlistUrl: "https://www.youtube.com/playlist?list=PLwgyuMsn4VC1k6QzqBnRDK_Fm_3mCGFHm",
+    // "천일국 가정예배(시즌2)" 재생목록의 최신 4편(2026-09-09 실측). 새 영상이 올라오면
+    // 이 재생목록 RSS(youtube.com/feeds/videos.xml?playlist_id=PLJaCQu-qe010)를 보고
+    // 맨 앞에 추가하고, 5번째 항목은 지우고, 이전 1위의 isNew만 떼면 됩니다.
+    playlistUrl: "https://www.youtube.com/playlist?list=PLJaCQu-qe010",
     videos: [
       {
-        id: "J6aFq2VbZnM",
-        title: "천일국 가정예배 | 26년 8월 둘째 주 | 노력",
-        publishedLabel: "2026년 8월 6일",
+        id: "ox9lPdyqbfE",
+        title: "천일국 가정예배 | 26년 9월 첫째 주 | 전진",
+        publishedLabel: "2026년 9월 3일",
         isNew: true,
       },
       {
-        id: "m2BB3cEZ1ow",
-        title: "천일국 가정예배 | 26년 8월 첫째 주 | 목표",
-        publishedLabel: "2026년 7월 30일",
+        id: "WpbM0ZXseNs",
+        title: "천일국 가정예배 | 26년 8월 다섯째 주 | 아버지",
+        publishedLabel: "2026년 8월 27일",
+      },
+      {
+        id: "_S6kPmpopkU",
+        title: "천일국 가정예배 | 26년 8월 넷째 주 | 성장",
+        publishedLabel: "2026년 8월 20일",
+      },
+      {
+        id: "8XG27UAV8fY",
+        title: "천일국 가정예배 | 26년 8월 셋째 주 | 도전",
+        publishedLabel: "2026년 8월 14일",
       },
     ],
   },
