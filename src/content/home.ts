@@ -126,16 +126,6 @@ export const HOME_CARDS: HomeCard[] = [
     size: "sm",
   },
   {
-    badge: "축복로드맵",
-    title: "축복까지 가는 여덟 걸음",
-    description: "알아보기부터 축복식까지, 어떤 순서로 진행되는지 한눈에 확인하세요.",
-    to: "/roadmap",
-    cta: "로드맵 보기 →",
-    image: IMG("7-home-card-mass-blessing-group.webp"),
-    imageAlt: "여러 가정이 함께한 합동축복식",
-    size: "sm",
-  },
-  {
     badge: "축복센터",
     title: "상담 신청·교회 찾기·서류",
     description: "축복을 결심하셨다면, 필요한 모든 절차를 한곳에서 시작하실 수 있습니다.",
