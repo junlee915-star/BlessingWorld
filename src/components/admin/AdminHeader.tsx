@@ -12,6 +12,7 @@ const ADMIN_NAV = [
   { label: "신청 관리", path: "/admin/guidance" },
   { label: "행복의 꽃", path: "/admin/stories" },
   { label: "사랑의 기술", path: "/admin/curriculum" },
+  { label: "느낀 점", path: "/admin/reflections" },
   { label: "축복로드맵", path: "/admin/roadmap" },
   { label: "지역가정교회", path: "/admin/churches" },
   { label: "홈 수치", path: "/admin/stats" },

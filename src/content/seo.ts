@@ -34,8 +34,8 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
       "축복결혼이 실제 삶에서 어떻게 피어나는지, 가정들의 이야기로 만나보세요.",
   },
   "/curriculum": {
-    title: "사랑의 기술 — 축복가치교육 4강좌",
-    description: "사랑은 감정이 아니라 배울 수 있는 기술입니다. 4개의 강좌로 차근차근 익혀보세요.",
+    title: "사랑의 기술 — 축복결혼 영상 강좌 6편",
+    description: "사랑은 감정이 아니라 배울 수 있는 기술입니다. 여섯 편의 영상 강좌로 차근차근 익혀보세요.",
   },
   "/roadmap": {
     title: "축복로드맵 — 축복까지 가는 8단계",
@@ -78,6 +78,10 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
   "/admin/curriculum": {
     title: "사랑의 기술 관리 — 블레싱월드 관리자",
     description: "사랑의 기술 강좌 목록과 확인 퀴즈를 관리합니다.",
+  },
+  "/admin/reflections": {
+    title: "느낀 점 관리 — 블레싱월드 관리자",
+    description: "사랑의 기술 강좌를 들은 회원이 남긴 느낀 점을 강좌별로 모아 봅니다.",
   },
   "/admin/roadmap": {
     title: "축복로드맵 관리 — 블레싱월드 관리자",

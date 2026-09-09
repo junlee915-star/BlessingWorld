@@ -32,6 +32,7 @@ const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const MyPage = lazy(() => import("@/pages/MyPage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const CourseAdmin = lazy(() => import("@/pages/admin/CourseAdmin"));
+const ReflectionAdmin = lazy(() => import("@/pages/admin/ReflectionAdmin"));
 const ChurchAdmin = lazy(() => import("@/pages/admin/ChurchAdmin"));
 const StoryAdmin = lazy(() => import("@/pages/admin/StoryAdmin"));
 const FaqAdmin = lazy(() => import("@/pages/admin/FaqAdmin"));
@@ -119,6 +120,14 @@ export default function App() {
                     element={
                       <RequireAdmin>
                         <CourseAdmin />
+                      </RequireAdmin>
+                    }
+                  />
+                  <Route
+                    path="/admin/reflections"
+                    element={
+                      <RequireAdmin>
+                        <ReflectionAdmin />
                       </RequireAdmin>
                     }
                   />

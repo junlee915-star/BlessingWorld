@@ -40,7 +40,7 @@ export const DEFAULT_ROADMAP_STEPS: RoadmapStep[] = [
     title: "배우기",
     description:
       "교육을 통해 참사랑과 축복가정의 의미를 배우고, 행복한 가정을 위한 기준을 세웁니다. 사랑을 표현하고 갈등을 풀어 가는 법도 함께 익힙니다.",
-    to: { label: "사랑의 기술 4강좌", href: "/curriculum" },
+    to: { label: "사랑의 기술 6강좌", href: "/curriculum" },
   },
   {
     key: "step_03",

@@ -384,6 +384,25 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["course_completions"]["Row"]>;
         Relationships: [];
       };
+      /** 사랑의 기술 강좌를 다 들은 뒤 남기는 "느낀 점"(§0019_course_reflections.sql). */
+      course_reflections: {
+        Row: {
+          user_id: string;
+          course_id: string;
+          body: string;
+          created_at: string;
+          updated_at: string;
+        };
+        // courses/course_completions와 같은 `Partial<Row> & {필수 키}` 형태 — 설치된
+        // @supabase/supabase-js의 타입 버그로 select() 결과가 `never`로 좁혀지는 것을 피합니다.
+        Insert: Partial<Database["public"]["Tables"]["course_reflections"]["Row"]> & {
+          user_id: string;
+          course_id: string;
+          body: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_reflections"]["Row"]>;
+        Relationships: [];
+      };
     };
     // @supabase/supabase-js(최신)의 쿼리 빌더가 스키마 타입에서 요구하는 필드입니다.
     // 이 프로젝트는 뷰/함수를 쓰지 않아 비워둡니다 — 없으면 모든 .from() 호출의 타입이

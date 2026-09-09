@@ -8,6 +8,7 @@ import { EyebrowLabel } from "@/components/common/EyebrowLabel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CourseQuiz } from "@/components/curriculum/CourseQuiz";
+import { CourseReflection } from "@/components/curriculum/CourseReflection";
 import { CURRICULUM_VIDEO_PLACEHOLDER, type Course } from "@/content/curriculum";
 import { fetchPublishedCourses, getCompletedCourses, saveCompletedCourses } from "@/lib/courses";
 import { setCourseCompletion } from "@/lib/courseCompletions";
@@ -167,6 +168,10 @@ export default function CourseDetail() {
               </button>
             </div>
           )}
+
+          <div className="mt-6">
+            <CourseReflection courseId={course.id} />
+          </div>
         </div>
 
         <nav className="mt-12 flex flex-wrap gap-3" aria-label="다음 강좌">

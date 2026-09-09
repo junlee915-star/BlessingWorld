@@ -108,7 +108,7 @@ export const HOME_CARDS: HomeCard[] = [
   {
     badge: "사랑의 기술",
     title: "배울 수 있는 사랑",
-    description: "좋은 가정을 이루는 데 필요한 네 가지 기술을 강좌로 담았습니다.",
+    description: "축복결혼을 이해하는 데 도움이 되는 여섯 편의 영상 강좌를 모았습니다.",
     to: "/curriculum",
     cta: "강좌 보기 →",
     image: IMG("6-home-card-online-course.webp"),
