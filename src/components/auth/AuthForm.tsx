@@ -14,18 +14,42 @@ const RESEND_COOLDOWN_SECONDS = 60;
 const inputClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
+/** 구글 브랜드 G 마크. lucide에는 브랜드 아이콘이 없어 공식 색상 SVG를 인라인합니다. */
+function GoogleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        fill="#4285F4"
+        d="M23.06 12.25c0-.85-.08-1.67-.22-2.45H12v4.64h6.2a5.3 5.3 0 0 1-2.3 3.48v2.9h3.72c2.18-2.01 3.44-4.97 3.44-8.57Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.1 0 5.7-1.03 7.6-2.78l-3.72-2.9c-1.03.7-2.35 1.1-3.88 1.1-2.98 0-5.5-2.01-6.4-4.72H1.75v2.98A11.99 11.99 0 0 0 12 24Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.6 14.7a7.2 7.2 0 0 1 0-4.6V7.12H1.75a12 12 0 0 0 0 10.76L5.6 14.7Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.77c1.68 0 3.19.58 4.38 1.71l3.28-3.28C17.7 1.19 15.1 0 12 0A11.99 11.99 0 0 0 1.75 7.12L5.6 10.1C6.5 7.39 9.02 4.77 12 4.77Z"
+      />
+    </svg>
+  );
+}
+
 const VARIANT_COPY = {
   // /admin/login — staff/admin 로그인. 가입은 누구나 할 수 있지만 기본 role은 항상 'user'.
   admin: {
     eyebrow: "ADMIN",
     title: "관리자 로그인",
-    hint: "새 계정은 기본 권한(user)으로 생성돼요. 사랑의 기술 관리 권한은 운영자가 별도로 부여합니다.",
+    hint: "구글 계정 또는 이메일로 로그인하세요. 새 계정은 기본 권한(user)으로 생성돼요 — 사랑의 기술 관리 권한은 운영자가 별도로 부여합니다.",
   },
   // /login — 일반 회원 로그인. §마이페이지(수강한 교육 확인)로 이어집니다.
   member: {
     eyebrow: "MEMBER",
     title: "로그인",
-    hint: "이메일과 비밀번호로 로그인하면, 내가 수강한 교육을 어느 기기에서든 확인할 수 있어요.",
+    hint: "구글 계정 또는 이메일로 로그인하면, 내가 수강한 교육을 어느 기기에서든 확인할 수 있어요.",
   },
 } as const;
 
@@ -38,7 +62,14 @@ interface AuthFormProps {
 /** §/admin/login, §/login이 공유하는 이메일·비밀번호 로그인/가입 폼(Supabase Auth). */
 export function AuthForm({ variant, defaultRedirectTo }: AuthFormProps) {
   const copy = VARIANT_COPY[variant];
-  const { session, signInWithPassword, signUp, resendConfirmationEmail, requestPasswordReset } = useAuth();
+  const {
+    session,
+    signInWithPassword,
+    signInWithGoogle,
+    signUp,
+    resendConfirmationEmail,
+    requestPasswordReset,
+  } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from =
@@ -48,6 +79,8 @@ export function AuthForm({ variant, defaultRedirectTo }: AuthFormProps) {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [googleSubmitting, setGoogleSubmitting] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -89,6 +122,17 @@ export function AuthForm({ variant, defaultRedirectTo }: AuthFormProps) {
   // 이미 로그인돼 있으면 바로 보냅니다 (RequireAdmin/RequireAuth가 권한을 다시 확인해요).
   if (session) {
     return <Navigate to={from} replace />;
+  }
+
+  async function handleGoogle() {
+    setGoogleError(null);
+    setGoogleSubmitting(true);
+    const { error: oauthError } = await signInWithGoogle();
+    // 성공 시 브라우저가 구글 동의 화면으로 이동하므로 아래 코드는 보통 실행되지 않습니다.
+    if (oauthError) {
+      setGoogleError(oauthError);
+      setGoogleSubmitting(false);
+    }
   }
 
   async function handleLogin(event: FormEvent) {
@@ -169,7 +213,26 @@ export function AuthForm({ variant, defaultRedirectTo }: AuthFormProps) {
       <h1 className="mt-3 text-2xl font-bold text-foreground">{copy.title}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{copy.hint}</p>
 
-      <Tabs defaultValue="login" className="mt-8">
+      <div className="mt-8">
+        <button
+          type="button"
+          onClick={handleGoogle}
+          disabled={googleSubmitting || submitting}
+          className="flex w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-background px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <GoogleIcon className="h-4 w-4" />
+          {googleSubmitting ? "구글로 이동 중…" : "구글 계정으로 계속하기"}
+        </button>
+        {googleError ? <p className="mt-3 text-sm text-destructive">{googleError}</p> : null}
+
+        <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
+          또는 이메일로
+          <span className="h-px flex-1 bg-border" />
+        </div>
+      </div>
+
+      <Tabs defaultValue="login">
         <TabsList>
           <TabsTrigger value="login">로그인</TabsTrigger>
           <TabsTrigger value="signup">회원가입</TabsTrigger>

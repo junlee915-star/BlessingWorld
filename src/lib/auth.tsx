@@ -24,6 +24,9 @@ interface AuthContextValue {
   /** profile.role이 staff 또는 admin인지 */
   isStaff: boolean;
   signInWithPassword: (email: string, password: string) => Promise<{ error: string | null }>;
+  /** 구글 계정으로 로그인/회원가입합니다. 성공하면 브라우저가 구글 동의 화면으로 이동하므로
+   *  이 Promise는 보통 리다이렉트 직전에 끝납니다(에러가 있을 때만 의미 있는 값이 옵니다). */
+  signInWithGoogle: () => Promise<{ error: string | null }>;
   signUp: (
     email: string,
     password: string,
@@ -152,6 +155,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { error: "Supabase가 연결되어 있지 않아요." };
         }
         const { error } = await supabase.auth.signInWithPassword({ email, password });
+        return { error: error?.message ?? null };
+      },
+      async signInWithGoogle() {
+        if (!isSupabaseConfigured || !supabase) {
+          return { error: "Supabase가 연결되어 있지 않아요." };
+        }
+        // OAuth 후 사이트 루트로 돌아옵니다. 이 값이 Supabase 프로젝트의 Redirect URL
+        // 허용 목록에 등록돼 있어야 하며(대시보드), HashRouter 배포에서는
+        // §lib/authHashRedirect.ts가, 그 외에는 detectSessionInUrl이 콜백 해시
+        // (#access_token=...)를 세션으로 바꿔줍니다 — 이메일 인증 링크와 동일한 경로입니다.
+        const redirectTo = window.location.origin + import.meta.env.BASE_URL;
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: { redirectTo },
+        });
         return { error: error?.message ?? null };
       },
       async signUp(email, password, displayName) {
