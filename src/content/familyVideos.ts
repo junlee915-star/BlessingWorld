@@ -42,31 +42,28 @@ export const VIDEO_RAILS: VideoRail[] = [
     id: "blessed-family-interview",
     eyebrow: "BLESSED FAMILY INTERVIEW",
     title: "축복가정 인터뷰",
-    playlistUrl: "https://www.youtube.com/playlist?list=PLwgyuMsn4VC1lTi-QHQP1vKM-hXQz0kxZ",
+    // "축복톡톡" 재생목록의 최신 영상(2026-09-09 실측 — 현재 3편이 전부입니다). 새 영상이
+    // 올라오면 이 재생목록 RSS(youtube.com/feeds/videos.xml?playlist_id=PLAqn3szZyCaY)를
+    // 보고 맨 앞에 추가하고, 4편을 넘기면 가장 오래된 항목을 지우고, 이전 1위의 isNew만 떼세요.
+    playlistUrl: "https://www.youtube.com/playlist?list=PLAqn3szZyCaY",
     videos: [
       {
-        id: "qhqXVE9q32k",
+        id: "-OzVgb7WOH8",
         title:
-          "[축복가정인터뷰] 한국과 일본, 서로 다른 두 나라의 만남… 🌊 하지만 너무나 닮은 한일 국제부부의 축복스토리 💞",
-        publishedLabel: "2026년 3월 10일",
+          "\"여보 얘기 좀 하자\" 극E 아내를 만난 극I 남편의 최후ㅋㅋ #정반대커플 #장거리연애 #통일교결혼",
+        publishedLabel: "2026년 9월 8일",
         isNew: true,
       },
       {
-        id: "chPMmv9uGQY",
-        title: "[축복가정인터뷰] 경상도와 제주의 만남,,,🌴꿀뚝뚝 동갑내기 신혼부부의 축복스토리🍯",
-        publishedLabel: "2026년 7월 21일",
+        id: "IkyMDOkdsHw",
+        title:
+          "15일만에 초고속 약혼, 2달 만에 결혼?! 20대 엄빠의 달달한 신혼 일기💕 #통일교 #가정연합 #초고속결혼 #신혼부부",
+        publishedLabel: "2026년 9월 7일",
       },
       {
-        id: "Y7s6hdmmC3w",
-        title:
-          "[축복가정인터뷰] 공직이라는 공통점으로 만난 운명적 만남…🧡서로를 배려하며 이제는 같은 꿈을 꾸기까지💌 축복스토리",
-        publishedLabel: "2026년 7월 21일",
-      },
-      {
-        id: "gmxZPK7EgXg",
-        title:
-          "[축복가정인터뷰] 헌수를 하며 만난 나의 짝…🧡어색한 첫 만남을 뒤로하고 서로 보듬기까지💌 축복스토리",
-        publishedLabel: "2026년 7월 21일",
+        id: "BwMO7dd89sI",
+        title: "10년 친구사이였다가 부부로?! │ 창원-아산 장거리 커플",
+        publishedLabel: "2026년 9월 2일",
       },
     ],
   },
