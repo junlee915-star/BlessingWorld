@@ -10,7 +10,7 @@
 export const ROADMAP_HERO = {
   eyebrow: "YOUR ROADMAP",
   title: "축복까지, 여덟 걸음",
-  body: "한 번에 다 준비하지 않아도 괜찮습니다. 지금 서 있는 자리에서 다음 한 걸음만 보시면 됩니다.",
+  body: "한 번에 다 준비하지 않아도 괜찮습니다. 지금 서 계신 자리에서 다음 한 걸음만 보시면 됩니다.",
 };
 
 export interface RoadmapStep {

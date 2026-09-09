@@ -6,8 +6,31 @@ import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 import type { BlessingStepStatus } from "@/integrations/supabase/types";
 
 const LOCAL_STORAGE_KEY = "blessingworld:roadmap-current-step";
+const LOCAL_CHECKED_KEY = "blessingworld:roadmap-checked-steps";
 
 export type ProgressMap = Record<string, BlessingStepStatus>;
+
+/** 방문자가 직접 체크한 단계 키 목록. 저장 불가 환경에서는 빈 배열. */
+export function getLocalCheckedSteps(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(LOCAL_CHECKED_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+export function setLocalCheckedSteps(stepKeys: string[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(LOCAL_CHECKED_KEY, JSON.stringify(stepKeys));
+  } catch {
+    // 저장 불가 환경은 무시 — 표시만 못 할 뿐 기능은 정상입니다.
+  }
+}
 
 export function getLocalCurrentStep(): string | null {
   if (typeof window === "undefined") return null;

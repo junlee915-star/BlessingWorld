@@ -13,7 +13,6 @@ import {
   deriveCurrentStep,
   fetchMyProgress,
   getLocalCurrentStep,
-  setLocalCurrentStep,
 } from "@/lib/blessingProgress";
 import { useAuth } from "@/lib/auth";
 
@@ -66,39 +65,32 @@ export default function Roadmap() {
     <>
       <SEO path="/roadmap" jsonLd={[stepListJsonLd]} />
 
-      <section className="mx-auto max-w-6xl px-5 pb-8 pt-16 text-center md:px-8 md:pt-24">
+      <section className="mx-auto max-w-6xl px-5 pb-8 pt-16 md:px-8 md:pt-24">
         <EyebrowLabel>{ROADMAP_HERO.eyebrow}</EyebrowLabel>
-        <h1 className="mx-auto mt-4 max-w-3xl text-[28px] font-bold leading-[1.3] text-foreground md:text-[40px]">
+        <h1 className="mt-4 max-w-3xl font-serif text-[28px] font-bold leading-[1.3] text-foreground md:text-[40px]">
           {ROADMAP_HERO.title}
         </h1>
-        <p className="prose-copy mx-auto mt-5 text-[15px] md:text-[17px]">{ROADMAP_HERO.body}</p>
+        <p className="prose-copy mt-5 max-w-2xl text-[15px] md:text-[17px]">{ROADMAP_HERO.body}</p>
       </section>
 
       <section className="mx-auto max-w-6xl px-5 pb-16 md:px-8 md:pb-24">
-        <RoadmapTimeline
-          steps={steps}
-          currentStepKey={currentStepKey}
-          onSelectCurrent={(key) => {
-            setCurrentStepKey(key);
-            setLocalCurrentStep(key);
-          }}
-        />
+        <RoadmapTimeline steps={steps} currentStepKey={currentStepKey} />
       </section>
 
       <ReadinessChecker />
 
-      <section className="bg-primary-soft py-16 md:py-24">
+      <section className="bg-primary py-16 text-white md:py-24">
         <div className="mx-auto flex max-w-3xl flex-col items-center px-5 text-center md:px-8">
-          <h2 className="text-2xl font-bold leading-[1.4] text-primary-deep md:text-[30px]">
+          <h2 className="text-2xl font-bold leading-[1.4] md:text-[30px]">
             {ROADMAP_FINAL_CTA.title}
           </h2>
-          <p className="mt-4 max-w-prose text-[15px] leading-[1.8] text-foreground/75 md:text-base">
+          <p className="mt-4 max-w-prose text-[15px] leading-[1.8] text-white/80 md:text-base">
             {ROADMAP_FINAL_CTA.body}
           </p>
-          <Button asChild size="lg" className="mt-8">
+          <Button asChild variant="light" size="lg" className="mt-8">
             <Link to={ROADMAP_FINAL_CTA.cta.to}>{ROADMAP_FINAL_CTA.cta.label}</Link>
           </Button>
-          <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-medium text-primary-deep/80">
+          <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-medium text-white/75">
             {ROADMAP_FINAL_CTA.badges.map((badge) => (
               <li key={badge}>· {badge}</li>
             ))}
