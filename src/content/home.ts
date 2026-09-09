@@ -56,6 +56,16 @@ export const HOME_CTA_BAND = {
   body: "궁금한 것부터 하나씩, 블레싱월드가 끝까지 함께합니다.",
 };
 
+/** 홈 소개 영상(§4.1 감정 블록) — 히어로·인트로 다음에 짧은 영상으로 서비스를 소개합니다. */
+export const HOME_VIDEO = {
+  eyebrow: "WATCH",
+  title: "영상으로 먼저 만나보세요",
+  body: "블레싱월드가 전하고 싶은 이야기를 짧은 영상에 담았습니다.",
+  // https://youtu.be/dVzeoyC19O8 — 임베드는 CourseDetail과 같은 www.youtube.com/embed 형식을 씁니다.
+  youtubeId: "dVzeoyC19O8",
+  iframeTitle: "블레싱월드 소개 영상",
+};
+
 /** 호명 섹션(6축 개편 §4.1-2) — 수치는 site_stats에서 오고, 없으면 섹션 전체가 렌더되지 않습니다. */
 export const HOME_STATS_SECTION = {
   eyebrow: "OUR FAMILIES",

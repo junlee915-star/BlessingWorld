@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { SEO } from "@/components/common/SEO";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { IntroTriad } from "@/components/home/IntroTriad";
+import { HomeVideo } from "@/components/home/HomeVideo";
 import { HomeCtaSection } from "@/components/home/HomeCtaSection";
 import { FeatureCardGrid } from "@/components/home/FeatureCardGrid";
 import { StatBand } from "@/components/home/StatBand";
@@ -46,6 +47,7 @@ export default function Home() {
       {/* 6축 개편 §4.1 — 듀오식 4블록 순서: 감정(히어로·인트로) → 숫자(StatBand)
           → 방법론(5축 카드·로드맵) → 안심(신뢰 배지) → 전환(CTA 밴드). */}
       <IntroTriad />
+      <HomeVideo />
       <StatBand />
       <FeatureCardGrid />
       <RoadmapPreview />
