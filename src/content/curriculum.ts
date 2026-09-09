@@ -6,8 +6,8 @@
 export const CURRICULUM_HERO = {
   eyebrow: "THE ART OF LOVE",
   title: "사랑은 감정이 아니라\n배울 수 있는 기술입니다",
-  body: "축복결혼을 이해하는 데 도움이 되는 여섯 편의 영상 강좌를 모았습니다. 순서대로 들어도, 궁금한 강좌부터 골라 들어도 괜찮아요.",
-  subtitle: "영상 강좌 6편",
+  body: "축복결혼을 이해하는 데 도움이 되는 영상 강좌를 모았습니다. 순서대로 들어도, 궁금한 강좌부터 골라 들어도 괜찮아요.",
+  subtitle: "영상 강좌 모음",
 };
 
 /** 강좌 확인 퀴즈 문항 — 평가가 아니라 학습 확인이 목적입니다(재응시 무제한·점수 비공개). */
@@ -130,7 +130,7 @@ export const QUIZ_COPY = {
 };
 
 export const CURRICULUM_FINAL_CTA = {
-  title: "6강좌를 모두 들으셨나요?",
+  title: "강좌를 모두 들으셨나요?",
   body: "이제 지역 담당자와 함께 다음 걸음을 이야기해보세요.",
   // ref=curriculum: /onboarding이 §P-04 교육 이수를 거쳐 왔음을 알고 안내 문구와
   // 제출 페이로드(completed_courses)에 반영할 수 있게 하는 연계 파라미터(§P-07).

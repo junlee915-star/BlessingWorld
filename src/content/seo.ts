@@ -34,8 +34,8 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
       "축복결혼이 실제 삶에서 어떻게 피어나는지, 가정들의 이야기로 만나보세요.",
   },
   "/curriculum": {
-    title: "사랑의 기술 — 축복결혼 영상 강좌 6편",
-    description: "사랑은 감정이 아니라 배울 수 있는 기술입니다. 여섯 편의 영상 강좌로 차근차근 익혀보세요.",
+    title: "사랑의 기술 — 축복결혼 영상 강좌",
+    description: "사랑은 감정이 아니라 배울 수 있는 기술입니다. 영상 강좌로 차근차근 익혀보세요.",
   },
   "/roadmap": {
     title: "축복로드맵 — 축복까지 가는 8단계",
