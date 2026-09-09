@@ -42,9 +42,11 @@ export const VIDEO_RAILS: VideoRail[] = [
     id: "blessed-family-interview",
     eyebrow: "BLESSED FAMILY INTERVIEW",
     title: "축복가정 인터뷰",
-    // "축복톡톡" 재생목록의 최신 영상(2026-09-09 실측 — 현재 3편이 전부입니다). 새 영상이
-    // 올라오면 이 재생목록 RSS(youtube.com/feeds/videos.xml?playlist_id=PLAqn3szZyCaY)를
-    // 보고 맨 앞에 추가하고, 4편을 넘기면 가장 오래된 항목을 지우고, 이전 1위의 isNew만 떼세요.
+    // "축복톡톡" 재생목록의 최신 4편(2026-09-10 실측). 이 재생목록 RSS
+    // (youtube.com/feeds/videos.xml?playlist_id=PLAqn3szZyCaY)는 중간에 비공개 영상이
+    // 하나 있어 최신 3건까지만 내려주므로, 4번째(mjjJo5IZhYo)는 재생목록 페이지에서 직접
+    // 확인했습니다. 새 영상이 올라오면 맨 앞에 추가하고, 4편을 넘기면 가장 오래된 항목을
+    // 지우고, 이전 1위의 isNew만 떼세요.
     playlistUrl: "https://www.youtube.com/playlist?list=PLAqn3szZyCaY",
     videos: [
       {
@@ -64,6 +66,12 @@ export const VIDEO_RAILS: VideoRail[] = [
         id: "BwMO7dd89sI",
         title: "10년 친구사이였다가 부부로?! │ 창원-아산 장거리 커플",
         publishedLabel: "2026년 9월 2일",
+      },
+      {
+        id: "mjjJo5IZhYo",
+        title:
+          "15년 전 수련회 첫사랑과 결혼! 통일교 축복가정 20대 부부의 진짜 가정행복 스토리💕 #통일교 #가정연합 #축복가정 #신혼부부 #결혼",
+        publishedLabel: "2026년 8월 20일",
       },
     ],
   },
