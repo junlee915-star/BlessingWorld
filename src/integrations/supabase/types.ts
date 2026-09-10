@@ -10,7 +10,7 @@ export type GuidanceStatus =
   | "in_progress"
   | "closed"
   | "opted_out";
-export type StoryCategory = "interview" | "case" | "video";
+export type StoryCategory = "interview" | "case" | "video" | "education";
 export type CommunityCategory = "goods" | "talent" | "together" | "chat";
 export type CommunityMethod = "direct" | "delivery" | "online";
 export type CommunityStatus = "open" | "reserved" | "completed";

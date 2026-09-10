@@ -13,7 +13,7 @@ import type { StoryCategory } from "@/integrations/supabase/types";
 const inputClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-const CATEGORY_OPTIONS: StoryCategory[] = ["interview", "case", "video"];
+const CATEGORY_OPTIONS: StoryCategory[] = ["interview", "case", "video", "education"];
 
 function makeEmptyStory(): Story {
   return {

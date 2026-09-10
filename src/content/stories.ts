@@ -23,12 +23,14 @@ export const STORY_CATEGORIES: { value: "all" | StoryCategory; label: string }[]
   { value: "interview", label: "인터뷰" },
   { value: "case", label: "사례" },
   { value: "video", label: "영상" },
+  { value: "education", label: "교육" },
 ];
 
 export const STORY_CATEGORY_LABELS: Record<StoryCategory, string> = {
   interview: "인터뷰",
   case: "사례",
   video: "영상",
+  education: "교육",
 };
 
 export const STORY_SORTS: { value: "latest" | "views"; label: string }[] = [
