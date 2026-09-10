@@ -61,6 +61,10 @@ export default function Stories() {
   const shownStories = visibleStories.slice(0, visibleCount);
   const hasMore = visibleStories.length > shownStories.length;
 
+  // 축복가정 인터뷰 레일은 페이지 맨 위(히어로 바로 아래)로, 나머지 레일은 글 목록 뒤에.
+  const topRail = VIDEO_RAILS.find((rail) => rail.id === "blessed-family-interview");
+  const bottomRails = VIDEO_RAILS.filter((rail) => rail.id !== "blessed-family-interview");
+
   return (
     <>
       <SEO path="/stories" />
@@ -74,6 +78,14 @@ export default function Stories() {
           {STORIES_HERO.sub}
         </p>
       </section>
+
+      {/* 축복가정 인터뷰 영상 레일 — 페이지 최상단 노출(§content/familyVideos.ts).
+          재생은 YouTube에서 하고 이 페이지는 링크만 겁니다. */}
+      {topRail ? (
+        <section className="mx-auto max-w-6xl px-5 pb-4 pt-6 md:px-8 md:pt-8">
+          <VideoRailSection rail={topRail} />
+        </section>
+      ) : null}
 
       <section className="mx-auto max-w-6xl px-5 pb-4 pt-2 md:px-8 md:pt-4">
         <div className="mb-8">
@@ -214,13 +226,15 @@ export default function Stories() {
         </div>
       </section>
 
-      {/* 영상 블록 — 축복가정 인터뷰 → 가정예배 순(§content/familyVideos.ts).
+      {/* 나머지 영상 블록 — 가정예배 등(§content/familyVideos.ts).
           재생은 YouTube에서 하고 이 페이지는 링크만 겁니다. */}
-      <section className="mx-auto max-w-6xl px-5 pb-16 md:px-8 md:pb-24">
-        {VIDEO_RAILS.map((rail) => (
-          <VideoRailSection key={rail.id} rail={rail} />
-        ))}
-      </section>
+      {bottomRails.length > 0 ? (
+        <section className="mx-auto max-w-6xl px-5 pb-16 md:px-8 md:pb-24">
+          {bottomRails.map((rail) => (
+            <VideoRailSection key={rail.id} rail={rail} />
+          ))}
+        </section>
+      ) : null}
     </>
   );
 }
