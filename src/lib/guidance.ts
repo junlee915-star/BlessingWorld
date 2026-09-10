@@ -3,7 +3,13 @@
 // 리드 데이터라서) — Supabase가 연결되지 않았다면 실패로 보고하고, 화면에서 전화
 // 문의로 안내하세요.
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
-import type { ConsultMethod, Gender } from "@/integrations/supabase/types";
+import type {
+  ChildAgeBand,
+  ChildAwareness,
+  ConsultMethod,
+  Gender,
+  GuidanceTrack,
+} from "@/integrations/supabase/types";
 import type { ValuesAssessmentResult } from "@/content/valuesAssessment";
 
 export interface GuidanceRequestPayload {
@@ -22,6 +28,12 @@ export interface GuidanceRequestPayload {
   consultMethod: ConsultMethod;
   /** 가치관 진단 12문항(§content/valuesAssessment.ts) 결과 — 신청자가 첨부를 선택했을 때만 전달됩니다. */
   valuesAssessment?: ValuesAssessmentResult;
+  /** §14 개선안 P-13(§14.4.3) — 본인/부모 분기. name·phone 등은 항상 신청서를 작성하는
+   *  사람(본인 또는 부모) 본인의 정보이고, track='parent'일 때만 아래 두 필드가 자녀에
+   *  대한 정보로 함께 채워집니다. */
+  track: GuidanceTrack;
+  childAgeBand?: ChildAgeBand;
+  childAwareness?: ChildAwareness;
 }
 
 export type GuidanceSubmitResult =
@@ -89,6 +101,9 @@ export async function submitGuidanceRequest(
     completed_courses: payload.completedCourses.length > 0 ? payload.completedCourses : undefined,
     consult_method: payload.consultMethod,
     values_assessment: payload.valuesAssessment ?? undefined,
+    track: payload.track,
+    child_age_band: payload.track === "parent" ? payload.childAgeBand ?? undefined : undefined,
+    child_awareness: payload.track === "parent" ? payload.childAwareness ?? undefined : undefined,
   };
 
   recordClientSubmitAttempt();

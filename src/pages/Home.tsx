@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 
 import { SEO } from "@/components/common/SEO";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
+import { NoticeBand } from "@/components/home/NoticeBand";
 import { IntroTriad } from "@/components/home/IntroTriad";
 import { HomeVideo } from "@/components/home/HomeVideo";
 import { HomeCtaSection } from "@/components/home/HomeCtaSection";
@@ -19,7 +20,7 @@ const ORGANIZATION_JSON_LD = {
   name: "블레싱월드",
   url: `${SITE_URL}/`,
   description:
-    "세계평화통일가정연합 한국협회 가정행복국 축복가정부가 운영하는 축복결혼·가정생활 통합 안내 서비스",
+    "세계평화통일가정연합 한국협회 가정행복국이 운영하는 축복결혼·가정생활 통합 안내 서비스",
 };
 
 export default function Home() {
@@ -32,6 +33,7 @@ export default function Home() {
     <>
       <SEO path="/" jsonLd={[ORGANIZATION_JSON_LD]} />
       <HeroCarousel />
+      <NoticeBand />
       {session ? (
         <div className="border-b border-border bg-card">
           <div className="mx-auto max-w-6xl px-5 py-3 md:px-8">
@@ -44,10 +46,10 @@ export default function Home() {
           </div>
         </div>
       ) : null}
-      {/* 6축 개편 §4.1 — 듀오식 4블록 순서: 감정(히어로·인트로) → 숫자(StatBand)
+      {/* 6축 개편 §4.1 — 듀오식 4블록 순서: 감정(히어로·영상·인트로) → 숫자(StatBand)
           → 방법론(5축 카드·로드맵) → 안심(신뢰 배지) → 전환(CTA 밴드). */}
-      <IntroTriad />
       <HomeVideo />
+      <IntroTriad />
       <StatBand />
       <FeatureCardGrid />
       <RoadmapPreview />

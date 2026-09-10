@@ -135,4 +135,14 @@ export const HOME_CARDS: HomeCard[] = [
     imageAlt: "지역가정교회 안내",
     size: "sm",
   },
+  {
+    badge: "부모와 함께",
+    title: "자녀의 축복, 부모가 먼저 이해하면",
+    description: "자녀를 축복으로 이끌고 싶은 부모님을 위한 준비·대화법·워크시트를 모았습니다.",
+    to: "/parents",
+    cta: "부모 트랙 가기 →",
+    image: IMG("7-home-card-mass-blessing-group.webp"),
+    imageAlt: "여러 세대가 함께한 축복가정 모임",
+    size: "sm",
+  },
 ];

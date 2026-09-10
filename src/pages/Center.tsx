@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ClipboardList, FileCheck, MapPin, ShieldCheck } from "lucide-react";
+import { ClipboardList, FileCheck, HeartHandshake, MapPin, ShieldCheck } from "lucide-react";
 
 import { SEO } from "@/components/common/SEO";
 import { EyebrowLabel } from "@/components/common/EyebrowLabel";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { CENTER_ASSURANCE, CENTER_ENTRIES, CENTER_HERO } from "@/content/center";
 import { CONTACT_HOURS, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_TEL } from "@/content/footer";
 
-const ICONS = { ClipboardList, MapPin, FileCheck } as const;
+const ICONS = { ClipboardList, MapPin, FileCheck, HeartHandshake } as const;
 
 // 축복센터 허브 `/center` — 6축 개편 §4.6.
 export default function Center() {
@@ -24,7 +24,7 @@ export default function Center() {
       </section>
 
       <section className="mx-auto max-w-6xl px-5 pb-16 md:px-8 md:pb-24">
-        <ul className="grid gap-6 md:grid-cols-3">
+        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {CENTER_ENTRIES.map((entry, index) => {
             const Icon = ICONS[entry.icon];
             return (

@@ -71,6 +71,7 @@ export const DEFAULT_ROADMAP_STEPS: RoadmapStep[] = [
     no: "06",
     title: "심사",
     description: "제출한 서류로 축복후보자 심사를 받습니다. 보완이 필요하면 담당자가 안내드립니다.",
+    to: { label: "심사 기준 보기", href: "/roadmap/06-review/criteria" },
   },
   {
     key: "step_07",
@@ -79,6 +80,7 @@ export const DEFAULT_ROADMAP_STEPS: RoadmapStep[] = [
     description:
       "같은 마음으로 가정을 꿈꾸는 사람과 대화하며 서로를 알아가고, 두 사람의 뜻을 확인합니다.",
     waiting: true,
+    to: { label: "매칭은 어떻게 진행되나", href: "/roadmap/07-matching/how" },
   },
   {
     key: "step_08",
@@ -86,6 +88,7 @@ export const DEFAULT_ROADMAP_STEPS: RoadmapStep[] = [
     title: "축복식",
     description:
       "두 사람의 뜻을 모아 축복을 준비하고, 행복한 가정의 첫걸음을 내딛습니다.",
+    to: { label: "축복식 준비 안내 보기", href: "/roadmap/08-ceremony/prepare" },
   },
 ];
 

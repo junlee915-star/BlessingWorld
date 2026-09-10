@@ -19,9 +19,18 @@ export function Footer() {
           {FOOTER_CONTENT.blocks.map((block) => (
             <div key={block.title}>
               <p className="eyebrow text-accent-deep">{block.title}</p>
-              <p className="mt-3 whitespace-pre-line text-sm leading-[1.7] text-foreground/80">
-                {block.body}
-              </p>
+              {"tel" in block && block.tel ? (
+                <a
+                  href={block.tel}
+                  className="mt-3 block whitespace-pre-line text-sm leading-[1.7] text-foreground/80 hover:text-primary-deep hover:underline"
+                >
+                  {block.body}
+                </a>
+              ) : (
+                <p className="mt-3 whitespace-pre-line text-sm leading-[1.7] text-foreground/80">
+                  {block.body}
+                </p>
+              )}
             </div>
           ))}
         </div>

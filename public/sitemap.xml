@@ -8,9 +8,26 @@
   <url><loc>https://blessingworld.example/</loc><priority>1.0</priority></url>
   <url><loc>https://blessingworld.example/guide</loc><priority>0.9</priority></url>
   <url><loc>https://blessingworld.example/roadmap</loc><priority>0.9</priority></url>
+  <url><loc>https://blessingworld.example/roadmap/06-review/criteria</loc><priority>0.5</priority></url>
+  <url><loc>https://blessingworld.example/roadmap/06-review/revision</loc><priority>0.5</priority></url>
+  <url><loc>https://blessingworld.example/roadmap/06-review/timeline</loc><priority>0.5</priority></url>
+  <url><loc>https://blessingworld.example/roadmap/07-matching/how</loc><priority>0.5</priority></url>
+  <url><loc>https://blessingworld.example/roadmap/07-matching/manner</loc><priority>0.5</priority></url>
+  <url><loc>https://blessingworld.example/roadmap/07-matching/checkpoint</loc><priority>0.5</priority></url>
+  <url><loc>https://blessingworld.example/roadmap/07-matching/engagement</loc><priority>0.5</priority></url>
+  <url><loc>https://blessingworld.example/roadmap/08-ceremony/prepare</loc><priority>0.5</priority></url>
+  <url><loc>https://blessingworld.example/roadmap/08-ceremony/after</loc><priority>0.5</priority></url>
   <url><loc>https://blessingworld.example/center</loc><priority>0.9</priority></url>
   <url><loc>https://blessingworld.example/center/apply</loc><priority>0.9</priority></url>
+  <url><loc>https://blessingworld.example/parents</loc><priority>0.8</priority></url>
+  <url><loc>https://blessingworld.example/parents/preparation</loc><priority>0.6</priority></url>
+  <url><loc>https://blessingworld.example/parents/talking</loc><priority>0.6</priority></url>
+  <url><loc>https://blessingworld.example/parents/plan-sheet</loc><priority>0.6</priority></url>
+  <url><loc>https://blessingworld.example/parents/faq</loc><priority>0.6</priority></url>
+  <url><loc>https://blessingworld.example/parents/seminars</loc><priority>0.4</priority></url>
   <url><loc>https://blessingworld.example/curriculum</loc><priority>0.8</priority></url>
+  <url><loc>https://blessingworld.example/schedules</loc><priority>0.6</priority></url>
+  <url><loc>https://blessingworld.example/notice</loc><priority>0.4</priority></url>
   <url><loc>https://blessingworld.example/stories</loc><priority>0.7</priority></url>
   <url><loc>https://blessingworld.example/center/churches</loc><priority>0.7</priority></url>
   <url><loc>https://blessingworld.example/center/documents</loc><priority>0.6</priority></url>

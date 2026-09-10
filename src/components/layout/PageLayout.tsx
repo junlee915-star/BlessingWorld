@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { MobileCtaBar } from "./MobileCtaBar";
+import { RoadmapIndex } from "@/components/roadmap/RoadmapIndex";
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -18,6 +19,7 @@ export function PageLayout({ children }: PageLayoutProps) {
       <main id="main-content" className="flex-1">
         {children}
       </main>
+      <RoadmapIndex />
       <Footer />
       {/* 모바일 고정 CTA 바가 가리지 않도록 아래 여백을 둡니다(바 높이 72px + 여유). */}
       <div aria-hidden="true" className="h-[72px] md:hidden" />

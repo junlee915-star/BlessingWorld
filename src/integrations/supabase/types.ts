@@ -19,6 +19,11 @@ export type VerificationStatus = "pending" | "approved" | "rejected";
 export type BlessingStepStatus = "not_started" | "in_progress" | "completed";
 /** 축복상담 신청서에서 고르는 상담 방식 — 일정 예약 대신 방식만 받습니다(6축 개편 §4.6). */
 export type ConsultMethod = "visit" | "phone" | "video";
+/** §14 개선안 P-13(§14.4.3) — 본인이 직접 신청했는지, 부모가 자녀를 위해 신청했는지. */
+export type GuidanceTrack = "self" | "parent";
+/** track='parent'일 때만 채워집니다. */
+export type ChildAgeBand = "10s" | "20s" | "30s" | "40s_plus";
+export type ChildAwareness = "aware_positive" | "aware_undecided" | "unaware";
 
 /** 사랑의 기술 강좌별 확인 퀴즈 문항. `courses.quiz`(jsonb)에 배열로 저장됩니다. */
 export interface QuizQuestion {
@@ -88,6 +93,10 @@ export interface Database {
           consult_method: ConsultMethod | null;
           /** 가치관 진단 12문항 결과 — 신청자가 첨부를 선택했을 때만 채워집니다. */
           values_assessment: ValuesAssessmentJson | null;
+          /** §14 개선안 P-13(§14.4.3) — 본인/부모 분기. 개편 이전 신청 건은 'self'입니다. */
+          track: GuidanceTrack;
+          child_age_band: ChildAgeBand | null;
+          child_awareness: ChildAwareness | null;
         };
         Insert: Omit<
           Database["public"]["Tables"]["guidance_requests"]["Row"],
@@ -112,6 +121,9 @@ export interface Database {
               | "completed_courses"
               | "consult_method"
               | "values_assessment"
+              | "track"
+              | "child_age_band"
+              | "child_awareness"
             >
           >;
         Update: Partial<Database["public"]["Tables"]["guidance_requests"]["Row"]>;
@@ -312,6 +324,54 @@ export interface Database {
           name: string;
         };
         Update: Partial<Database["public"]["Tables"]["churches"]["Row"]>;
+        Relationships: [];
+      };
+      events: {
+        Row: {
+          id: string;
+          category: "ceremony" | "retreat" | "education" | "matching_meet" | "parents_seminar";
+          title: string;
+          starts_at: string;
+          ends_at: string | null;
+          format: "offline" | "online" | "hybrid" | null;
+          venue: string | null;
+          audience: string | null;
+          fee: string | null;
+          apply_deadline: string | null;
+          payment_deadline: string | null;
+          apply_method: string | null;
+          host: string | null;
+          contact: string | null;
+          source_note: string | null;
+          is_published: boolean;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["events"]["Row"]> & {
+          id: string;
+          category: "ceremony" | "retreat" | "education" | "matching_meet" | "parents_seminar";
+          title: string;
+          starts_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["events"]["Row"]>;
+        Relationships: [];
+      };
+      notices: {
+        Row: {
+          id: string;
+          title: string;
+          body: string;
+          level: "info" | "important";
+          starts_at: string | null;
+          ends_at: string | null;
+          is_published: boolean;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["notices"]["Row"]> & {
+          id: string;
+          title: string;
+          body: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["notices"]["Row"]>;
         Relationships: [];
       };
       /** §7.4 개인정보 자동 파기(purge-guidance-requests 함수)가 남기는 건수 로그. 개인식별정보는 없습니다. */

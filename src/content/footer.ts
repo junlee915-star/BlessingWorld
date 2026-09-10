@@ -1,9 +1,9 @@
 // 푸터 — §5.2. 모든 페이지 공통.
 // ※ §10 I-02, I-03: 원본은 표기(운영기관명·답변 소요시간)가 페이지마다 달랐음.
-//   재구현본에서는 "세계평화통일가정연합 한국협회 가정행복국 축복가정부" /
+//   재구현본에서는 "세계평화통일가정연합 한국협회 가정행복국" /
 //   "영업일 기준 1~2일 이내" 로 전 페이지 통일.
 export const ORG_NAME = "세계평화통일가정연합 한국협회";
-export const ORG_DEPARTMENT = "가정행복국 축복가정부";
+export const ORG_DEPARTMENT = "가정행복국";
 export const RESPONSE_TIME = "영업일 기준 1~2일 이내";
 export const CONTACT_PHONE_DISPLAY = "02-3271-0480";
 export const CONTACT_PHONE_TEL = "tel:0232710480";
@@ -16,6 +16,11 @@ export const FOOTER_CONTENT = {
     {
       title: "운영기관",
       body: `${ORG_NAME}\n${ORG_DEPARTMENT}`,
+    },
+    {
+      title: "대표 전화",
+      body: `${CONTACT_PHONE_DISPLAY}\n${CONTACT_HOURS}`,
+      tel: CONTACT_PHONE_TEL,
     },
     {
       title: "답변 소요 시간",
@@ -33,9 +38,6 @@ export const FOOTER_CONTENT = {
   legalLinks: [
     { label: "개인정보처리방침", path: "/privacy" },
     { label: "이용약관", path: "/terms" },
-    // /admin/curriculum은 RequireAdmin으로 보호됩니다(§components/admin/RequireAdmin.tsx) —
-    // 로그인 안 한 방문자는 /admin/login으로 리다이렉트되고, staff/admin이 아니면 접근이 막혀요.
-    { label: "관리자", path: "/admin/curriculum" },
   ],
   copyright: "© 2026 블레싱월드. All rights reserved.",
 };

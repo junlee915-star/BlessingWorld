@@ -18,14 +18,28 @@ import {
 } from "@/lib/guidanceAdmin";
 import { isSupabaseConfigured } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import type { ConsultMethod, GuidanceStatus } from "@/integrations/supabase/types";
+import type { ConsultMethod, GuidanceStatus, GuidanceTrack } from "@/integrations/supabase/types";
 import { STYLE_COPY, VALUES_CATEGORIES } from "@/content/valuesAssessment";
+import { CHILD_AGE_BAND_OPTIONS, CHILD_AWARENESS_OPTIONS } from "@/content/center";
 
 const CONSULT_METHOD_LABEL: Record<ConsultMethod, string> = {
   visit: "교회 방문",
   phone: "전화",
   video: "화상",
 };
+
+const TRACK_LABEL: Record<GuidanceTrack, string> = {
+  self: "본인",
+  parent: "부모",
+};
+
+const CHILD_AGE_BAND_LABEL = Object.fromEntries(
+  CHILD_AGE_BAND_OPTIONS.map((o) => [o.value, o.label]),
+) as Record<string, string>;
+
+const CHILD_AWARENESS_LABEL = Object.fromEntries(
+  CHILD_AWARENESS_OPTIONS.map((o) => [o.value, o.label]),
+) as Record<string, string>;
 
 const STATUS_OPTIONS: GuidanceStatus[] = [
   "received",
@@ -68,15 +82,33 @@ function toCsvValue(value: string): string {
 }
 
 function downloadCsv(rows: GuidanceRequestRow[], staffById: Map<string, string>) {
-  const header = ["이름", "연락처", "이메일", "성별", "출생연도", "지역", "유입경로", "이수강좌수", "상태", "담당자", "신청일"];
+  const header = [
+    "신청유형",
+    "이름",
+    "연락처",
+    "이메일",
+    "성별",
+    "출생연도",
+    "지역",
+    "자녀연령대",
+    "자녀인지여부",
+    "유입경로",
+    "이수강좌수",
+    "상태",
+    "담당자",
+    "신청일",
+  ];
   const lines = rows.map((row) =>
     [
+      TRACK_LABEL[row.track],
       row.name,
       row.phone,
       row.email ?? "",
       row.gender === "female" ? "여성" : "남성",
       String(row.birthYear),
       `${row.regionSido} ${row.regionSigungu}`,
+      row.childAgeBand ? CHILD_AGE_BAND_LABEL[row.childAgeBand] : "",
+      row.childAwareness ? CHILD_AWARENESS_LABEL[row.childAwareness] : "",
       row.source,
       String(row.completedCourses?.length ?? 0),
       STATUS_LABEL[row.status],
@@ -107,6 +139,7 @@ export default function GuidanceAdmin() {
   const [staff, setStaff] = useState<StaffOption[]>([]);
   const [sidoFilter, setSidoFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<GuidanceStatus | "">("");
+  const [trackFilter, setTrackFilter] = useState<GuidanceTrack | "">("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [memoDrafts, setMemoDrafts] = useState<Record<string, string>>({});
@@ -130,11 +163,12 @@ export default function GuidanceAdmin() {
     return rows.filter((row) => {
       if (sidoFilter && row.regionSido !== sidoFilter) return false;
       if (statusFilter && row.status !== statusFilter) return false;
+      if (trackFilter && row.track !== trackFilter) return false;
       if (dateFrom && row.createdAt.slice(0, 10) < dateFrom) return false;
       if (dateTo && row.createdAt.slice(0, 10) > dateTo) return false;
       return true;
     });
-  }, [rows, sidoFilter, statusFilter, dateFrom, dateTo]);
+  }, [rows, sidoFilter, statusFilter, trackFilter, dateFrom, dateTo]);
 
   function applyUpdate(id: string, updated: GuidanceRequestRow | null, failureMessage: string) {
     if (!updated) {
@@ -235,6 +269,19 @@ export default function GuidanceAdmin() {
               </label>
 
               <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
+                신청 유형
+                <select
+                  className={inputClass}
+                  value={trackFilter}
+                  onChange={(e) => setTrackFilter(e.target.value as GuidanceTrack | "")}
+                >
+                  <option value="">전체</option>
+                  <option value="self">본인</option>
+                  <option value="parent">부모</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
                 신청일(부터)
                 <input
                   type="date"
@@ -294,10 +341,21 @@ export default function GuidanceAdmin() {
                     {filteredRows.map((row) => (
                       <tr key={row.id} className="border-b border-border align-top last:border-0">
                         <td className="px-4 py-3">
-                          <p className="font-medium text-foreground">{row.name}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1.5">
+                            <Badge variant={row.track === "parent" ? "accent" : "muted"}>
+                              {TRACK_LABEL[row.track]}
+                            </Badge>
+                            <p className="font-medium text-foreground">{row.name}</p>
+                          </div>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
                             {row.gender === "female" ? "여성" : "남성"} · {row.birthYear}년생
                           </p>
+                          {row.track === "parent" ? (
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                              자녀 {row.childAgeBand ? CHILD_AGE_BAND_LABEL[row.childAgeBand] : "—"} ·{" "}
+                              {row.childAwareness ? CHILD_AWARENESS_LABEL[row.childAwareness] : "—"}
+                            </p>
+                          ) : null}
                           {row.completedCourses && row.completedCourses.length > 0 ? (
                             <Badge variant="success" className="mt-1">
                               교육 {row.completedCourses.length}강 이수

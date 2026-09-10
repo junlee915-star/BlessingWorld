@@ -201,9 +201,11 @@ export default function Stories() {
                           : story.region || "축복가정"}{" "}
                         · {formatPublishedDate(story)}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-3.5 w-3.5" aria-hidden="true" /> {story.viewCount}
-                      </span>
+                      {story.viewCount > 0 ? (
+                        <span className="flex items-center gap-1">
+                          <Eye className="h-3.5 w-3.5" aria-hidden="true" /> {story.viewCount}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
                 </Link>

@@ -3,7 +3,7 @@ import { EyebrowLabel } from "@/components/common/EyebrowLabel";
 import { ValuesAssessmentSection } from "@/components/apply/ValuesAssessmentSection";
 import { VALUES_ASSESSMENT_COPY } from "@/content/valuesAssessment";
 
-// 가치관 진단 `/values` — GNB 6번째 항목. 축복상담 신청과는 별개로, 누구나 부담 없이
+// 가치관 진단 `/values` — 축복센터 하위 진입점(§14 개선안 §14.6). 축복상담 신청과는 별개로, 누구나 부담 없이
 // 자신의 성향과 잘 맞는 상대 스타일을 확인해볼 수 있는 단독 페이지입니다.
 export default function Values() {
   return (
@@ -16,7 +16,7 @@ export default function Values() {
           {VALUES_ASSESSMENT_COPY.title}
         </h1>
         <p className="mt-4 max-w-prose text-[15px] leading-[1.8] text-muted-foreground">
-          {VALUES_ASSESSMENT_COPY.body}
+          {VALUES_ASSESSMENT_COPY.standaloneBody}
         </p>
 
         <div className="mt-10 flex w-full justify-center">

@@ -46,7 +46,7 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
   "/center": {
     title: "축복센터 — 상담 신청·교회 찾기·서류 안내",
     description:
-      "축복을 결심하셨다면 여기서 시작하세요. 상담 신청, 지역가정교회 찾기, 제출서류 안내를 한곳에 모았습니다.",
+      "축복을 결심하셨다면 여기서 시작하세요. 상담 신청, 지역가정교회 찾기, 제출서류 안내, 가치관 진단을 한곳에 모았습니다.",
   },
   "/center/apply": {
     title: "축복상담 신청 — 축복센터",
@@ -66,6 +66,83 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     title: "가치관 진단 12문항 — 블레싱월드",
     description:
       "대화·가족·신앙·생활 4가지 영역 12문항으로 나의 성향과 잘 맞는 상대 스타일을 확인해보세요.",
+  },
+  "/roadmap/06-review/criteria": {
+    title: "심사는 무엇을 보나 — 축복로드맵",
+    description: "축복후보자 심사에서 무엇을 확인하는지, 누가 심사하는지, 결과는 어떻게 안내받는지 정리했습니다.",
+  },
+  "/roadmap/06-review/revision": {
+    title: "보완 요청이 왔을 때 — 축복로드맵",
+    description: "심사 중 보완 요청을 받았을 때 무엇을 준비하고 어떻게 진행하면 되는지 안내합니다.",
+  },
+  "/roadmap/06-review/timeline": {
+    title: "소요 기간과 진행 확인 — 축복로드맵",
+    description: "심사 소요 기간을 확정해 안내하기 어려운 이유와, 지금 진행 상황을 확인하는 방법을 안내합니다.",
+  },
+  "/roadmap/07-matching/how": {
+    title: "매칭은 어떻게 진행되나 — 축복로드맵",
+    description: "심사 이후 상대를 만나는 절차가 어떻게 시작되는지, 무엇을 알아두면 좋은지 안내합니다.",
+  },
+  "/roadmap/07-matching/manner": {
+    title: "교류 단계와 매너·규칙 — 축복로드맵",
+    description: "서로를 알아가는 교류 기간 동안 지켜야 할 기본적인 태도와 매너를 안내합니다.",
+  },
+  "/roadmap/07-matching/checkpoint": {
+    title: "약혼 전 확인 체크포인트 — 축복로드맵",
+    description: "약혼을 결심하기 전에 두 사람이 함께 확인해보면 좋은 것들을 정리했습니다.",
+  },
+  "/roadmap/07-matching/engagement": {
+    title: "약혼 절차와 서류 — 축복로드맵",
+    description: "두 사람의 뜻이 확인된 이후 약혼 절차와 필요 서류를 어떻게 준비하는지 안내합니다.",
+  },
+  "/roadmap/08-ceremony/prepare": {
+    title: "축복식 준비 안내 — 축복로드맵",
+    description: "축복식을 앞두고 사전 교육, 준비물, 가족과 함께 준비할 것들을 안내합니다.",
+  },
+  "/roadmap/08-ceremony/after": {
+    title: "축복 이후의 가정생활 — 축복로드맵",
+    description: "축복식 이후에도 계속 도움받을 수 있는 콘텐츠와 연결 방법을 안내합니다.",
+  },
+  "/schedules": {
+    title: "일정·공지 — 블레싱월드",
+    description: "축복식·수련회·교육·교류회 등 기한 있는 일정을 한곳에서 확인하세요.",
+  },
+  "/notice": {
+    title: "공지사항 — 블레싱월드",
+    description: "블레싱월드의 새로운 소식과 안내를 전해드립니다.",
+  },
+  "/admin/events": {
+    title: "일정 관리 — 블레싱월드 관리자",
+    description: "/schedules에 노출되는 행사 일정을 관리합니다.",
+  },
+  "/admin/notices": {
+    title: "공지 관리 — 블레싱월드 관리자",
+    description: "홈 공지 슬롯과 /notice에 노출되는 공지를 관리합니다.",
+  },
+  "/parents": {
+    title: "부모와 함께 — 자녀의 축복 준비 안내",
+    description:
+      "자녀의 축복을 준비하는 부모님을 위한 안내. 부모의 준비, 자녀와의 대화법, 매칭플랜 시트, 부모용 FAQ를 한곳에 모았습니다.",
+  },
+  "/parents/preparation": {
+    title: "부모의 준비 — 부모와 함께",
+    description: "자녀의 축복을 앞두고 부모가 먼저 정리해두면 좋은 것들을 안내합니다.",
+  },
+  "/parents/talking": {
+    title: "자녀와 축복을 이야기하는 법 — 부모와 함께",
+    description: "자녀에게 축복을 어떻게 말을 꺼내야 할지 막막한 부모님을 위한 대화법을 안내합니다.",
+  },
+  "/parents/plan-sheet": {
+    title: "매칭플랜 시트 — 부모와 함께",
+    description: "부모와 자녀가 각자 채워보고 서로 다른 생각을 확인하는 워크시트. 입력 내용은 이 기기에만 저장됩니다.",
+  },
+  "/parents/faq": {
+    title: "부모용 FAQ — 부모와 함께",
+    description: "자녀의 축복을 준비하는 부모님들이 실제로 물어보신 질문에 자세히 답합니다.",
+  },
+  "/parents/seminars": {
+    title: "부모 세미나 일정 — 부모와 함께",
+    description: "부모님을 위한 설명회·세미나 일정 안내 — 현재 준비 중입니다.",
   },
   "/privacy": {
     title: "개인정보처리방침 — 블레싱월드",

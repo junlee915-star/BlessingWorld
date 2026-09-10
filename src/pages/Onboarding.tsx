@@ -9,13 +9,24 @@ import { EyebrowLabel } from "@/components/common/EyebrowLabel";
 import { TrustBadges } from "@/components/guide/TrustBadges";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CONSULT_METHODS } from "@/content/center";
+import {
+  CHILD_AGE_BAND_OPTIONS,
+  CHILD_AWARENESS_OPTIONS,
+  CONSULT_METHODS,
+  GUIDANCE_TRACK_OPTIONS,
+} from "@/content/center";
 import { CONTACT_PHONE_DISPLAY, CONTACT_PHONE_TEL } from "@/content/footer";
 import { DEFAULT_COURSES, type Course } from "@/content/curriculum";
 import { REGIONS, getSigunguOptions } from "@/content/regions";
 import { fetchPublishedCourses, getCompletedCourses, isAllCompleted } from "@/lib/courses";
 import { submitGuidanceRequest } from "@/lib/guidance";
-import type { ConsultMethod, Gender } from "@/integrations/supabase/types";
+import type {
+  ChildAgeBand,
+  ChildAwareness,
+  ConsultMethod,
+  Gender,
+  GuidanceTrack,
+} from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 
 // 축복상담 신청 `/center/apply` — 6축 개편 §4.6.
@@ -27,37 +38,61 @@ const MIN_BIRTH_YEAR = 1940;
 const MAX_BIRTH_YEAR = CURRENT_YEAR - 18;
 const DRAFT_STORAGE_KEY = "blessingworld:onboarding:draft";
 
-const formSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(2, "이름은 2자 이상 입력해주세요.")
-    .max(20, "이름은 20자 이하로 입력해주세요."),
-  gender: z.enum(["female", "male"], { errorMap: () => ({ message: "성별을 선택해주세요." }) }),
-  birthYear: z.coerce
-    .number({ invalid_type_error: "출생년도를 입력해주세요." })
-    .int("출생년도를 정확히 입력해주세요.")
-    .min(MIN_BIRTH_YEAR, `${MIN_BIRTH_YEAR}년 이후로 입력해주세요.`)
-    .max(MAX_BIRTH_YEAR, "만 18세 미만은 신청하실 수 없어요."),
-  regionSido: z.string().trim().min(1, "시·도를 선택해주세요."),
-  regionSigungu: z.string().trim().min(1, "시·군·구를 선택해주세요."),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^01[0-9]-\d{3,4}-\d{4}$/, "휴대전화 번호 형식을 확인해주세요. 예: 010-1234-5678"),
-  consultMethod: z.enum(["visit", "phone", "video"], {
-    errorMap: () => ({ message: "원하시는 상담 방식을 선택해주세요." }),
-  }),
-  email: z.union([z.literal(""), z.string().trim().email("이메일 형식을 확인해주세요.")]).optional(),
-  privacyAgreed: z.literal(true, {
-    errorMap: () => ({ message: "개인정보 수집·이용에 동의해주세요." }),
-  }),
-});
+const formSchema = z
+  .object({
+    // §14 개선안 P-13(§14.4.3) — 본인/부모 분기. 아래 이름·연락처 등은 이 신청서를 작성하는
+    // 사람(본인 또는 부모) 본인의 정보이고, track='parent'일 때만 자녀 관련 두 필드가 함께 필요합니다.
+    track: z.enum(["self", "parent"], { errorMap: () => ({ message: "신청 유형을 선택해주세요." }) }),
+    name: z
+      .string()
+      .trim()
+      .min(2, "이름은 2자 이상 입력해주세요.")
+      .max(20, "이름은 20자 이하로 입력해주세요."),
+    gender: z.enum(["female", "male"], { errorMap: () => ({ message: "성별을 선택해주세요." }) }),
+    birthYear: z.coerce
+      .number({ invalid_type_error: "출생년도를 입력해주세요." })
+      .int("출생년도를 정확히 입력해주세요.")
+      .min(MIN_BIRTH_YEAR, `${MIN_BIRTH_YEAR}년 이후로 입력해주세요.`)
+      .max(MAX_BIRTH_YEAR, "만 18세 미만은 신청하실 수 없어요."),
+    regionSido: z.string().trim().min(1, "시·도를 선택해주세요."),
+    regionSigungu: z.string().trim().min(1, "시·군·구를 선택해주세요."),
+    phone: z
+      .string()
+      .trim()
+      .regex(/^01[0-9]-\d{3,4}-\d{4}$/, "휴대전화 번호 형식을 확인해주세요. 예: 010-1234-5678"),
+    consultMethod: z.enum(["visit", "phone", "video"], {
+      errorMap: () => ({ message: "원하시는 상담 방식을 선택해주세요." }),
+    }),
+    email: z.union([z.literal(""), z.string().trim().email("이메일 형식을 확인해주세요.")]).optional(),
+    childAgeBand: z.enum(["10s", "20s", "30s", "40s_plus"]).optional().or(z.literal("")),
+    childAwareness: z.enum(["aware_positive", "aware_undecided", "unaware"]).optional().or(z.literal("")),
+    privacyAgreed: z.literal(true, {
+      errorMap: () => ({ message: "개인정보 수집·이용에 동의해주세요." }),
+    }),
+  })
+  .superRefine((values, ctx) => {
+    if (values.track !== "parent") return;
+    if (!values.childAgeBand) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["childAgeBand"],
+        message: "자녀 연령대를 선택해주세요.",
+      });
+    }
+    if (!values.childAwareness) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["childAwareness"],
+        message: "자녀의 인지 여부를 선택해주세요.",
+      });
+    }
+  });
 
 type FieldKey = keyof z.input<typeof formSchema>;
 type FormErrors = Partial<Record<FieldKey, string>>;
 
 interface FormState {
+  track: GuidanceTrack | "";
   name: string;
   gender: Gender | "";
   birthYear: string;
@@ -66,12 +101,15 @@ interface FormState {
   phone: string;
   consultMethod: ConsultMethod | "";
   email: string;
+  childAgeBand: ChildAgeBand | "";
+  childAwareness: ChildAwareness | "";
   privacyAgreed: boolean;
   /** 허니팟 — 사람 사용자에게는 보이지 않는 필드. 채워져 있으면 스팸으로 간주합니다. */
   website: string;
 }
 
 const initialFormState: FormState = {
+  track: "self",
   name: "",
   gender: "",
   birthYear: "",
@@ -80,6 +118,8 @@ const initialFormState: FormState = {
   phone: "",
   consultMethod: "",
   email: "",
+  childAgeBand: "",
+  childAwareness: "",
   privacyAgreed: false,
   website: "",
 };
@@ -149,7 +189,11 @@ export default function Onboarding() {
   const [completedIds, setCompletedIds] = useState<string[]>([]);
   const [form, setForm] = useState<FormState>(() => {
     const draft = readDraft();
-    return draft ? { ...initialFormState, ...draft, website: "" } : initialFormState;
+    const base = draft ? { ...initialFormState, ...draft, website: "" } : initialFormState;
+    // §14 개선안 P-13 — 부모 트랙(§/parents) CTA가 ?track=parent로 넘어오면 미리 선택해둡니다.
+    // 기존 초안(draft)에 남아있던 track보다 URL의 명시적 의도를 우선합니다.
+    const trackParam = searchParams.get("track");
+    return trackParam === "parent" ? { ...base, track: "parent" } : base;
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -204,6 +248,10 @@ export default function Onboarding() {
       consultMethod: values.consultMethod,
       source: ref === "curriculum" ? "curriculum" : "web",
       completedCourses: completedIds,
+      track: values.track,
+      childAgeBand: values.track === "parent" && values.childAgeBand ? values.childAgeBand : undefined,
+      childAwareness:
+        values.track === "parent" && values.childAwareness ? values.childAwareness : undefined,
     });
     setSubmitting(false);
 
@@ -234,6 +282,7 @@ export default function Onboarding() {
     if (submitting) return;
 
     const result = formSchema.safeParse({
+      track: form.track,
       name: form.name,
       gender: form.gender,
       birthYear: form.birthYear,
@@ -242,6 +291,8 @@ export default function Onboarding() {
       phone: form.phone,
       consultMethod: form.consultMethod,
       email: form.email,
+      childAgeBand: form.childAgeBand,
+      childAwareness: form.childAwareness,
       privacyAgreed: form.privacyAgreed,
     });
 
@@ -279,12 +330,17 @@ export default function Onboarding() {
             영업일 기준 1~2일 이내에 가까운 지역 담당자가 연락드릴 예정입니다. 연락을 원하지
             않으시면 언제든 중단을 요청하실 수 있어요.
           </p>
+          {/* §14 개선안 P-13(§14.4.3, AC-31) — 홈·가이드로만 보내던 것에서 신청 직후
+              바로 이어갈 수 있는 구체적인 다음 행동 3가지로 바꿨습니다. */}
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg" variant="outline">
-              <Link to="/roadmap">다음 단계 확인하기</Link>
+              <Link to="/roadmap#readiness-check">서류 준비도 진단 해보기</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/curriculum/step-01">사랑의 기술 1강 듣기</Link>
             </Button>
             <Button asChild size="lg">
-              <Link to="/curriculum">사랑의 기술 배우기</Link>
+              <Link to="/schedules">일정 받기</Link>
             </Button>
           </div>
         </section>
@@ -362,9 +418,42 @@ export default function Onboarding() {
             className="absolute -left-[9999px] h-0 w-0 overflow-hidden opacity-0"
           />
 
+          <fieldset id="field-track">
+            <legend className="text-sm font-medium text-foreground">누가 신청하시나요?</legend>
+            <div className="mt-1.5 grid grid-cols-2 gap-3">
+              {GUIDANCE_TRACK_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-pressed={form.track === option.value}
+                  onClick={() => updateField("track", option.value)}
+                  className={cn(
+                    "flex flex-col items-start rounded-lg border px-4 py-3 text-left transition-colors",
+                    form.track === option.value
+                      ? "border-primary bg-primary-soft"
+                      : "border-border hover:border-primary",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "text-sm font-semibold",
+                      form.track === option.value ? "text-primary-deep" : "text-foreground",
+                    )}
+                  >
+                    {option.label}
+                  </span>
+                  <span className="mt-0.5 text-xs text-muted-foreground">{option.hint}</span>
+                </button>
+              ))}
+            </div>
+            <FieldError id="error-track" message={errors.track} />
+          </fieldset>
+
           <div id="field-name">
             <label className="block">
-              <span className="text-sm font-medium text-foreground">이름</span>
+              <span className="text-sm font-medium text-foreground">
+                {form.track === "parent" ? "부모님 성함" : "이름"}
+              </span>
               <input
                 type="text"
                 autoComplete="name"
@@ -540,6 +629,56 @@ export default function Onboarding() {
             </label>
             <FieldError id="error-email" message={errors.email} />
           </div>
+
+          {form.track === "parent" ? (
+            <>
+              <fieldset id="field-childAgeBand">
+                <legend className="text-sm font-medium text-foreground">자녀 연령대</legend>
+                <div className="mt-1.5 grid grid-cols-2 gap-2">
+                  {CHILD_AGE_BAND_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      aria-pressed={form.childAgeBand === option.value}
+                      onClick={() => updateField("childAgeBand", option.value)}
+                      className={cn(
+                        "rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors",
+                        form.childAgeBand === option.value
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border text-muted-foreground hover:border-primary hover:text-primary-deep",
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                <FieldError id="error-childAgeBand" message={errors.childAgeBand} />
+              </fieldset>
+
+              <fieldset id="field-childAwareness">
+                <legend className="text-sm font-medium text-foreground">자녀가 축복을 알고 있나요?</legend>
+                <div className="mt-1.5 grid gap-2">
+                  {CHILD_AWARENESS_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      aria-pressed={form.childAwareness === option.value}
+                      onClick={() => updateField("childAwareness", option.value)}
+                      className={cn(
+                        "rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors",
+                        form.childAwareness === option.value
+                          ? "border-primary bg-primary-soft text-primary-deep"
+                          : "border-border text-foreground hover:border-primary",
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                <FieldError id="error-childAwareness" message={errors.childAwareness} />
+              </fieldset>
+            </>
+          ) : null}
 
           <div id="field-privacyAgreed">
             <label className="flex items-start gap-2.5 text-sm text-muted-foreground">

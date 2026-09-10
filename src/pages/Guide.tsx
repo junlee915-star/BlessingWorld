@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { SEO } from "@/components/common/SEO";
 import { EyebrowLabel } from "@/components/common/EyebrowLabel";
@@ -8,6 +9,7 @@ import { RoadmapBanner } from "@/components/guide/RoadmapBanner";
 import { FaqAccordion } from "@/components/guide/FaqAccordion";
 import { GuideFinalCta } from "@/components/guide/GuideFinalCta";
 import { GUIDE_HERO } from "@/content/guide";
+import { GUIDE_PARENTS_CROSS_LINK } from "@/content/parents";
 import type { FaqItem } from "@/content/faq";
 import { fetchPublishedFaqs } from "@/lib/faq";
 
@@ -59,6 +61,13 @@ export default function Guide() {
             </li>
           ))}
         </ul>
+
+        <p className="mt-8 text-sm text-muted-foreground">
+          {GUIDE_PARENTS_CROSS_LINK.body}{" "}
+          <Link to={GUIDE_PARENTS_CROSS_LINK.to} className="font-medium text-primary-deep hover:underline">
+            {GUIDE_PARENTS_CROSS_LINK.cta}
+          </Link>
+        </p>
       </section>
 
       <WhatIsBlessing />

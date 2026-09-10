@@ -15,6 +15,8 @@ const ADMIN_NAV = [
   { label: "느낀 점", path: "/admin/reflections" },
   { label: "축복로드맵", path: "/admin/roadmap" },
   { label: "지역가정교회", path: "/admin/churches" },
+  { label: "일정 관리", path: "/admin/events" },
+  { label: "공지 관리", path: "/admin/notices" },
   { label: "홈 수치", path: "/admin/stats" },
   { label: "FAQ", path: "/admin/faq" },
   { label: "회원관리", path: "/admin/members" },

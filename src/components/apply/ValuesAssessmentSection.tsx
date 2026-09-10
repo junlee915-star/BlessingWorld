@@ -168,7 +168,7 @@ export function ValuesAssessmentSection({
           ) : (
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="sm:flex-1">
-                <Link to="/center/apply">이 결과 가지고 축복상담 신청하기</Link>
+                <Link to="/center/apply">축복상담 신청서에서 다시 진단하고 전달하기</Link>
               </Button>
               <Button type="button" size="lg" variant="outline" className="sm:flex-1" onClick={retake}>
                 다시 진단하기

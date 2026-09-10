@@ -62,14 +62,16 @@ Migrations live in `supabase/migrations/`, applied in numeric filename order (`0
 ### Routing (`src/App.tsx`)
 
 - All routes except a few small ones are `React.lazy`-loaded per-route — this is intentional (see the comment in `App.tsx`: bundling everything blew past the 200KB gzip budget).
-- Two router modes selected by `VITE_USE_HASH_ROUTER` env var: `BrowserRouter` (default, for real deployments with server-side rewrites) vs `HashRouter` (for GitHub Pages and the artifact-preview build, which can't rewrite deep links to `index.html`). Don't assume `BrowserRouter` when writing routing-adjacent code — check both paths.
+- Two router modes selected by `VITE_USE_HASH_ROUTER` env var: `BrowserRouter` (default — used for both real deployments and GitHub Pages as of §14 개선안 §14.6) vs `HashRouter` (only for the artifact-preview build now, which is served at an arbitrary path with no server at all and can't get even a 404-fallback trick). Don't assume `BrowserRouter` when writing routing-adjacent code — check both paths. `BrowserRouter` is given `basename={import.meta.env.BASE_URL}` so it works under GitHub Pages' `/BlessingWorld/` subpath; `HashRouter` deliberately gets no basename (see the comment in `App.tsx` for why one would break it).
+- GitHub Pages is a static host that can't rewrite deep links to `index.html` server-side, so `deploy-pages.yml` copies the built `index.html` to `404.html` after `vite build` — GitHub Pages serves `404.html` for any unmatched path, and since its content is identical to `index.html`, React Router boots normally and renders the requested deep link client-side.
+- Old hash-style links from before this switch (`#/guide`) are rewritten to real paths by `src/lib/legacyHashRedirect.ts`, called synchronously in `main.tsx` before React mounts (self-guards to no-op when `VITE_USE_HASH_ROUTER=true`).
 - HashRouter + Supabase auth redirects conflict (Supabase appends `#access_token=...` which HashRouter misreads as a route). `src/lib/authHashRedirect.ts` runs in `main.tsx` *before* React mounts to intercept and rewrite that hash when in HashRouter mode.
 - The site went through an IA restructuring ("6축 개편"): old routes like `/civil-affairs`, `/churches`, `/documents`, `/onboarding`, `/guide/curriculum` are kept as `<Navigate replace>` redirects to their new homes under `/center/*` or `/curriculum` for backwards-compat with bookmarks/search results — don't delete these redirects when touching routing.
 - Static assets referenced in `content/*.ts` must be built with `import.meta.env.BASE_URL` prefixed (e.g. `` `${import.meta.env.BASE_URL}image/${file}` ``), never an absolute `/image/...` path — GitHub Pages serves from a `/BlessingWorld/` subpath (`VITE_BASE_PATH`), so an absolute path 404s there even though it works locally.
 
 ### Deployment
 
-`.github/workflows/deploy-pages.yml` builds and deploys to GitHub Pages on every push to `main`, forcing `VITE_USE_HASH_ROUTER=true` and `VITE_BASE_PATH=/BlessingWorld/`. Supabase secrets are injected from repo Actions secrets and are allowed to be empty (build still succeeds; Supabase-dependent features just stay disabled per the optional-backend design above).
+`.github/workflows/deploy-pages.yml` builds and deploys to GitHub Pages on every push to `main`, setting `VITE_BASE_PATH=/BlessingWorld/` (routing stays the default `BrowserRouter` — see the Routing section above for the `404.html` SPA-fallback trick this relies on). Supabase secrets are injected from repo Actions secrets and are allowed to be empty (build still succeeds; Supabase-dependent features just stay disabled per the optional-backend design above).
 
 ### Design tokens
 

@@ -61,8 +61,11 @@ export function RoadmapTimeline({ steps, currentStepKey }: RoadmapTimelineProps)
         ? "모든 단계 완료"
         : `${total}단계 중 ${doneCount}단계 완료`;
 
-  // "지금 여기"는 담당자 값이 있으면 그것, 없으면 아직 체크하지 않은 첫 단계.
-  const currentKey = currentStepKey ?? steps.find((step) => !checked[step.key])?.key ?? null;
+  // "지금 여기"는 담당자 값이 있으면 그것, 없으면 방문자가 하나라도 체크한 뒤 아직
+  // 체크하지 않은 다음 단계. 아무것도 체크하지 않은 첫 방문에는 임의로 1단계를
+  // "지금 여기"로 단정하지 않습니다 — 다른 카드와 똑같은 테두리로 보여야 합니다.
+  const currentKey =
+    currentStepKey ?? (doneCount > 0 ? steps.find((step) => !checked[step.key])?.key ?? null : null);
 
   return (
     <div>
@@ -160,7 +163,7 @@ export function RoadmapTimeline({ steps, currentStepKey }: RoadmapTimelineProps)
                         aria-label={`${step.title} 단계 완료로 표시`}
                         className="h-4 w-4 rounded border-input text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       />
-                      완료
+                      {isDone ? "완료" : "완료로 표시"}
                     </label>
                   </div>
 

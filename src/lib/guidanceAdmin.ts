@@ -4,9 +4,12 @@
 // 대상이 아닙니다).
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 import type {
+  ChildAgeBand,
+  ChildAwareness,
   ConsultMethod,
   Gender,
   GuidanceStatus,
+  GuidanceTrack,
   ValuesAssessmentJson,
 } from "@/integrations/supabase/types";
 
@@ -33,6 +36,10 @@ export interface GuidanceRequestRow {
   completedCourses: string[] | null;
   consultMethod: ConsultMethod | null;
   valuesAssessment: ValuesAssessmentJson | null;
+  /** §14 개선안 P-13(§14.4.3) — 본인/부모 분기. 개편 이전 신청 건은 'self'입니다. */
+  track: GuidanceTrack;
+  childAgeBand: ChildAgeBand | null;
+  childAwareness: ChildAwareness | null;
 }
 
 export interface StaffOption {
@@ -63,6 +70,9 @@ function rowFromDb(row: {
   completed_courses: string[] | null;
   consult_method: ConsultMethod | null;
   values_assessment: ValuesAssessmentJson | null;
+  track: GuidanceTrack;
+  child_age_band: ChildAgeBand | null;
+  child_awareness: ChildAwareness | null;
 }): GuidanceRequestRow {
   return {
     id: row.id,
@@ -86,6 +96,9 @@ function rowFromDb(row: {
     completedCourses: row.completed_courses,
     consultMethod: row.consult_method ?? null,
     valuesAssessment: row.values_assessment ?? null,
+    track: row.track,
+    childAgeBand: row.child_age_band ?? null,
+    childAwareness: row.child_awareness ?? null,
   };
 }
 

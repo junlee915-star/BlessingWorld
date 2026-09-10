@@ -26,7 +26,7 @@ export function ReadinessChecker() {
   const remaining = items.filter((item) => !checked[`${category?.id}:${item.no}`]);
 
   return (
-    <section className="bg-muted/60 py-16 md:py-24">
+    <section id="readiness-check" className="scroll-mt-24 bg-muted/60 py-16 md:py-24">
       <div className="mx-auto max-w-6xl px-5 md:px-8">
         <SectionHeading
           eyebrow={READINESS.eyebrow}
