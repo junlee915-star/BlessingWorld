@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 import { SEO } from "@/components/common/SEO";
-import { HeroCarousel } from "@/components/home/HeroCarousel";
+import { Hero } from "@/components/home/Hero";
 import { IntroTriad } from "@/components/home/IntroTriad";
 import { HomeVideo } from "@/components/home/HomeVideo";
 import { HomeCtaSection } from "@/components/home/HomeCtaSection";
@@ -31,7 +31,7 @@ export default function Home() {
   return (
     <>
       <SEO path="/" jsonLd={[ORGANIZATION_JSON_LD]} />
-      <HeroCarousel />
+      <Hero />
       {session ? (
         <div className="border-b border-border bg-card">
           <div className="mx-auto max-w-6xl px-5 py-3 md:px-8">

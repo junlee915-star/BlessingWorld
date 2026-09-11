@@ -5,25 +5,15 @@
 // 로컬(base "/")에서만 동작하고 배포 환경에서는 404가 난다.
 const IMG = (file: string) => `${import.meta.env.BASE_URL}image/${file}`;
 
-export const HERO_SLIDES = [
-  {
-    image: IMG("1-home-hero-mass-blessing.webp"),
-    alt: "다양한 국적의 부부들이 함께 참여한 합동축복식",
-  },
-  {
-    image: IMG("2-home-hero-couple-smile.webp"),
-    alt: "따뜻하게 미소짓는 축복가정 부부",
-  },
-  {
-    image: IMG("3-home-hero-family-laugh.webp"),
-    alt: "함께 웃으며 즐거운 시간을 보내는 축복가정",
-  },
-];
+export const HERO_IMAGE = {
+  image: IMG("9-home-hero-garden-couple.webp"),
+  alt: "정원에서 서로 손을 맞잡고 마주 보는 축복가정 부부",
+};
 
 export const HERO_COPY = {
-  eyebrow: "A WARM PLACE TO BEGIN",
-  title: "좋은 가정을 향한\n마음의 씨앗을 심어요",
-  body: "축복결혼이 처음이신가요?\n궁금한 것부터 하나씩, 블레싱월드가 함께합니다.",
+  eyebrow: "WHERE ETERNAL LOVE BEGINS",
+  title: "영원한 사랑의 시작,\n축복결혼",
+  body: "단순한 만남을 넘어, 영원한 사랑을 중심으로 하나 되는 특별한 언약, 당신의 새로운 출발을 축복합니다.",
 };
 
 export const INTRO_TRIAD = [
