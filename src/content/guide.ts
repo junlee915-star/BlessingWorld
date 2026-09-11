@@ -70,16 +70,8 @@ export const OUR_DIRECTION = {
   ],
 };
 
-/** 절차(=/roadmap)로 넘어가는 다리 역할 섹션. 원본의 TOGETHER, FOR FAMILY 카피입니다. */
-export const TOGETHER_FOR_FAMILY = {
-  eyebrow: "TOGETHER, FOR FAMILY",
-  title: "축복가정을 꿈꾸는 사람들과,\n좋은 사람이 되는 법을 배웁니다",
-  body: "축복결혼은 교육과 만남을 통해 사랑하는 법, 대화하는 법, 책임지는 법을 익히며 행복한 가정을 차근차근 준비해 가는 여정입니다.",
-  cta: { label: "축복로드맵 보기", to: "/roadmap" },
-};
-
 // 절차(단계별 여정) 데이터는 6축 개편에서 /roadmap으로 옮겼습니다 — src/content/roadmap.ts가
-// 유일한 출처입니다. 축복의 씨앗은 '가치'만 다루고, 절차는 RoadmapBanner로 넘깁니다(§4.2).
+// 유일한 출처입니다. 축복의 씨앗은 '가치'만 다룹니다(§4.2).
 
 export const FAQ_SECTION_HEADING = {
   eyebrow: "FAQ",
