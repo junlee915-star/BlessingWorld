@@ -330,17 +330,13 @@ export default function Onboarding() {
             영업일 기준 1~2일 이내에 가까운 지역 담당자가 연락드릴 예정입니다. 연락을 원하지
             않으시면 언제든 중단을 요청하실 수 있어요.
           </p>
-          {/* §14 개선안 P-13(§14.4.3, AC-31) — 홈·가이드로만 보내던 것에서 신청 직후
-              바로 이어갈 수 있는 구체적인 다음 행동 3가지로 바꿨습니다. */}
+          {/* 홈·가이드로만 보내던 것에서 신청 직후 바로 이어갈 수 있는 구체적인 다음 행동으로 바꿨습니다. */}
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg" variant="outline">
               <Link to="/roadmap#readiness-check">서류 준비도 진단 해보기</Link>
             </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/curriculum/step-01">사랑의 기술 1강 듣기</Link>
-            </Button>
             <Button asChild size="lg">
-              <Link to="/schedules">일정 받기</Link>
+              <Link to="/curriculum/step-01">사랑의 기술 1강 듣기</Link>
             </Button>
           </div>
         </section>

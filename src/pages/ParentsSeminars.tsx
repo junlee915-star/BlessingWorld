@@ -7,10 +7,8 @@ import { ParentsFinalCta } from "@/components/parents/ParentsFinalCta";
 import { CONTACT_HOURS, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_TEL } from "@/content/footer";
 
 // 부모 세미나 일정 `/parents/seminars` — §14 개선안 P-12 ⑤.
-// 원래는 `/schedules`(§14.4.1) 일정 데이터를 부모 세미나로 필터링해 보여주는 화면이지만,
-// events 테이블·일정 페이지는 아직 없습니다(§14.9 P0 범위). 원천 없이 화면만 먼저 만들면
-// 신뢰를 잃으므로, §14.7 원칙("미확보 항목은 '준비 중'으로 표기")에 따라 안내형 자리표시
-// 화면으로 둡니다. `/schedules`가 생기면 이 페이지를 그 데이터의 필터 뷰로 교체하세요.
+// 부모 세미나 일정 원천 데이터가 아직 없어(§14.9 P0 범위), 신뢰를 잃지 않도록 §14.7 원칙
+// ("미확보 항목은 '준비 중'으로 표기")에 따라 안내형 자리표시 화면으로 둡니다.
 export default function ParentsSeminars() {
   return (
     <>

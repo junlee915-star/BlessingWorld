@@ -22,8 +22,6 @@ const CourseDetail = lazy(() => import("@/pages/CourseDetail"));
 const Roadmap = lazy(() => import("@/pages/Roadmap"));
 const RoadmapDetail = lazy(() => import("@/pages/RoadmapDetail"));
 const Values = lazy(() => import("@/pages/Values"));
-const Schedules = lazy(() => import("@/pages/Schedules"));
-const Notice = lazy(() => import("@/pages/Notice"));
 const Parents = lazy(() => import("@/pages/Parents"));
 const ParentsPreparation = lazy(() => import("@/pages/ParentsPreparation"));
 const ParentsTalking = lazy(() => import("@/pages/ParentsTalking"));
@@ -48,8 +46,6 @@ const FaqAdmin = lazy(() => import("@/pages/admin/FaqAdmin"));
 const GuidanceAdmin = lazy(() => import("@/pages/admin/GuidanceAdmin"));
 const MemberAdmin = lazy(() => import("@/pages/admin/MemberAdmin"));
 const RoadmapAdmin = lazy(() => import("@/pages/admin/RoadmapAdmin"));
-const EventAdmin = lazy(() => import("@/pages/admin/EventAdmin"));
-const NoticeAdmin = lazy(() => import("@/pages/admin/NoticeAdmin"));
 const StatsAdmin = lazy(() => import("@/pages/admin/StatsAdmin"));
 const AdminLogin = lazy(() => import("@/pages/admin/Login"));
 
@@ -100,10 +96,6 @@ export default function App() {
                   <Route path="/roadmap" element={<Roadmap />} />
                   <Route path="/roadmap/:stage/:slug" element={<RoadmapDetail />} />
                   <Route path="/values" element={<Values />} />
-
-                  {/* 일정·공지 — §14 개선안 P-13(§14.4.1, §14.4.2). */}
-                  <Route path="/schedules" element={<Schedules />} />
-                  <Route path="/notice" element={<Notice />} />
 
                   {/* 부모 트랙 — §14 개선안 P-12. 본인 트랙을 대체하지 않는 별도 트랙입니다. */}
                   <Route path="/parents" element={<Parents />} />
@@ -219,22 +211,6 @@ export default function App() {
                     element={
                       <RequireAdmin>
                         <StatsAdmin />
-                      </RequireAdmin>
-                    }
-                  />
-                  <Route
-                    path="/admin/events"
-                    element={
-                      <RequireAdmin>
-                        <EventAdmin />
-                      </RequireAdmin>
-                    }
-                  />
-                  <Route
-                    path="/admin/notices"
-                    element={
-                      <RequireAdmin>
-                        <NoticeAdmin />
                       </RequireAdmin>
                     }
                   />

@@ -103,22 +103,6 @@ export const ROUTE_SEO: Record<string, RouteSeo> = {
     title: "축복 이후의 가정생활 — 축복로드맵",
     description: "축복식 이후에도 계속 도움받을 수 있는 콘텐츠와 연결 방법을 안내합니다.",
   },
-  "/schedules": {
-    title: "일정·공지 — 블레싱월드",
-    description: "축복식·수련회·교육·교류회 등 기한 있는 일정을 한곳에서 확인하세요.",
-  },
-  "/notice": {
-    title: "공지사항 — 블레싱월드",
-    description: "블레싱월드의 새로운 소식과 안내를 전해드립니다.",
-  },
-  "/admin/events": {
-    title: "일정 관리 — 블레싱월드 관리자",
-    description: "/schedules에 노출되는 행사 일정을 관리합니다.",
-  },
-  "/admin/notices": {
-    title: "공지 관리 — 블레싱월드 관리자",
-    description: "홈 공지 슬롯과 /notice에 노출되는 공지를 관리합니다.",
-  },
   "/parents": {
     title: "부모와 함께 — 자녀의 축복 준비 안내",
     description:

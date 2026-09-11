@@ -3,7 +3,6 @@ import { ArrowRight } from "lucide-react";
 
 import { SEO } from "@/components/common/SEO";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
-import { NoticeBand } from "@/components/home/NoticeBand";
 import { IntroTriad } from "@/components/home/IntroTriad";
 import { HomeVideo } from "@/components/home/HomeVideo";
 import { HomeCtaSection } from "@/components/home/HomeCtaSection";
@@ -33,7 +32,6 @@ export default function Home() {
     <>
       <SEO path="/" jsonLd={[ORGANIZATION_JSON_LD]} />
       <HeroCarousel />
-      <NoticeBand />
       {session ? (
         <div className="border-b border-border bg-card">
           <div className="mx-auto max-w-6xl px-5 py-3 md:px-8">
