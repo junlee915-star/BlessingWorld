@@ -24,6 +24,7 @@ export const STORY_CATEGORIES: { value: "all" | StoryCategory; label: string }[]
   { value: "case", label: "사례" },
   { value: "video", label: "영상" },
   { value: "education", label: "교육" },
+  { value: "notice", label: "본부 소식" },
 ];
 
 export const STORY_CATEGORY_LABELS: Record<StoryCategory, string> = {
@@ -31,6 +32,8 @@ export const STORY_CATEGORY_LABELS: Record<StoryCategory, string> = {
   case: "사례",
   video: "영상",
   education: "교육",
+  /** 가정연합 홈페이지(ffwp.org) 등에서 옮겨오는 본부 발 소식. */
+  notice: "본부 소식",
 };
 
 export const STORY_SORTS: { value: "latest" | "views"; label: string }[] = [
@@ -69,6 +72,10 @@ export interface Story {
   /** 가정 표기(예: "김ㅇㅇ·이ㅇㅇ 가정"). 실명 대신 익명 표기를 권장합니다. */
   familyName: string;
   region: string;
+  /** 원문 링크(예: ffwp.org 본부 소식). category="notice" 글에서 주로 씁니다. */
+  sourceUrl: string;
+  /** 본문에 곁들이는 여러 장의 사진. 커버 이미지(대표 1장)와 별개입니다. */
+  galleryImageUrls: string[];
   viewCount: number;
   isPublished: boolean;
   /** 게시 시각. 비어있으면(초안) 카드/목록에 노출되지 않습니다. */
@@ -106,6 +113,8 @@ export const DEFAULT_STORIES: Story[] = [
     category: "case",
     familyName: "",
     region: "",
+    sourceUrl: "",
+    galleryImageUrls: [],
     viewCount: 0,
     isPublished: true,
     publishedAt: "2026-08-20T09:00:00+09:00",
@@ -131,6 +140,8 @@ export const DEFAULT_STORIES: Story[] = [
     category: "case",
     familyName: "",
     region: "",
+    sourceUrl: "",
+    galleryImageUrls: [],
     viewCount: 0,
     isPublished: true,
     publishedAt: "2026-08-18T09:00:00+09:00",
@@ -156,6 +167,8 @@ export const DEFAULT_STORIES: Story[] = [
     category: "case",
     familyName: "",
     region: "",
+    sourceUrl: "",
+    galleryImageUrls: [],
     viewCount: 0,
     isPublished: true,
     publishedAt: "2026-08-14T09:00:00+09:00",
@@ -181,6 +194,8 @@ export const DEFAULT_STORIES: Story[] = [
     category: "case",
     familyName: "",
     region: "",
+    sourceUrl: "",
+    galleryImageUrls: [],
     viewCount: 0,
     isPublished: true,
     publishedAt: "2026-08-11T09:00:00+09:00",
@@ -206,6 +221,8 @@ export const DEFAULT_STORIES: Story[] = [
     category: "case",
     familyName: "",
     region: "",
+    sourceUrl: "",
+    galleryImageUrls: [],
     viewCount: 0,
     isPublished: true,
     publishedAt: "2026-08-07T09:00:00+09:00",
@@ -231,9 +248,45 @@ export const DEFAULT_STORIES: Story[] = [
     category: "case",
     familyName: "",
     region: "",
+    sourceUrl: "",
+    galleryImageUrls: [],
     viewCount: 0,
     isPublished: true,
     publishedAt: "2026-08-04T09:00:00+09:00",
     createdAt: "2026-08-04T09:00:00+09:00",
+  },
+  {
+    id: "story-hyojeong-camp-2026",
+    slug: "hyojeong-gamun-sangsok-camp-2026",
+    title: "김종출 정정순 천보가정 제1회 효정가문 상속 캠프예배",
+    quote: "효정가문 상속 캠프예배 현장의 기록입니다.",
+    blessingType: "효정가문 상속",
+    excerpt:
+      "김종출·정정순 천보가정이 주관한 제1회 효정가문 상속 캠프예배 소식을 가정연합 홈페이지에서 옮겨왔습니다.",
+    body: `가정연합(세계평화통일가정연합) 홈페이지에 게시된 본부 소식을 옮겨 싣습니다.
+
+김종출·정정순 천보가정이 주관한 제1회 효정가문 상속 캠프예배 현장 소식입니다. 원문 게시글에는 캠프예배 현장 사진과 함께 결과보고서(PDF)가 첨부되어 있습니다.
+
+자세한 내용과 원문 결과보고서는 아래 "원문 보기" 링크에서 확인하실 수 있습니다.`,
+    coverImageUrl: "https://www.ffwp.org/ffwpData/ckeditor/content/202609/20260908233730_65.jpg",
+    category: "notice",
+    familyName: "",
+    region: "",
+    sourceUrl: "https://www.ffwp.org/list/blank_view_all.php?menuKey=13&subKey=98&numberKey=28174&page=1",
+    galleryImageUrls: [
+      "https://www.ffwp.org/ffwpData/ckeditor/content/202609/20260908223730_32.jpg",
+      "https://www.ffwp.org/ffwpData/ckeditor/content/202609/20260908223730_52.jpg",
+      "https://www.ffwp.org/ffwpData/ckeditor/content/202609/20260908223749_87.jpg",
+      "https://www.ffwp.org/ffwpData/ckeditor/content/202609/20260908223749_29.jpg",
+      "https://www.ffwp.org/ffwpData/ckeditor/content/202609/20260908223806_76.jpg",
+      "https://www.ffwp.org/ffwpData/ckeditor/content/202609/20260908223806_13.jpg",
+      "https://www.ffwp.org/ffwpData/ckeditor/content/202609/20260908223806_50.jpg",
+      "https://www.ffwp.org/ffwpData/ckeditor/content/202609/20260908223806_65.jpg",
+      "https://www.ffwp.org/ffwpData/ckeditor/content/202609/20260908223806_66.jpg",
+    ],
+    viewCount: 0,
+    isPublished: true,
+    publishedAt: "2026-09-08T00:00:00+09:00",
+    createdAt: "2026-09-08T00:00:00+09:00",
   },
 ];

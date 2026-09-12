@@ -10,7 +10,7 @@ export type GuidanceStatus =
   | "in_progress"
   | "closed"
   | "opted_out";
-export type StoryCategory = "interview" | "case" | "video" | "education";
+export type StoryCategory = "interview" | "case" | "video" | "education" | "notice";
 export type CommunityCategory = "goods" | "talent" | "together" | "chat";
 export type CommunityMethod = "direct" | "delivery" | "online";
 export type CommunityStatus = "open" | "reserved" | "completed";
@@ -143,6 +143,10 @@ export interface Database {
           quote: string | null;
           /** 축복 유형 배지(예: 합동축복, 축복자녀). category(콘텐츠 형식)와는 다른 축입니다. */
           blessing_type: string | null;
+          /** 원문 링크(예: ffwp.org 본부 소식). category='notice' 글에서 주로 씁니다. */
+          source_url: string | null;
+          /** 본문에 곁들이는 여러 장의 사진(커버 이미지와 별개). */
+          gallery_image_urls: string[] | null;
           view_count: number;
           is_published: boolean;
           published_at: string | null;

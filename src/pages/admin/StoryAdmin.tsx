@@ -13,7 +13,7 @@ import type { StoryCategory } from "@/integrations/supabase/types";
 const inputClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-const CATEGORY_OPTIONS: StoryCategory[] = ["interview", "case", "video", "education"];
+const CATEGORY_OPTIONS: StoryCategory[] = ["interview", "case", "video", "education", "notice"];
 
 function makeEmptyStory(): Story {
   return {
@@ -28,11 +28,24 @@ function makeEmptyStory(): Story {
     quote: "",
     blessingType: "",
     region: "",
+    sourceUrl: "",
+    galleryImageUrls: [],
     viewCount: 0,
     isPublished: false,
     publishedAt: null,
     createdAt: new Date().toISOString(),
   };
+}
+
+/** 갤러리 이미지 입력칸(한 줄에 URL 하나)과 Story.galleryImageUrls 배열 사이 변환. */
+function galleryUrlsToText(urls: string[]): string {
+  return urls.join("\n");
+}
+function textToGalleryUrls(text: string): string[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 function slugify(title: string): string {
@@ -249,6 +262,31 @@ export default function StoryAdmin() {
                       value={story.coverImageUrl}
                       onChange={(e) => updateStory(story.id, { coverImageUrl: e.target.value })}
                       placeholder="https://..."
+                    />
+                  </label>
+
+                  <label className="flex flex-col gap-1.5 text-sm sm:col-span-2">
+                    <span className="font-medium text-foreground">
+                      원문 링크 <span className="font-normal text-muted-foreground">— 본부 소식 등 출처가 있는 글에</span>
+                    </span>
+                    <input
+                      className={inputClass}
+                      value={story.sourceUrl}
+                      onChange={(e) => updateStory(story.id, { sourceUrl: e.target.value })}
+                      placeholder="https://www.ffwp.org/..."
+                    />
+                  </label>
+
+                  <label className="flex flex-col gap-1.5 text-sm sm:col-span-2">
+                    <span className="font-medium text-foreground">
+                      갤러리 이미지 URL <span className="font-normal text-muted-foreground">— 한 줄에 하나씩, 커버 이미지와 별개</span>
+                    </span>
+                    <textarea
+                      className={inputClass}
+                      rows={4}
+                      value={galleryUrlsToText(story.galleryImageUrls)}
+                      onChange={(e) => updateStory(story.id, { galleryImageUrls: textToGalleryUrls(e.target.value) })}
+                      placeholder={"https://...\nhttps://..."}
                     />
                   </label>
 

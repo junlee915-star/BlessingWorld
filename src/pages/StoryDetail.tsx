@@ -118,9 +118,28 @@ export default function StoryDetail() {
           </div>
         ) : null}
 
-        <Button variant="outline" className="mt-8" onClick={() => void shareStory(story)}>
-          <Share2 className="h-4 w-4" /> 공유하기
-        </Button>
+        {story.galleryImageUrls.length > 0 ? (
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {story.galleryImageUrls.map((url) => (
+              <div key={url} className="aspect-square overflow-hidden rounded-xl bg-muted">
+                <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Button variant="outline" onClick={() => void shareStory(story)}>
+            <Share2 className="h-4 w-4" /> 공유하기
+          </Button>
+          {story.sourceUrl ? (
+            <Button variant="outline" asChild>
+              <a href={story.sourceUrl} target="_blank" rel="noreferrer">
+                원문 보기
+              </a>
+            </Button>
+          ) : null}
+        </div>
 
         <div className="mt-10 grid gap-3 border-t border-border pt-8 sm:grid-cols-2">
           {olderStory ? (
