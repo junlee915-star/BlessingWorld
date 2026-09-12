@@ -14,6 +14,12 @@ const LOCAL_STORAGE_KEY = "blessingworld:stories";
 
 export type StoryPersistTarget = "supabase" | "local";
 
+export interface StorySaveResult {
+  target: StoryPersistTarget;
+  /** target이 "local"일 때, Supabase 저장이 왜 실패했는지(Postgrest 에러 메시지). */
+  error?: string;
+}
+
 function readLocalOverride(): Story[] | null {
   if (typeof window === "undefined") return null;
   try {
@@ -132,9 +138,10 @@ export async function fetchAllStories(): Promise<Story[]> {
 /**
  * 스토리 목록 전체를 저장합니다. Supabase가 연결돼 있으면 upsert하고(로컬에서 지운 글은
  * 삭제), 아니면 이 브라우저의 localStorage에만 저장합니다. §lib/churches.ts saveChurches()와
- * 동일한 패턴입니다.
+ * 동일한 패턴입니다. Supabase 저장이 실패하면(RLS/제약조건 위반 등) 원인을 error로 함께
+ * 돌려줘서, 호출부(StoryAdmin)가 "왜 로컬로 떨어졌는지"를 화면에 보여줄 수 있게 합니다.
  */
-export async function saveStories(stories: Story[]): Promise<StoryPersistTarget> {
+export async function saveStories(stories: Story[]): Promise<StorySaveResult> {
   if (isSupabaseConfigured && supabase) {
     const rows = stories.map(storyToRow);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- §lib/courses.ts와 같은 라이브러리 타입 버그 우회
@@ -145,9 +152,11 @@ export async function saveStories(stories: Story[]): Promise<StoryPersistTarget>
         ? await supabase.from("stories").delete().not("id", "in", `(${ids.join(",")})`)
         : { error: null };
     if (!upsertError && !deleteError) {
-      return "supabase";
+      return { target: "supabase" };
     }
+    writeLocalOverride(stories);
+    return { target: "local", error: (upsertError ?? deleteError)?.message };
   }
   writeLocalOverride(stories);
-  return "local";
+  return { target: "local" };
 }

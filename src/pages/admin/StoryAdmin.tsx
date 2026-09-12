@@ -115,9 +115,16 @@ export default function StoryAdmin() {
     setStories(withPublishedAt);
     setSaving(true);
     try {
-      const target = await saveStories(withPublishedAt);
-      if (target === "supabase") {
+      const result = await saveStories(withPublishedAt);
+      if (result.target === "supabase") {
         toast.success("저장했어요. Supabase에 반영되어 모든 방문자에게 보여요.");
+      } else if (result.error) {
+        // Supabase가 연결은 되어 있지만 저장 자체가 실패한 경우(RLS/제약조건 위반 등) —
+        // 원인 없이 "로컬에 저장됐다"고만 하면 사용자가 왜 안 되는지 알 길이 없습니다.
+        toast.error("Supabase 저장에 실패해서 이 브라우저에만 저장했어요.", {
+          description: result.error,
+          duration: 15000,
+        });
       } else {
         toast.success("이 브라우저에 저장했어요.", {
           description: "Supabase가 연결되면 모든 방문자에게 반영되는 저장으로 자동 전환돼요.",
