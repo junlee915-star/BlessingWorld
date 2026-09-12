@@ -41,11 +41,11 @@ export const STORYBOOK_PROTAGONISTS: StorybookCharacter[] = [
 ];
 
 export const STORYBOOK_FAMILY_CHARACTER: StorybookCharacter = {
-  name: "지호의 가족",
+  name: "지우와 지호의 가족",
   role: "아버지 · 어머니 · 할머니",
-  description: "저녁 식탁에서, 그리고 낡은 사진 한 장 속에서 지호가 다시 만나는 사람들입니다.",
+  description: "저녁 식탁에서, 그리고 낡은 사진 한 장 속에서 지우와 지호가 다시 만나는 사람들입니다.",
   image: IMG("guide-storybook-character-jiho-family.webp"),
-  imageAlt: "지호의 아버지, 어머니, 할머니 세 사람이 나란히 서 있는 모습",
+  imageAlt: "아버지, 어머니, 할머니 세 사람이 나란히 서 있는 모습",
 };
 
 export interface StorybookPanel {
