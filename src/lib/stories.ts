@@ -165,6 +165,32 @@ export async function saveStories(stories: Story[]): Promise<StorySaveResult> {
 }
 
 /**
+ * 스토리 한 건만 저장합니다(§StoryAdmin.tsx 카드별 "저장" 버튼). saveStories()와 달리
+ * 목록에 없는 글을 지우지 않습니다 — 편집 중인 다른 카드에 영향을 주지 않기 위해서입니다.
+ * 삭제는 여전히 하단의 "전체 저장" 버튼(saveStories)에서만 일어납니다.
+ */
+export async function saveStory(story: Story): Promise<StorySaveResult> {
+  if (isSupabaseConfigured && supabase) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- §lib/courses.ts와 같은 라이브러리 타입 버그 우회
+    const { error } = await (supabase.from("stories") as any).upsert(storyToRow(story));
+    if (!error) {
+      return { target: "supabase" };
+    }
+    upsertLocalStory(story);
+    return { target: "local", error: error.message };
+  }
+  upsertLocalStory(story);
+  return { target: "local" };
+}
+
+function upsertLocalStory(story: Story) {
+  const current = readLocalOverride() ?? DEFAULT_STORIES;
+  const index = current.findIndex((s) => s.id === story.id);
+  const next = index >= 0 ? current.map((s, i) => (i === index ? story : s)) : [story, ...current];
+  writeLocalOverride(next);
+}
+
+/**
  * 이미지 파일을 Supabase Storage(§STORY_IMAGE_BUCKET)에 올리고 공개 URL을 돌려줍니다.
  * URL 붙여넣기(hotlink) 대신 파일을 직접 업로드하고 싶을 때 씁니다. localStorage로는
  * 대체할 수 없는 기능이라, Supabase가 연결되어 있지 않으면 바로 에러를 던집니다.

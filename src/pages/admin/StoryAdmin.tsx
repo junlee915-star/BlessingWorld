@@ -6,7 +6,7 @@ import { SEO } from "@/components/common/SEO";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Button } from "@/components/ui/button";
 import { STORY_CATEGORY_LABELS, type Story } from "@/content/stories";
-import { fetchAllStories, saveStories, uploadStoryImage } from "@/lib/stories";
+import { fetchAllStories, saveStories, saveStory, uploadStoryImage } from "@/lib/stories";
 import { isSupabaseConfigured } from "@/integrations/supabase/client";
 import type { StoryCategory } from "@/integrations/supabase/types";
 
@@ -60,6 +60,7 @@ function slugify(title: string): string {
 export default function StoryAdmin() {
   const [stories, setStories] = useState<Story[] | null>(null);
   const [saving, setSaving] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
   // 어느 카드의 어느 필드가 지금 업로드 중인지("<storyId>:cover" | "<storyId>:gallery") —
   // 한 번에 하나씩만 올리게 해서 겹치는 요청을 막습니다.
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
@@ -113,6 +114,48 @@ export default function StoryAdmin() {
       toast.error("업로드에 실패했어요.", { description: err instanceof Error ? err.message : undefined });
     } finally {
       setUploadingFor(null);
+    }
+  }
+
+  async function handleSaveOne(story: Story) {
+    if (!story.title.trim()) {
+      toast.error("제목은 비어있을 수 없어요.");
+      return;
+    }
+    const slug = story.slug.trim() || slugify(story.title);
+    if (!slug) {
+      toast.error("슬러그(URL 주소)를 자동으로 만들 수 없는 제목이에요. 슬러그를 직접 입력해주세요.");
+      return;
+    }
+    const duplicate = (stories ?? []).some(
+      (s) => s.id !== story.id && (s.slug.trim() || slugify(s.title)) === slug,
+    );
+    if (duplicate) {
+      toast.error(`슬러그가 중복돼요: "${slug}". 다른 값으로 바꿔주세요.`);
+      return;
+    }
+
+    const publishedAt = story.isPublished && !story.publishedAt ? new Date().toISOString() : story.publishedAt;
+    const normalized: Story = { ...story, slug, publishedAt };
+    updateStory(story.id, { slug, publishedAt });
+
+    setSavingId(story.id);
+    try {
+      const result = await saveStory(normalized);
+      if (result.target === "supabase") {
+        toast.success("이 스토리를 저장했어요. Supabase에 반영되어 모든 방문자에게 보여요.");
+      } else if (result.error) {
+        toast.error("Supabase 저장에 실패해서 이 브라우저에만 저장했어요.", {
+          description: result.error,
+          duration: 15000,
+        });
+      } else {
+        toast.success("이 브라우저에 저장했어요.", {
+          description: "Supabase가 연결되면 모든 방문자에게 반영되는 저장으로 자동 전환돼요.",
+        });
+      }
+    } finally {
+      setSavingId(null);
     }
   }
 
@@ -399,12 +442,26 @@ export default function StoryAdmin() {
                     <span>공개 (체크 해제하면 방문자에게 보이지 않아요)</span>
                   </label>
                 </div>
+
+                <div className="mt-4 flex justify-end border-t border-border pt-4">
+                  <Button
+                    onClick={() => void handleSaveOne(story)}
+                    disabled={savingId === story.id}
+                    variant="outline"
+                  >
+                    {savingId === story.id ? "저장 중…" : "이 스토리 저장"}
+                  </Button>
+                </div>
               </div>
             ))}
 
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex flex-col items-end gap-2 pt-2">
+              <p className="text-xs text-muted-foreground">
+                스토리를 삭제했다면, 그 삭제를 실제로 반영하려면 아래 "전체 저장"이 필요해요 — 카드별
+                저장은 삭제를 반영하지 않아요.
+              </p>
               <Button onClick={handleSave} disabled={saving} size="lg">
-                {saving ? "저장 중…" : "저장하기"}
+                {saving ? "저장 중…" : "전체 저장하기"}
               </Button>
             </div>
           </div>
