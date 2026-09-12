@@ -5,6 +5,7 @@ import { SEO } from "@/components/common/SEO";
 import { EyebrowLabel } from "@/components/common/EyebrowLabel";
 import { WhatIsBlessing } from "@/components/guide/WhatIsBlessing";
 import { BlessingMeaning } from "@/components/guide/BlessingMeaning";
+import { StorybookCharacters } from "@/components/guide/StorybookCharacters";
 import { FaqAccordion } from "@/components/guide/FaqAccordion";
 import { GuideFinalCta } from "@/components/guide/GuideFinalCta";
 import { GUIDE_HERO } from "@/content/guide";
@@ -71,6 +72,7 @@ export default function Guide() {
 
       <WhatIsBlessing />
       <BlessingMeaning />
+      <StorybookCharacters />
       <FaqAccordion items={faqs} />
       <GuideFinalCta />
     </>

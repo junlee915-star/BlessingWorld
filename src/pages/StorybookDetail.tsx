@@ -6,6 +6,7 @@ import { ComingSoon } from "@/components/common/ComingSoon";
 import { STORYBOOKS } from "@/content/storybooks";
 
 const GENDER_LABEL: Record<string, string> = { male: "남성", female: "여성" };
+const CHARACTER_NAME: Record<string, string> = { male: "지호", female: "지우" };
 
 // 그림책(6컷 내레이션) 형식의 스토리북 리더. 축복의 씨앗 "축복의 의미와 가치" 각
 // STEP에서 남성/여성을 고르면 들어온다. 나머지 사이트와는 결이 다른 '읽는 경험'이라
@@ -15,6 +16,7 @@ export default function StorybookDetail() {
   const { no, gender } = useParams();
   const genderLabel = gender ? GENDER_LABEL[gender] : undefined;
   const book = STORYBOOKS.find((b) => b.stepNo === no && b.gender === gender);
+  const companion = book ? STORYBOOKS.find((b) => b.stepNo === book.stepNo && b.gender !== book.gender) : undefined;
 
   if (!genderLabel || !book) {
     return (
@@ -48,6 +50,7 @@ export default function StorybookDetail() {
           --gold: #B58C3C;
           --hair: #E4DDD3;
           --frame: rgba(46, 40, 54, 0.10);
+          --chip: #F1ECF7;
           --serif: 'Nanum Myeongjo', 'Apple SD Gothic Neo', 'Noto Serif KR', serif;
           background: var(--paper);
           color: var(--ink);
@@ -289,6 +292,37 @@ export default function StorybookDetail() {
           font-size: 13px;
           color: var(--muted);
         }
+        .storybook-reader .switch {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          margin-bottom: 20px;
+          padding: 4px;
+          border: 1px solid var(--hair);
+          border-radius: 999px;
+          width: fit-content;
+        }
+        .storybook-reader .switch a,
+        .storybook-reader .switch span {
+          display: block;
+          padding: 7px 15px;
+          border-radius: 999px;
+          font-size: 12.5px;
+          font-weight: 500;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+        .storybook-reader .switch .on {
+          background: var(--chip);
+          color: var(--lavender);
+          font-weight: 700;
+        }
+        .storybook-reader .switch a {
+          color: var(--muted);
+        }
+        .storybook-reader .switch a:hover {
+          color: var(--ink);
+        }
         .storybook-reader .prev {
           display: inline-flex;
           align-items: center;
@@ -388,6 +422,14 @@ export default function StorybookDetail() {
           </Link>
 
           <header>
+            {companion ? (
+              <nav className="switch" aria-label="화자 전환">
+                <span className="on">{CHARACTER_NAME[book.gender]} 편</span>
+                <Link to={`/guide/storybook/${companion.stepNo}/${companion.gender}`}>
+                  {CHARACTER_NAME[companion.gender]} 편으로 읽기
+                </Link>
+              </nav>
+            ) : null}
             {book.prev ? (
               <Link to={book.prev.to} className="prev">
                 ← {book.prev.title}
