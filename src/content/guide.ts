@@ -30,42 +30,29 @@ export const WHAT_IS_BLESSING = {
   imageAlt: "서로를 바라보며 미소짓는 부부",
 };
 
-export const OUR_DIRECTION = {
-  eyebrow: "OUR DIRECTION",
-  title: "우리가 소중히 여기는 것",
-  lead: "완벽한 가정보다 서로 배우고 성장하는 가정을 꿈꿉니다.",
-  pillars: [
+/** "우리가 소중히 여기는 것"(가치 4카드)을 대체 — §components/guide/BlessingMeaning.tsx */
+export const BLESSING_MEANING = {
+  eyebrow: "WHY THE BLESSING MATTERS",
+  title: "축복의 의미와 가치",
+  lead: "축복결혼이 특별한 이유는, 그 자리에 담긴 세 가지 믿음에 있습니다.",
+  points: [
     {
-      icon: "Heart",
-      title: "참사랑",
-      description: "먼저 주고,\n더 주고 싶은 마음으로\n서로를 대합니다.",
-      image:
-        "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80",
-      imageAlt: "마주 보며 이야기 나누는 부부",
+      no: "01",
+      title: "천국은 가정 단위로 들어갑니다",
+      description:
+        "우리가 향해 가는 곳은 나 혼자가 아니라, 가정이 함께 들어가는 곳입니다.\n그래서 가정을 이루는 일이 곧 신앙의 완성과 맞닿아 있습니다.",
     },
     {
-      icon: "Sprout",
-      title: "함께 성장하는 약속",
-      description: "서로의 꿈을 응원하며,\n오늘보다 더 넓은 내일로\n함께 성장합니다.",
-      image:
-        "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80",
-      imageAlt: "나란히 걸으며 대화하는 두 사람",
+      no: "02",
+      title: "가정의 중심은 부부입니다",
+      description:
+        "부모와 자녀의 사랑도 소중하지만, 가정의 뿌리는 부부가 서로 사랑하고 존중하는 관계입니다.\n부부관계가 바로 설 때, 온 가정이 함께 바로 섭니다.",
     },
     {
-      icon: "Home",
-      title: "사랑의 터전",
-      description: "사랑을 배우고 생명을 잇는 곳,\n가정은 우리 삶의\n가장 따뜻한 뿌리입니다.",
-      image:
-        "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=800&q=80",
-      imageAlt: "집에서 함께 시간을 보내는 가정",
-    },
-    {
-      icon: "Users",
-      title: "평화의 시작",
-      description: "행복한 한 가정이\n이웃을 밝히고,\n세상을 따뜻하게 합니다.",
-      image:
-        "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=800&q=80",
-      imageAlt: "이웃과 함께 모인 사람들",
+      no: "03",
+      title: "그 준비는 가정에서, 출발은 축복입니다",
+      description:
+        "가족이 함께 천국에 들어갈 준비는 매일의 가정생활 속에서 이루어집니다.\n그리고 그 준비의 첫걸음이 바로 축복입니다.",
     },
   ],
 };

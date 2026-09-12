@@ -15,6 +15,7 @@ import { AuthProvider } from "@/lib/auth";
 // 라우트 단위로 나눠서 처음 그리는 화면의 다운로드량만 줄입니다.
 const Home = lazy(() => import("@/pages/Home"));
 const Guide = lazy(() => import("@/pages/Guide"));
+const StorybookDetail = lazy(() => import("@/pages/StorybookDetail"));
 const Curriculum = lazy(() => import("@/pages/Curriculum"));
 const Stories = lazy(() => import("@/pages/Stories"));
 const StoryDetail = lazy(() => import("@/pages/StoryDetail"));
@@ -87,6 +88,7 @@ export default function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/guide" element={<Guide />} />
+                  <Route path="/guide/storybook/:no/:gender" element={<StorybookDetail />} />
                   <Route path="/curriculum" element={<Curriculum />} />
                   <Route path="/curriculum/:courseId" element={<CourseDetail />} />
                   {/* 이전 경로 북마크 대비 리다이렉트 */}

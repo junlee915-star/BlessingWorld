@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { SEO } from "@/components/common/SEO";
 import { EyebrowLabel } from "@/components/common/EyebrowLabel";
 import { WhatIsBlessing } from "@/components/guide/WhatIsBlessing";
-import { ValuePillars } from "@/components/guide/ValuePillars";
+import { BlessingMeaning } from "@/components/guide/BlessingMeaning";
 import { FaqAccordion } from "@/components/guide/FaqAccordion";
 import { GuideFinalCta } from "@/components/guide/GuideFinalCta";
 import { GUIDE_HERO } from "@/content/guide";
@@ -70,7 +70,7 @@ export default function Guide() {
       </section>
 
       <WhatIsBlessing />
-      <ValuePillars />
+      <BlessingMeaning />
       <FaqAccordion items={faqs} />
       <GuideFinalCta />
     </>
