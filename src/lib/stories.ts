@@ -12,6 +12,9 @@ import type { StoryCategory } from "@/integrations/supabase/types";
 
 const LOCAL_STORAGE_KEY = "blessingworld:stories";
 
+/** 스토리 커버/갤러리 이미지를 올리는 공개 Storage 버킷(§0026_stories_storage.sql). */
+const STORY_IMAGE_BUCKET = "story-images";
+
 export type StoryPersistTarget = "supabase" | "local";
 
 export interface StorySaveResult {
@@ -159,4 +162,23 @@ export async function saveStories(stories: Story[]): Promise<StorySaveResult> {
   }
   writeLocalOverride(stories);
   return { target: "local" };
+}
+
+/**
+ * 이미지 파일을 Supabase Storage(§STORY_IMAGE_BUCKET)에 올리고 공개 URL을 돌려줍니다.
+ * URL 붙여넣기(hotlink) 대신 파일을 직접 업로드하고 싶을 때 씁니다. localStorage로는
+ * 대체할 수 없는 기능이라, Supabase가 연결되어 있지 않으면 바로 에러를 던집니다.
+ */
+export async function uploadStoryImage(file: File): Promise<string> {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error("Supabase가 연결되어 있지 않아 파일을 업로드할 수 없어요. 이미지 URL을 직접 입력해주세요.");
+  }
+  const ext = file.name.includes(".") ? file.name.slice(file.name.lastIndexOf(".")) : "";
+  const path = `${crypto.randomUUID()}${ext}`;
+  const { error } = await supabase.storage.from(STORY_IMAGE_BUCKET).upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+  });
+  if (error) throw error;
+  return supabase.storage.from(STORY_IMAGE_BUCKET).getPublicUrl(path).data.publicUrl;
 }

@@ -6,7 +6,7 @@ import { SEO } from "@/components/common/SEO";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Button } from "@/components/ui/button";
 import { STORY_CATEGORY_LABELS, type Story } from "@/content/stories";
-import { fetchAllStories, saveStories } from "@/lib/stories";
+import { fetchAllStories, saveStories, uploadStoryImage } from "@/lib/stories";
 import { isSupabaseConfigured } from "@/integrations/supabase/client";
 import type { StoryCategory } from "@/integrations/supabase/types";
 
@@ -60,6 +60,9 @@ function slugify(title: string): string {
 export default function StoryAdmin() {
   const [stories, setStories] = useState<Story[] | null>(null);
   const [saving, setSaving] = useState(false);
+  // 어느 카드의 어느 필드가 지금 업로드 중인지("<storyId>:cover" | "<storyId>:gallery") —
+  // 한 번에 하나씩만 올리게 해서 겹치는 요청을 막습니다.
+  const [uploadingFor, setUploadingFor] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,6 +84,36 @@ export default function StoryAdmin() {
 
   function removeStory(id: string) {
     setStories((prev) => (prev ? prev.filter((s) => s.id !== id) : prev));
+  }
+
+  async function handleCoverFileChange(storyId: string, fileList: FileList | null) {
+    const file = fileList?.[0];
+    if (!file) return;
+    setUploadingFor(`${storyId}:cover`);
+    try {
+      const url = await uploadStoryImage(file);
+      updateStory(storyId, { coverImageUrl: url });
+      toast.success("커버 이미지를 업로드했어요.");
+    } catch (err) {
+      toast.error("업로드에 실패했어요.", { description: err instanceof Error ? err.message : undefined });
+    } finally {
+      setUploadingFor(null);
+    }
+  }
+
+  async function handleGalleryFilesChange(story: Story, fileList: FileList | null) {
+    const files = fileList ? Array.from(fileList) : [];
+    if (files.length === 0) return;
+    setUploadingFor(`${story.id}:gallery`);
+    try {
+      const urls = await Promise.all(files.map(uploadStoryImage));
+      updateStory(story.id, { galleryImageUrls: [...story.galleryImageUrls, ...urls] });
+      toast.success(`사진 ${urls.length}장을 업로드했어요.`);
+    } catch (err) {
+      toast.error("업로드에 실패했어요.", { description: err instanceof Error ? err.message : undefined });
+    } finally {
+      setUploadingFor(null);
+    }
   }
 
   async function handleSave() {
@@ -263,13 +296,32 @@ export default function StoryAdmin() {
                   </label>
 
                   <label className="flex flex-col gap-1.5 text-sm sm:col-span-2">
-                    <span className="font-medium text-foreground">커버 이미지 URL</span>
+                    <span className="font-medium text-foreground">커버 이미지</span>
                     <input
                       className={inputClass}
                       value={story.coverImageUrl}
                       onChange={(e) => updateStory(story.id, { coverImageUrl: e.target.value })}
-                      placeholder="https://..."
+                      placeholder="https://... (URL을 붙여넣거나, 아래에서 파일을 직접 올려주세요)"
                     />
+                    {isSupabaseConfigured ? (
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={uploadingFor === `${story.id}:cover`}
+                        onChange={(e) => {
+                          void handleCoverFileChange(story.id, e.target.files);
+                          e.target.value = "";
+                        }}
+                        className="text-xs text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary-soft file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary-deep"
+                      />
+                    ) : (
+                      <span className="text-xs text-muted-foreground">
+                        파일 업로드는 Supabase 연결이 필요해요 — 지금은 URL만 입력할 수 있어요.
+                      </span>
+                    )}
+                    {uploadingFor === `${story.id}:cover` ? (
+                      <span className="text-xs text-muted-foreground">업로드 중…</span>
+                    ) : null}
                   </label>
 
                   <label className="flex flex-col gap-1.5 text-sm sm:col-span-2">
@@ -286,7 +338,7 @@ export default function StoryAdmin() {
 
                   <label className="flex flex-col gap-1.5 text-sm sm:col-span-2">
                     <span className="font-medium text-foreground">
-                      갤러리 이미지 URL <span className="font-normal text-muted-foreground">— 한 줄에 하나씩, 커버 이미지와 별개</span>
+                      갤러리 이미지 <span className="font-normal text-muted-foreground">— 한 줄에 URL 하나씩, 커버 이미지와 별개</span>
                     </span>
                     <textarea
                       className={inputClass}
@@ -295,6 +347,26 @@ export default function StoryAdmin() {
                       onChange={(e) => updateStory(story.id, { galleryImageUrls: textToGalleryUrls(e.target.value) })}
                       placeholder={"https://...\nhttps://..."}
                     />
+                    {isSupabaseConfigured ? (
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        disabled={uploadingFor === `${story.id}:gallery`}
+                        onChange={(e) => {
+                          void handleGalleryFilesChange(story, e.target.files);
+                          e.target.value = "";
+                        }}
+                        className="text-xs text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary-soft file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary-deep"
+                      />
+                    ) : (
+                      <span className="text-xs text-muted-foreground">
+                        파일 업로드는 Supabase 연결이 필요해요 — 지금은 URL만 입력할 수 있어요.
+                      </span>
+                    )}
+                    {uploadingFor === `${story.id}:gallery` ? (
+                      <span className="text-xs text-muted-foreground">업로드 중… (여러 장이면 시간이 걸려요)</span>
+                    ) : null}
                   </label>
 
                   <label className="flex flex-col gap-1.5 text-sm sm:col-span-2">
