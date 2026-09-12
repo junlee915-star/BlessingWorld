@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 import { SectionHeading } from "@/components/common/SectionHeading";
 import {
   STORYBOOK_CHARACTERS_HEADING,
@@ -20,28 +22,42 @@ export function StorybookCharacters() {
       />
 
       <ul className="mt-10 grid gap-5 sm:grid-cols-3">
-        {ALL_CHARACTERS.map((character) => (
-          <li
-            key={character.name}
-            className="overflow-hidden rounded-2xl border border-border bg-card shadow-card"
-          >
-            <img
-              src={character.image}
-              alt={character.imageAlt}
-              loading="lazy"
-              className="aspect-square w-full object-cover object-top"
-            />
-            <div className="p-5">
-              <span className="text-xs font-semibold tracking-wide text-primary-deep">
-                {character.role}
-              </span>
-              <h3 className="mt-2 text-base font-semibold text-foreground">{character.name}</h3>
-              <p className="mt-2 text-sm leading-[1.7] text-muted-foreground">
-                {character.description}
-              </p>
-            </div>
-          </li>
-        ))}
+        {ALL_CHARACTERS.map((character) => {
+          const content = (
+            <>
+              <img
+                src={character.image}
+                alt={character.imageAlt}
+                loading="lazy"
+                className="aspect-square w-full object-cover object-top"
+              />
+              <div className="p-5">
+                <span className="text-xs font-semibold tracking-wide text-primary-deep">
+                  {character.role}
+                </span>
+                <h3 className="mt-2 text-base font-semibold text-foreground">{character.name}</h3>
+                <p className="mt-2 text-sm leading-[1.7] text-muted-foreground">
+                  {character.description}
+                </p>
+              </div>
+            </>
+          );
+
+          return (
+            <li
+              key={character.name}
+              className="overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-shadow hover:shadow-lg"
+            >
+              {character.to ? (
+                <Link to={character.to} className="block">
+                  {content}
+                </Link>
+              ) : (
+                content
+              )}
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

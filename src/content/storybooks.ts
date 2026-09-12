@@ -10,6 +10,8 @@ export interface StorybookCharacter {
   description: string;
   image: string;
   imageAlt: string;
+  /** 있으면 카드 전체가 이 경로로 링크됩니다(예: STEP 01 스토리북). */
+  to?: string;
 }
 
 /** 축복의 씨앗 "축복의 의미와 가치" 바로 아래에 보여주는 스토리북 등장인물 소개. */
@@ -26,6 +28,7 @@ export const STORYBOOK_PROTAGONISTS: StorybookCharacter[] = [
     description: "혼자서도 잘 살 수 있다고 믿었던 스물여덟. 할머니의 한마디에서, 그리고 부모님의 오래된 사진 한 장에서 가정의 의미를 다시 배워갑니다.",
     image: IMG("guide-storybook-character-jiho.webp"),
     imageAlt: "안경을 쓰고 베이지색 가디건을 입은 남성 캐릭터 지호의 상반신",
+    to: "/guide/storybook/01/male",
   },
   {
     name: "지우",
@@ -33,6 +36,7 @@ export const STORYBOOK_PROTAGONISTS: StorybookCharacter[] = [
     description: "혼자서도 꽤 잘 살고 있다고 믿었던 스물여덟. 할머니의 한마디와 엄마의 오래된 앨범 한 장에서 가정의 의미를 다시 배워갑니다.",
     image: IMG("guide-storybook-character-jiwoo.webp"),
     imageAlt: "베이지색 니트 카디건을 입은 여성 캐릭터 지우의 상반신",
+    to: "/guide/storybook/01/female",
   },
 ];
 
