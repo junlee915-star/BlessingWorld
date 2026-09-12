@@ -274,7 +274,7 @@ export default function StoryAdmin() {
 
                   <label className="flex flex-col gap-1.5 text-sm sm:col-span-2">
                     <span className="font-medium text-foreground">
-                      원문 링크 <span className="font-normal text-muted-foreground">— 본부 소식 등 출처가 있는 글에</span>
+                      원문 링크 <span className="font-normal text-muted-foreground">— 교회 소식 등 출처가 있는 글에</span>
                     </span>
                     <input
                       className={inputClass}

@@ -24,7 +24,7 @@ export const STORY_CATEGORIES: { value: "all" | StoryCategory; label: string }[]
   { value: "case", label: "사례" },
   { value: "video", label: "영상" },
   { value: "education", label: "교육" },
-  { value: "notice", label: "본부 소식" },
+  { value: "notice", label: "교회 소식" },
 ];
 
 export const STORY_CATEGORY_LABELS: Record<StoryCategory, string> = {
@@ -32,8 +32,8 @@ export const STORY_CATEGORY_LABELS: Record<StoryCategory, string> = {
   case: "사례",
   video: "영상",
   education: "교육",
-  /** 가정연합 홈페이지(ffwp.org) 등에서 옮겨오는 본부 발 소식. */
-  notice: "본부 소식",
+  /** 가정연합 홈페이지(ffwp.org) 등에서 옮겨오는 본부/교회 발 소식. */
+  notice: "교회 소식",
 };
 
 export const STORY_SORTS: { value: "latest" | "views"; label: string }[] = [
